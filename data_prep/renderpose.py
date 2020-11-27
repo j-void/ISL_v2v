@@ -75,7 +75,7 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
 	# 		[9, 10], [10, 11], [11, 22], [11, 24], [12, 13], [13, 14], [14, 19], [14, 21], [15, 17], [16, 18], \
 	# 		[19, 20], [22, 23]]
     
-    limbSeq = [[0,1], [1, 2], [1, 5], [1, 8], [2, 3], [3, 4], [5, 6], [6, 7], [8, 9], [8, 12], [0, 15], [0, 16], [15, 17], [16, 18]]#, \
+    limbSeq = [[0,1], [1, 2], [1, 5], [2, 3], [3, 4], [5, 6], [6, 7], [0, 15], [0, 16], [15, 17], [16, 18]]#, \
 			# [9, 10], [10, 11], [11, 22], [11, 24], [12, 13], [13, 14], [14, 19], [14, 21], \
 			# [19, 20], [22, 23]]
     
@@ -145,7 +145,6 @@ def resize_scale(frame, myshape = (1080, 1920, 3), white_bg=False):
         sf = float(myshape[1])/float(width)
         _fr = cv2.resize(_frame, (int(width*sf), int(height*sf)))
         translate = int((1080 - int(height*sf))/2)
-        print(translate, int(height*sf))
         output_frame[translate:(translate+int(height*sf)),:,:] = _fr
         
     return output_frame
