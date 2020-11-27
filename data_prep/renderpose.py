@@ -145,6 +145,7 @@ def resize_scale(frame, myshape = (1080, 1920, 3), white_bg=False):
         sf = float(myshape[1])/float(width)
         _fr = cv2.resize(_frame, (int(width*sf), int(height*sf)))
         translate = int((1080 - int(height*sf))/2)
+        print(translate, int(height*sf))
         output_frame[translate:(translate+int(height*sf)),:,:] = _fr
         
     return output_frame
