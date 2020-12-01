@@ -128,25 +128,29 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
             
     return True
             
-def resize_scale(frame, myshape = (1080, 1920, 3), white_bg=False):
-    if frame.shape == myshape:
-        return frame
-    height, width, _ = frame.shape
-    output_frame = np.zeros(myshape, np.uint8)
-    if white_bg:
-        output_frame.fill(255)
-    _frame = frame.copy()
-    if height > width:
-        sf = float(myshape[0])/float(height)
-        _fr = cv2.resize(_frame, (int(width*sf), int(height*sf)))
-        translate = int((1920 - int(width*sf))/2)
-        output_frame[:,translate:(translate+int(width*sf)),:] = _fr
-    else:
-        sf = float(myshape[1])/float(width)
-        _fr = cv2.resize(_frame, (int(width*sf), int(height*sf)))
-        translate = int((1080 - int(height*sf))/2)
-        output_frame[translate:(translate+int(height*sf)),:,:] = _fr
+def resize_scale(frame, myshape = (512, 1024, 3), white_bg=False):
+    curshape = frame.shape
+    if curshape == myshape:
+        return None
+
+    x_mult = myshape[0] / float(curshape[0])
+    y_mult = myshape[1] / float(curshape[1])
+
+    if x_mult == y_mult:
+        scale = x_mult
+        translate = (0.0, 0.0)
+    elif y_mult > x_mult:
+        y_new = x_mult * float(curshape[1])
+        translate_y = (myshape[1] - y_new) / 2.0
+        scale = x_mult
+        translate = (translate_y, 0.0)
+    elif x_mult > y_mult:
+        x_new = y_mult * float(curshape[0])
+        translate_x = (myshape[0] - x_new) / 2.0
+        scale = y_mult
+        translate = (0.0, translate_x)
         
-    return output_frame
-    
+    M = np.float32([[scale,0,translate[0]],[0,scale,translate[1]]])
+    output_image = cv2.warpAffine(frame,M,(myshape[1],myshape[0]))
+    return output_image   
     
