@@ -37,7 +37,8 @@ for i, data in enumerate(dataset):
       previous_cond = torch.zeros(data['label'].size())
       unset = False
 
-    generated = model.inference(data['label'], previous_cond, data['face_coords'])
+    #generated = model.inference(data['label'], previous_cond, data['face_coords'])
+    generated = model.inference(data['label'], previous_cond)
 
     previous_cond = generated.data
 
