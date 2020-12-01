@@ -97,28 +97,28 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 visualizer.plot_current_errors(errors, total_steps)
 
             ### display output images
-            if save_fake:
-                syn = generated[0].data[0]
-                inputs = torch.cat((data['label'], data['next_label']), dim=3)
-                targets = torch.cat((data['image'], data['next_image']), dim=3)
-                visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
-                                           ('synthesized_image', util.tensor2im(syn)),
-                                           ('real_image', util.tensor2im(targets[0]))])
-                # if opt.face_generator: #display face generator on tensorboard
-                #     miny, maxy, minx, maxx = data['face_coords'][0]
-                #     res_face = generated[2].data[0]
-                #     syn_face = generated[1].data[0]
-                #     preres = generated[3].data[0]
-                #     visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
-                #                            ('synthesized_image', util.tensor2im(syn)),
-                #                            ('synthesized_face', util.tensor2im(syn_face)),
-                #                            ('residual', util.tensor2im(res_face)),
-                #                            ('real_face', util.tensor2im(data['image'][0][:, miny:maxy, minx:maxx])),
-                #                            # ('pre_residual', util.tensor2im(preres)),
-                #                            # ('pre_residual_face', util.tensor2im(preres[:, miny:maxy, minx:maxx])),
-                #                            ('input_face', util.tensor2im(data['label'][0][:, miny:maxy, minx:maxx], normalize=False)),
-                #                            ('real_image', util.tensor2im(targets[0]))])
-                visualizer.display_current_results(visuals, epoch, total_steps)
+            # if save_fake:
+            #     syn = generated[0].data[0]
+            #     inputs = torch.cat((data['label'], data['next_label']), dim=3)
+            #     targets = torch.cat((data['image'], data['next_image']), dim=3)
+            #     visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
+            #                                ('synthesized_image', util.tensor2im(syn)),
+            #                                ('real_image', util.tensor2im(targets[0]))])
+            #     # if opt.face_generator: #display face generator on tensorboard
+            #     #     miny, maxy, minx, maxx = data['face_coords'][0]
+            #     #     res_face = generated[2].data[0]
+            #     #     syn_face = generated[1].data[0]
+            #     #     preres = generated[3].data[0]
+            #     #     visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
+            #     #                            ('synthesized_image', util.tensor2im(syn)),
+            #     #                            ('synthesized_face', util.tensor2im(syn_face)),
+            #     #                            ('residual', util.tensor2im(res_face)),
+            #     #                            ('real_face', util.tensor2im(data['image'][0][:, miny:maxy, minx:maxx])),
+            #     #                            # ('pre_residual', util.tensor2im(preres)),
+            #     #                            # ('pre_residual_face', util.tensor2im(preres[:, miny:maxy, minx:maxx])),
+            #     #                            ('input_face', util.tensor2im(data['label'][0][:, miny:maxy, minx:maxx], normalize=False)),
+            #     #                            ('real_image', util.tensor2im(targets[0]))])
+            #     visualizer.display_current_results(visuals, epoch, total_steps)
 
         ### save latest model
         if total_steps % opt.save_latest_freq == 0:
