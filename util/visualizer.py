@@ -1,10 +1,12 @@
+### Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
+### Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 import numpy as np
 import os
 import ntpath
 import time
 from . import util
 from . import html
-import scipy.misc
+import scipy.misc 
 try:
     from StringIO import StringIO  # Python 2.7
 except ImportError:
@@ -64,7 +66,7 @@ class Visualizer():
                     util.save_image(image_numpy, img_path)
 
             # update website
-            webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, refresh=30)
+            webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, reflesh=1)
             for n in range(epoch, 0, -1):
                 webpage.add_header('epoch [%d]' % n)
                 ims = []
@@ -94,7 +96,7 @@ class Visualizer():
     # errors: dictionary of error labels and values
     def plot_current_errors(self, errors, step):
         if self.tf_log:
-            for tag, value in errors.items():
+            for tag, value in errors.items():            
                 summary = self.tf.Summary(value=[self.tf.Summary.Value(tag=tag, simple_value=value)])
                 self.writer.add_summary(summary, step)
 
@@ -121,7 +123,7 @@ class Visualizer():
         links = []
 
         for label, image_numpy in visuals.items():
-            image_name = '%s_%s.jpg' % (name, label)
+            image_name = '%s_%s.png' % (name, label)
             save_path = os.path.join(image_dir, image_name)
             util.save_image(image_numpy, save_path)
 

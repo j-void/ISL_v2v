@@ -1,76 +1,92 @@
+### Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
+### Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 import os.path
+import random
+import torchvision.transforms as transforms
+import torch
 from data.base_dataset import BaseDataset, get_params, get_transform, normalize
 from data.image_folder import make_dataset
 from PIL import Image
+import numpy as np
 
 class AlignedDataset(BaseDataset):
     def initialize(self, opt):
         self.opt = opt
         self.root = opt.dataroot    
 
-        ### input A (label maps)
-        dir_A = '_A' if self.opt.label_nc == 0 else '_label'
-        self.dir_A = os.path.join(opt.dataroot, opt.phase + dir_A)
-        self.A_paths = sorted(make_dataset(self.dir_A))
+        ### label maps    
+        self.dir_label = os.path.join(opt.dataroot, opt.phase + '_label')              
+        self.label_paths = sorted(make_dataset(self.dir_label))
 
-        ### input B (real images)
-        if opt.isTrain or opt.use_encoded_image:
-            dir_B = '_B' if self.opt.label_nc == 0 else '_img'
-            self.dir_B = os.path.join(opt.dataroot, opt.phase + dir_B)  
-            self.B_paths = sorted(make_dataset(self.dir_B))
+        ### real images
+        if opt.isTrain:
+            self.dir_image = os.path.join(opt.dataroot, opt.phase + '_img')  
+            self.image_paths = sorted(make_dataset(self.dir_image))
 
-        ### instance maps
-        if not opt.no_instance:
-            self.dir_inst = os.path.join(opt.dataroot, opt.phase + '_inst')
-            self.inst_paths = sorted(make_dataset(self.dir_inst))
+        ### load face bounding box coordinates size 128x128
+        # if opt.face_discrim or opt.face_generator:
+        #     self.dir_facetext = os.path.join(opt.dataroot, opt.phase + '_facetexts128')
+        #     print('----------- loading face bounding boxes from %s ----------' % self.dir_facetext)
+        #     self.facetext_paths = sorted(make_dataset(self.dir_facetext))
 
-        ### load precomputed instance-wise encoded features
-        if opt.load_features:                              
-            self.dir_feat = os.path.join(opt.dataroot, opt.phase + '_feat')
-            print('----------- loading features from %s ----------' % self.dir_feat)
-            self.feat_paths = sorted(make_dataset(self.dir_feat))
 
-        self.dataset_size = len(self.A_paths) 
+        self.dataset_size = len(self.label_paths) 
       
     def __getitem__(self, index):        
-        ### input A (label maps)
-        A_path = self.A_paths[index]              
-        A = Image.open(A_path)        
-        params = get_params(self.opt, A.size)
-        if self.opt.label_nc == 0:
-            transform_A = get_transform(self.opt, params)
-            A_tensor = transform_A(A.convert('RGB'))
-        else:
-            transform_A = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
-            A_tensor = transform_A(A) * 255.0
+        ### label maps
+        paths = self.label_paths
+        label_path = paths[index]              
+        label = Image.open(label_path).convert('RGB')        
+        params = get_params(self.opt, label.size)
+        transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
+        label_tensor = transform_label(label)
+        original_label_path = label_path
 
-        B_tensor = inst_tensor = feat_tensor = 0
-        ### input B (real images)
-        if self.opt.isTrain or self.opt.use_encoded_image:
-            B_path = self.B_paths[index]   
-            B = Image.open(B_path).convert('RGB')
-            transform_B = get_transform(self.opt, params)      
-            B_tensor = transform_B(B)
+        image_tensor = next_label = next_image = face_tensor = 0
+        ### real images 
+        if self.opt.isTrain:
+            image_path = self.image_paths[index]   
+            image = Image.open(image_path).convert('RGB')    
+            transform_image = get_transform(self.opt, params)     
+            image_tensor = transform_image(image).float()
 
-        ### if using instance maps        
-        if not self.opt.no_instance:
-            inst_path = self.inst_paths[index]
-            inst = Image.open(inst_path)
-            inst_tensor = transform_A(inst)
+        is_next = index < len(self) - 1
+        if self.opt.gestures:
+            is_next = is_next and (index % 64 != 63)
 
-            if self.opt.load_features:
-                feat_path = self.feat_paths[index]            
-                feat = Image.open(feat_path).convert('RGB')
-                norm = normalize()
-                feat_tensor = norm(transform_A(feat))                            
+        """ Load the next label, image pair """
+        if is_next:
 
-        input_dict = {'label': A_tensor, 'inst': inst_tensor, 'image': B_tensor, 
-                      'feat': feat_tensor, 'path': A_path}
+            paths = self.label_paths
+            label_path = paths[index+1]              
+            label = Image.open(label_path).convert('RGB')        
+            params = get_params(self.opt, label.size)          
+            transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
+            next_label = transform_label(label).float()
+            
+            if self.opt.isTrain:
+                image_path = self.image_paths[index+1]   
+                image = Image.open(image_path).convert('RGB')
+                transform_image = get_transform(self.opt, params)      
+                next_image = transform_image(image).float()
 
+        """ If using the face generator and/or face discriminator """
+        # if self.opt.face_discrim or self.opt.face_generator:
+        #     facetxt_path = self.facetext_paths[index]
+        #     facetxt = open(facetxt_path, "r")
+        #     face_tensor = torch.IntTensor(list([int(coord_str) for coord_str in facetxt.read().split()]))
+
+        # input_dict = {'label': label_tensor.float(), 'image': image_tensor, 
+        #               'path': original_label_path, 'face_coords': face_tensor,
+        #               'next_label': next_label, 'next_image': next_image }
+        
+        input_dict = {'label': label_tensor.float(), 'image': image_tensor, 
+                'path': original_label_path, 'next_label': next_label, 'next_image': next_image }
+        
         return input_dict
 
     def __len__(self):
-        return len(self.A_paths) // self.opt.batchSize * self.opt.batchSize
+        return len(self.label_paths)
 
     def name(self):
         return 'AlignedDataset'

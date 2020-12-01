@@ -1,9 +1,14 @@
+### Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
+### Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 from __future__ import print_function
 import torch
 import numpy as np
 from PIL import Image
+import inspect, re
 import numpy as np
 import os
+import collections
+from PIL import Image
 
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
@@ -19,23 +24,21 @@ def tensor2im(image_tensor, imtype=np.uint8, normalize=True):
     else:
         image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0      
     image_numpy = np.clip(image_numpy, 0, 255)
-    if image_numpy.shape[2] == 1 or image_numpy.shape[2] > 3:        
+    if image_numpy.shape[2] == 1:        
         image_numpy = image_numpy[:,:,0]
     return image_numpy.astype(imtype)
 
-# Converts a one-hot tensor into a colorful label map
-def tensor2label(label_tensor, n_label, imtype=np.uint8):
-    if n_label == 0:
-        return tensor2im(label_tensor, imtype)
-    label_tensor = label_tensor.cpu().float()    
-    if label_tensor.size()[0] > 1:
-        label_tensor = label_tensor.max(0, keepdim=True)[1]
-    label_tensor = Colorize(n_label)(label_tensor)
-    label_numpy = np.transpose(label_tensor.numpy(), (1, 2, 0))
-    return label_numpy.astype(imtype)
+def tensor2label(output, n_label, imtype=np.uint8):
+    output = output.cpu().float()    
+    if output.size()[0] > 1:
+        output = output.max(0, keepdim=True)[1]
+    output = Colorize(n_label)(output)
+    output = np.transpose(output.numpy(), (1, 2, 0))
+    return output.astype(imtype)
 
 def save_image(image_numpy, image_path):
     image_pil = Image.fromarray(image_numpy)
+    #image_pil = image_pil.resize((256,256), Image.ANTIALIAS)
     image_pil.save(image_path)
 
 def mkdirs(paths):
@@ -49,11 +52,6 @@ def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-###############################################################################
-# Code from
-# https://github.com/ycszen/pytorch-seg/blob/master/transform.py
-# Modified so it complies with the Citscape label map colors
-###############################################################################
 def uint82bin(n, count=8):
     """returns the binary of integer n, count refers to amount of bits"""
     return ''.join([str((n >> y) & 1) for y in range(count-1, -1, -1)])
@@ -69,7 +67,9 @@ def labelcolormap(N):
     else:
         cmap = np.zeros((N, 3), dtype=np.uint8)
         for i in range(N):
-            r, g, b = 0, 0, 0
+            r = 0
+            g = 0
+            b = 0
             id = i
             for j in range(7):
                 str_id = uint82bin(id)

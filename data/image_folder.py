@@ -4,13 +4,16 @@
 # Modified the original code so that it also loads images from the current
 # directory as well as the subdirectories
 ###############################################################################
+
 import torch.utils.data as data
+import numpy as np
 from PIL import Image
 import os
+import os.path
 
 IMG_EXTENSIONS = [
     '.jpg', '.JPG', '.jpeg', '.JPEG',
-    '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP', '.tiff'
+    '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP', '.tiff', '.txt'
 ]
 
 
@@ -22,12 +25,35 @@ def make_dataset(dir):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
 
+    stop = 100000
+
     for root, _, fnames in sorted(os.walk(dir)):
+        if stop == 0:
+            break
         for fname in fnames:
             if is_image_file(fname):
                 path = os.path.join(root, fname)
                 images.append(path)
+                stop -= 1
+    # print images, len(images)
+    return images
 
+def make_dataset_unaligned(dir, stop=100000):
+    images = []
+    assert os.path.isdir(dir), '%s is not a valid directory' % dir
+    print(dir)
+    for root, _, fnames in sorted(os.walk(dir)):
+        # print fnames, dir, min(stop, len(fnames))
+        random_perm = np.random.choice(len(fnames), min(stop, len(fnames)))
+        for f_index in random_perm:
+            fname = fnames[f_index]
+            if is_image_file(fname):
+                path = os.path.join(root, fname)
+                images.append(path)
+                stop -= 1
+            if stop == 0:
+                break
+    # print len(images), stop
     return images
 
 

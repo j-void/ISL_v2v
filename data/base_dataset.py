@@ -1,3 +1,5 @@
+### Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
+### Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 import torch.utils.data as data
 from PIL import Image
 import torchvision.transforms as transforms
@@ -14,15 +16,20 @@ class BaseDataset(data.Dataset):
     def initialize(self, opt):
         pass
 
-def get_params(opt, size):
+def get_params(opt, size, whocallme=''):
     w, h = size
     new_h = h
     new_w = w
+
+    storeload = opt.loadSize
+    if whocallme == 'heat':
+        storeload = storeload * 2
+
     if opt.resize_or_crop == 'resize_and_crop':
-        new_h = new_w = opt.loadSize            
+        new_h = new_w = storeload            
     elif opt.resize_or_crop == 'scale_width_and_crop':
-        new_w = opt.loadSize
-        new_h = opt.loadSize * h // w
+        new_w = storeload
+        new_h = storeload * h // w
 
     x = random.randint(0, np.maximum(0, new_w - opt.fineSize))
     y = random.randint(0, np.maximum(0, new_h - opt.fineSize))
@@ -30,13 +37,19 @@ def get_params(opt, size):
     flip = random.random() > 0.5
     return {'crop_pos': (x, y), 'flip': flip}
 
-def get_transform(opt, params, method=Image.BICUBIC, normalize=True):
+def get_transform(opt, params, method=Image.BICUBIC, normalize=True, whocallme=''):
     transform_list = []
+    storeload = opt.loadSize
+    if whocallme == 'heat':
+        storeload = storeload * 4
+    if whocallme == 'fulldisp':
+        transform_list += [transforms.ToTensor()]
+        return transforms.Compose(transform_list)    
     if 'resize' in opt.resize_or_crop:
-        osize = [opt.loadSize, opt.loadSize]
+        osize = [storeload, storeload]
         transform_list.append(transforms.Scale(osize, method))   
     elif 'scale_width' in opt.resize_or_crop:
-        transform_list.append(transforms.Lambda(lambda img: __scale_width(img, opt.loadSize, method)))
+        transform_list.append(transforms.Lambda(lambda img: __scale_width(img, storeload, method)))
         
     if 'crop' in opt.resize_or_crop:
         transform_list.append(transforms.Lambda(lambda img: __crop(img, params['crop_pos'], opt.fineSize)))
