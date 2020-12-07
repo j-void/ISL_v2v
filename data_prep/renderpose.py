@@ -88,17 +88,18 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
     
     for p in range(0, int(len(posepts)/3)):
         pt = (int(posepts[p*3]), int(posepts[p*3+1]))
-        cv2.circle(frame, (int(posepts[p*3]), int(posepts[p*3+1])), 3, pose_colors[p], -1)
+        if (p <= 7) or (p >= 15 and p <= 18):
+            cv2.circle(frame, (int(posepts[p*3]), int(posepts[p*3+1])), 6, pose_colors[p], -1)
         posepts_2d.append(pt)
         
     for p in range(0, int(len(r_handpts)/3)):
         pt = (int(r_handpts[p*3]), int(r_handpts[p*3+1]))
-        cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 2, hand_colors[p], -1)
+        cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 4, hand_colors[p], -1)
         r_handpts_2d.append(pt)
         
     for p in range(0, int(len(l_handpts)/3)):
         pt = (int(l_handpts[p*3]), int(l_handpts[p*3+1]))
-        cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 2, hand_colors[p], -1)
+        cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 4, hand_colors[p], -1)
         l_handpts_2d.append(pt)
         
     for p in range(0, int(len(facepts)/3)):
