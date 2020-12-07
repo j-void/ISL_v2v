@@ -88,18 +88,22 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
     
     for p in range(0, int(len(posepts)/3)):
         pt = (int(posepts[p*3]), int(posepts[p*3+1]))
+        cv2.circle(frame, (int(posepts[p*3]), int(posepts[p*3+1])), 3, pose_colors[p], -1)
         posepts_2d.append(pt)
         
     for p in range(0, int(len(r_handpts)/3)):
         pt = (int(r_handpts[p*3]), int(r_handpts[p*3+1]))
+        cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 2, hand_colors[p], -1)
         r_handpts_2d.append(pt)
         
     for p in range(0, int(len(l_handpts)/3)):
         pt = (int(l_handpts[p*3]), int(l_handpts[p*3+1]))
+        cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 2, hand_colors[p], -1)
         l_handpts_2d.append(pt)
         
     for p in range(0, int(len(facepts)/3)):
         pt = (int(facepts[p*3]), int(facepts[p*3+1]))
+        cv2.circle(frame, (int(facepts[p*3]), int(facepts[p*3+1])), 1, (0, 0, 0), -1)
         facepts_2d.append(pt)
     
     for k in range(len(limbSeq)):
@@ -114,24 +118,24 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
         secondlimb_ind = faceSeq[k][1]
         if facepts_2d[firstlimb_ind][0] > 0 and facepts_2d[secondlimb_ind][0] > 0:
             cv2.line(frame, facepts_2d[firstlimb_ind], facepts_2d[secondlimb_ind], (0,0,0), 1)
-    
-    for p in range(0, int(len(facepts)/3)):
-        cv2.circle(frame, (int(facepts[p*3]), int(facepts[p*3+1])), 1, (0, 0, 0), -1)
+            
             
     for k in range(len(handSeq)):
         firstlimb_ind = handSeq[k][0]
         secondlimb_ind = handSeq[k][1]
         if r_handpts_2d[firstlimb_ind][0] > 0 and r_handpts_2d[secondlimb_ind][0] > 0:
-            cv2.line(frame, r_handpts_2d[firstlimb_ind], r_handpts_2d[secondlimb_ind], hand_colors[k], 5)
+            cv2.line(frame, r_handpts_2d[firstlimb_ind], r_handpts_2d[secondlimb_ind], hand_colors[k], 4)
         if l_handpts_2d[firstlimb_ind][0] > 0 and l_handpts_2d[secondlimb_ind][0] > 0:
-            cv2.line(frame, l_handpts_2d[firstlimb_ind], l_handpts_2d[secondlimb_ind], hand_colors[k], 5)
+            cv2.line(frame, l_handpts_2d[firstlimb_ind], l_handpts_2d[secondlimb_ind], hand_colors[k], 4)
             
     return True
             
-def resize_scale(frame, myshape = (512, 1024, 3), white_bg=False):
+def resize_scale(frame, myshape = (512, 1024, 3)):
     curshape = frame.shape
     if curshape == myshape:
-        return None
+        scale = 1
+        translate = (0.0, 0.0)
+        return scale, translate
 
     x_mult = myshape[0] / float(curshape[0])
     y_mult = myshape[1] / float(curshape[1])
@@ -150,7 +154,18 @@ def resize_scale(frame, myshape = (512, 1024, 3), white_bg=False):
         scale = y_mult
         translate = (0.0, translate_x)
         
+    # M = np.float32([[scale,0,translate[0]],[0,scale,translate[1]]])
+    # output_image = cv2.warpAffine(frame,M,(myshape[1],myshape[0]))
+    return scale, translate
+
+def fix_image(scale, translate, frame, myshape = (512, 1024, 3)):
     M = np.float32([[scale,0,translate[0]],[0,scale,translate[1]]])
     output_image = cv2.warpAffine(frame,M,(myshape[1],myshape[0]))
-    return output_image   
+    return output_image
+
+def fix_scale_coords(points, scale, translate):
+    points = np.array(points)
+    points[0::3] = scale * points[0::3] + translate[0]
+    points[1::3] = scale * points[1::3] + translate[1]
+    return list(points)
     
