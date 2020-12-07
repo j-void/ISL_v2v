@@ -15,6 +15,8 @@ args = parser.parse_args()
 if args.output_frames:
     print("Writing Frames")
     path = args.input_vid
+    if args.output_vid:
+        path = args.output_vid
     path_split = path.split("/")
     name = path_split[len(path_split)-1]
     name_split = name.split(".")
