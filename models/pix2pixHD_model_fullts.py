@@ -234,8 +234,6 @@ class Pix2PixHDModel(BaseModel):
         pred_fake = self.netD.forward(torch.cat((input_label, next_label, I_0, I_1), dim=1))        
         loss_G_GAN = self.criterionGAN(pred_fake, True)
         
-        if self.opt.hand_discrim:
-            print("train hand")
         
         # GAN feature matching loss
         loss_G_GAN_Feat = 0
