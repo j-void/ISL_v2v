@@ -165,9 +165,9 @@ class Pix2PixHDModel(BaseModel):
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
 
         lhpts_real_tensor = torch.tensor(lhpts_real, dtype=torch.float)
-        print(lhpts_real_tensor)
+        #print(lhpts_real_tensor)
         lhpts_real_tensor = lhpts_real_tensor.view(1, 1, 21, 2).cuda()
-        print(lhpts_real_tensor)
+        #print(lhpts_real_tensor)
         
         rhpts_real_tensor = torch.tensor(rhpts_real, dtype=torch.float)
         rhpts_real_tensor = rhpts_real_tensor.view(1, 1, 21, 2).cuda()
