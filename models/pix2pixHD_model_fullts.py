@@ -156,7 +156,7 @@ class Pix2PixHDModel(BaseModel):
             return self.netDface.forward(input_concat)
         
     def discriminatehand(self, real_keypoints, use_pool=False):
-        return self.netDface.forward(real_keypoints)
+        return self.netDhand.forward(real_keypoints)
 
     def forward(self, label, next_label, image, next_image, zeroshere, lhpts_real, rhpts_real, infer=False):
         # Encode Inputs
