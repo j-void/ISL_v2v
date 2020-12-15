@@ -156,13 +156,15 @@ class Pix2PixHDModel(BaseModel):
         input_concat = torch.cat((input_label, zeroshere), dim=1) 
 
         I_0 = self.netG.forward(input_concat)
-        gen_img = util.tensor2im(I_0.data[0])
-        gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-        lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
-        lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
-        rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
-        hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
-        cv2.imwrite("tmp/out_gen_"+str(self.img_idx)+".png", gen_img)
+        
+        if self.img_idx % 100 == 0:
+            gen_img = util.tensor2im(I_0.data[0])
+            gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
+            lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
+            lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
+            rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
+            hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
+            cv2.imwrite("tmp/out_gen_"+str(self.img_idx)+".png", gen_img)
         self.img_idx = self.img_idx + 1
         input_concat1 = torch.cat((next_label, I_0), dim=1)
 
