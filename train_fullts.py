@@ -79,7 +79,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 real_img = util.tensor2im(targets[0])[:,:1024,:]
                 real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
                 lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
+                lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
+                rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
                 lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
+                lhpts_real = hand_utils.rescale_points(1024, 512, lhpts_real)
+                rhpts_real = hand_utils.rescale_points(1024, 512, rhpts_real)
                 hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
                 hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
                 cv2.imwrite("tmp/out_gen_"+str(i)+"_"+str(epoch)+".png", gen_img)
