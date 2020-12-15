@@ -56,6 +56,9 @@ class BaseOptions():
         self.parser.add_argument('--nef', type=int, default=16, help='# of encoder filters in the first conv layer')        
         self.parser.add_argument('--n_clusters', type=int, default=10, help='number of clusters for features')
 
+        # for hand keypoint loss
+        self.parser.add_argument('--train_hand', action='store_true', help='if specified, add conditional GAN for hand keypoints')
+
         # for face discriminator
         self.parser.add_argument('--face_discrim', action='store_true', help='if specified, add a face discriminator')
         self.parser.add_argument('--niter_fix_main', type=int, default=0, help='number of epochs that we only train the face discriminator')        

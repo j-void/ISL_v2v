@@ -2,6 +2,8 @@
 ### Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 import time
 from collections import OrderedDict
+
+from numpy.lib import utils
 from options.train_options import TrainOptions
 from data.data_loader import CreateDataLoader
 from models.models import create_model_fullts
@@ -39,6 +41,9 @@ print('#training images = %d' % dataset_size)
 model = create_model_fullts(opt)
 visualizer = Visualizer(opt)
 
+if not os.path.exists("tmp"):
+    os.makedirs("tmp")
+
 total_steps = (start_epoch-1) * dataset_size + epoch_iter    
 for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
     epoch_start_time = time.time()
@@ -51,6 +56,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
         # whether to collect output images
         save_fake = total_steps % opt.display_freq == 0
+        
+        
 
         ############## Forward Pass ######################
 
@@ -63,6 +70,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), infer=True)
 
+            gen_img = util.tensor2im(generated[0].data[0])
+            util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+epoch+".png")
+            util.save_image(util.tensor2im(Variable(data['image'])), "tmp/out_real_"+str(i)+"_"+epoch+".png")
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
             loss_dict = dict(zip(model.module.loss_names, losses))

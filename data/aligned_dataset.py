@@ -8,6 +8,8 @@ from data.base_dataset import BaseDataset, get_params, get_transform, normalize
 from data.image_folder import make_dataset
 from PIL import Image
 import numpy as np
+import glob
+from data_prep.renderpose import *
 
 class AlignedDataset(BaseDataset):
     def initialize(self, opt):
@@ -29,6 +31,16 @@ class AlignedDataset(BaseDataset):
         #     print('----------- loading face bounding boxes from %s ----------' % self.dir_facetext)
         #     self.facetext_paths = sorted(make_dataset(self.dir_facetext))
 
+        ### load hand keypoints
+        # if opt.train_hand:
+        #     _train_keypoint_path = os.path.join(opt.train_keypoints_dir, "*.json")
+        #     self.train_keypoints = glob.glob(_train_keypoint_path)
+        #     self.train_keypoints.sort()
+        #     print("Train Keypoints Loaded")
+        #     _test_keypoint_path = os.path.join(opt.test_keypoints_dir, "*.json")
+        #     self.test_keypoints = glob.glob(_test_keypoint_path)
+        #     self.test_keypoints.sort()
+        #     print("Test Keypoints Loaded")
 
         self.dataset_size = len(self.label_paths) 
       
@@ -42,7 +54,7 @@ class AlignedDataset(BaseDataset):
         label_tensor = transform_label(label)
         original_label_path = label_path
 
-        image_tensor = next_label = next_image = face_tensor = 0
+        image_tensor = next_label = next_image = face_tensor = handpts_real_tensor = handpts_fake_tensor = 0
         ### real images 
         if self.opt.isTrain:
             image_path = self.image_paths[index]   
@@ -79,6 +91,19 @@ class AlignedDataset(BaseDataset):
         # input_dict = {'label': label_tensor.float(), 'image': image_tensor, 
         #               'path': original_label_path, 'face_coords': face_tensor,
         #               'next_label': next_label, 'next_image': next_image }
+        
+        """ If using for hand keypoints """
+        # if self.opt.train_hand:
+        #     _, facepts_r, r_handpts_r, l_handpts_r = readkeypointsfile_json(self.train_keypoints[index])
+        #     _, facepts_f, r_handpts_f, l_handpts_f = readkeypointsfile_json(self.test_keypoints[index])
+        #     handpts_real = r_handpts_r + l_handpts_r
+        #     handpts_fake = r_handpts_f + l_handpts_f
+        #     handpts_real_tensor = torch.tensor(handpts_real)
+        #     handpts_fake_tensor = torch.tensor(handpts_fake)
+        
+        # input_dict = {'label': label_tensor.float(), 'image': image_tensor,
+        #               'path': original_label_path, 'next_label': next_label,
+        #               'next_image': next_image, 'hand_real': handpts_real_tensor, 'hand_fake': handpts_fake_tensor }
         
         input_dict = {'label': label_tensor.float(), 'image': image_tensor, 
                 'path': original_label_path, 'next_label': next_label, 'next_image': next_image }
