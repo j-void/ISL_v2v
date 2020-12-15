@@ -26,7 +26,7 @@ def get_keypoints(frame, fix_coords=False):
     for idx, hand_handedness in enumerate(results.multi_handedness):
         handedness_dict = MessageToDict(hand_handedness)
         hand_side[idx] = handedness_dict["classification"][0]["label"]
-        hand_prob[idx] = handedness_dict["score"][0]["label"]
+        hand_prob[idx] = handedness_dict["classification"][0]["score"]
     if hand_side[0] == hand_side[1]:
         if hand_prob[0] > hand_prob[1]:
             hand_side[1] = None
