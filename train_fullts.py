@@ -70,9 +70,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), infer=True)
 
-            gen_img = util.tensor2im(generated[0].data[0])
-            util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+epoch+".png")
-            util.save_image(util.tensor2im(Variable(data['image'])), "tmp/out_real_"+str(i)+"_"+epoch+".png")
+            if total_steps % opt.save_latest_freq == 0:
+                gen_img = util.tensor2im(generated[0].data[0])
+                util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+epoch+".png")
+                util.save_image(util.tensor2im(Variable(data['image'])), "tmp/out_real_"+str(i)+"_"+epoch+".png")
+
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
             loss_dict = dict(zip(model.module.loss_names, losses))
