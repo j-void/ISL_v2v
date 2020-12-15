@@ -43,7 +43,7 @@ class Pix2PixHDModel(BaseModel):
         if self.isTrain and self.opt.hand_discrim:
             use_sigmoid = opt.no_lsgan
             self.netDhand = networks.define_D(1, 42, opt.n_layers_D, opt.norm, use_sigmoid, 
-                                          1, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids, netD='hand')
+                                          1, False, gpu_ids=self.gpu_ids, netD='hand')
 
             
         print('---------- Networks initialized -------------')
