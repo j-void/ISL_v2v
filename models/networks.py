@@ -55,8 +55,9 @@ def define_D(input_nc, ndf, n_layers_D, norm='instance', use_sigmoid=False, num_
         norm_layer = get_norm_layer(norm_type=norm)   
         netD = MultiscaleDiscriminator(input_nc, ndf, n_layers_D, norm_layer, use_sigmoid, num_D, getIntermFeat)   
     elif netD == 'hand':
-        netD = NLayerDiscriminator(input_nc, ndf=64, n_layers=n_layers_D, norm_layer=nn.BatchNorm2d, use_sigmoid=False, 
-                            getIntermFeat=False, addname='hand')
+        # netD = NLayerDiscriminator(input_nc, ndf=64, n_layers=n_layers_D, norm_layer=nn.BatchNorm2d, use_sigmoid=False, 
+        #                     getIntermFeat=False, addname='hand')
+        netD = HandDiscriminator(42)
     else:
         raise('discriminator not implemented!')
     print(netD)
@@ -354,16 +355,16 @@ class NLayerDiscriminator(nn.Module):
         self.n_layers = n_layers
         self.addname = addname
 
-        kw = 1
+        kw = 4
         padw = int(np.ceil((kw-1.0)/2))
-        sequence = [[nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=1, padding=padw), nn.LeakyReLU(0.2, True)]]
+        sequence = [[nn.Conv2d(input_nc, ndf, kernel_size=kw, stride=2, padding=padw), nn.LeakyReLU(0.2, True)]]
 
         nf = ndf
         for n in range(1, n_layers):
             nf_prev = nf
             nf = min(nf * 2, 512)
             sequence += [[
-                nn.Conv2d(nf_prev, nf, kernel_size=kw, stride=1, padding=padw),
+                nn.Conv2d(nf_prev, nf, kernel_size=kw, stride=2, padding=padw),
                 norm_layer(nf), nn.LeakyReLU(0.2, True)
             ]]
 
@@ -517,3 +518,24 @@ class Vgg19(torch.nn.Module):
         h_relu5 = self.slice5(h_relu4)                
         out = [h_relu1, h_relu2, h_relu3, h_relu4, h_relu5]
         return out
+    
+    
+class HandDiscriminator(nn.Module):
+    
+    def __init__(self, pose_dim):
+        
+        super(HandDiscriminator, self).__init__()
+        
+        self.disc = torch.nn.Sequential(
+            torch.nn.Linear(in_features=pose_dim, out_features=240, bias=True),
+            torch.nn.ReLU(),
+
+            torch.nn.Linear(in_features=240, out_features=240, bias=True),
+            torch.nn.ReLU(),
+
+            torch.nn.Linear(in_features=240, out_features=1, bias=True),
+            torch.nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        return self.disc(x)
