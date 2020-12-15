@@ -165,10 +165,10 @@ class Pix2PixHDModel(BaseModel):
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
 
         lhpts_real_tensor = torch.tensor(lhpts_real, dtype=torch.float)
-        lhpts_real_tensor = lhpts_real_tensor.cuda()
+        lhpts_real_tensor = lhpts_real_tensor.unsqueeze(1).cuda()
         
         rhpts_real_tensor = torch.tensor(rhpts_real, dtype=torch.float)
-        rhpts_real_tensor = rhpts_real_tensor.cuda()
+        rhpts_real_tensor = rhpts_real_tensor.unsqueeze(1).cuda()
 
         initial_I_0 = 0
 
@@ -182,10 +182,10 @@ class Pix2PixHDModel(BaseModel):
         lhpts_fake, rhpts_fake = hand_utils.get_keypoints(gen_img)
         
         lhpts_fake_tensor = torch.tensor(lhpts_fake, dtype=torch.float)
-        lhpts_fake_tensor = lhpts_fake_tensor.cuda()
+        lhpts_fake_tensor = lhpts_fake_tensor.unsqueeze(1).cuda()
         
         rhpts_fake_tensor = torch.tensor(rhpts_fake, dtype=torch.float)
-        rhpts_fake_tensor = rhpts_fake_tensor.cuda()
+        rhpts_fake_tensor = rhpts_fake_tensor.unsqueeze(1).cuda()
         
         # if self.img_idx % 100 == 0:
         #     gen_img = util.tensor2im(I_0.data[0])
