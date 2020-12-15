@@ -162,3 +162,38 @@ def assert_bbox(handpts):
         sy = 0
     
     return int(sx), int(sy), int(max_dis*1.5)
+
+
+handSeq = [[0,1], [1,2], [2,3], [3,4], \
+    [0,5], [5,6], [6,7], [7,8], \
+    [0,9], [9,10], [10,11], [11,12], \
+    [0,13], [13,14], [14,15], [15,16], \
+    [0,17], [17,18], [18,19], [19,20], \
+    [5,9], [9,13], [13,17]]
+
+def display_single_hand_skleton(frame, handpts):
+                        
+    for k in range(len(handSeq)):
+        firstlimb_ind = handSeq[k][0]
+        secondlimb_ind = handSeq[k][1]
+        cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), (255,255,255), 4)
+
+    for p in range(handpts.shape[0]):
+        cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), 4, (255, 0, 255), -1)
+            
+    return True
+
+def display_hand_skleton(frame, r_handpts, l_handpts):
+        
+                
+    for k in range(len(handSeq)):
+        firstlimb_ind = handSeq[k][0]
+        secondlimb_ind = handSeq[k][1]
+        cv2.line(frame, (int(r_handpts[firstlimb_ind, 0]), int(r_handpts[firstlimb_ind, 1])), (int(r_handpts[secondlimb_ind, 0]), int(r_handpts[secondlimb_ind, 1])), (255,255,255), 4)
+        cv2.line(frame, (int(l_handpts[firstlimb_ind, 0]), int(l_handpts[firstlimb_ind, 1])), (int(l_handpts[secondlimb_ind, 0]), int(l_handpts[secondlimb_ind, 1])), (255,255,255), 4)
+
+    for p in range(r_handpts.shape[0]):
+        cv2.circle(frame, (int(r_handpts[p,0]), int(r_handpts[p,1])), 4, (255, 0, 255), -1)
+        cv2.circle(frame, (int(l_handpts[p,0]), int(l_handpts[p,1])), 4, (255, 0, 255), -1)   
+            
+    return True

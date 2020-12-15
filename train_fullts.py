@@ -13,6 +13,7 @@ import os
 import numpy as np
 import torch
 from torch.autograd import Variable
+import util.hand_utils as hand_utils
 
 opt = TrainOptions().parse()
 iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
@@ -71,10 +72,15 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     Variable(data['next_image']), Variable(cond_zeros), infer=True)
 
             if total_steps % 100 == 0:
-                gen_img = util.tensor2im(generated[0].data[0])
-                util.save_image(gen_img[:,:1024,:], "tmp/out_gen_"+str(i)+"_"+str(epoch)+".png")
+                gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
                 targets = torch.cat((data['image'], data['next_image']), dim=3)
-                util.save_image(util.tensor2im(targets[0])[:,:1024,:], "tmp/out_real_"+str(i)+"_"+str(epoch)+".png")
+                real_img = util.tensor2im(targets[0])[:,:1024,:]
+                lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img, 0.9)
+                lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img, 0.9)
+                hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
+                hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
+                util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+str(epoch)+".png")
+                util.save_image(real_img, "tmp/out_real_"+str(i)+"_"+str(epoch)+".png")
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
