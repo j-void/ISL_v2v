@@ -73,17 +73,16 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     Variable(data['next_image']), Variable(cond_zeros), infer=True)
 
             if total_steps % 100 == 0:
-                gen_img = generated[0].data[0].permute(1, 2, 0).cpu().numpy()[:,:1024,:]
-                gen_img.astype(np.uint8)
-                targets = torch.cat((data['image'], data['next_image']), dim=3)
-                real_img = targets[0].permute(1, 2, 0).cpu().numpy()[:,:1024,:]
-                real_img.astype(np.uint8)
-                lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
-                lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
-                hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
-                hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
-                cv2.imwrite("tmp/out_gen_"+str(i)+"_"+str(epoch)+".png", gen_img)
-                cv2.imwrite("tmp/out_real_"+str(i)+"_"+str(epoch)+".png", real_img)
+                gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
+                print(gen_img.shape, gen_img.type())
+                # targets = torch.cat((data['image'], data['next_image']), dim=3)
+                # real_img = util.tensor2im(targets[0])[:,:1024,:]
+                # lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
+                # lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
+                # hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
+                # hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
+                # util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+str(epoch)+".png")
+                # util.save_image(real_img, "tmp/out_real_"+str(i)+"_"+str(epoch)+".png")
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
