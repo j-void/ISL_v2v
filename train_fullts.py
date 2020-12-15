@@ -68,10 +68,13 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
         if no_nexts:
             cond_zeros = torch.zeros(data['label'].size()).float()
-            
+            targets = torch.cat((data['image'], data['next_image']), dim=3)
+            real_img = util.tensor2im(targets[0])[:,:1024,:]
+            real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
+            lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), infer=True)
+                    Variable(data['next_image']), Variable(cond_zeros), lhpts_real, rhpts_real, infer=True)
 
             # if total_steps % 100 == 0:
             #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
@@ -95,7 +98,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             loss_dict = dict(zip(model.module.loss_names, losses))
 
             # calculate final loss scalar
-            loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5 # + (loss_dict['D_realface'] + loss_dict['D_fakeface']) * 0.5
+            loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5 + (loss_dict['D_lhand_real'] + loss_dict['D_lhand_fake']) * 0.5 + (loss_dict['D_rhand_real'] + loss_dict['D_rhand_fake']) * 0.5
             loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG'] # + loss_dict['G_GANface']
 
             ############### Backward Pass ####################

@@ -54,9 +54,9 @@ def define_D(input_nc, ndf, n_layers_D, norm='instance', use_sigmoid=False, num_
     if netD == 'multi':        
         norm_layer = get_norm_layer(norm_type=norm)   
         netD = MultiscaleDiscriminator(input_nc, ndf, n_layers_D, norm_layer, use_sigmoid, num_D, getIntermFeat)   
-    # elif netD == 'face':
-    #     netD = NLayerDiscriminator(input_nc, ndf=64, n_layers=n_layers_D, norm_layer=nn.BatchNorm2d, use_sigmoid=False, 
-    #                         getIntermFeat=False, addname='face')
+    elif netD == 'hand':
+        netD = NLayerDiscriminator(input_nc, ndf=64, n_layers=n_layers_D, norm_layer=nn.BatchNorm2d, use_sigmoid=False, 
+                            getIntermFeat=False, addname='hand')
     else:
         raise('discriminator not implemented!')
     print(netD)

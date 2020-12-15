@@ -57,7 +57,7 @@ class BaseOptions():
         self.parser.add_argument('--n_clusters', type=int, default=10, help='number of clusters for features')
 
         # for hand keypoint loss
-        self.parser.add_argument('--train_hand', action='store_true', help='if specified, add conditional GAN for hand keypoints')
+        self.parser.add_argument('--hand_discrim', action='store_true', help='if specified, add conditional GAN for hand keypoints')
 
         # for face discriminator
         self.parser.add_argument('--face_discrim', action='store_true', help='if specified, add a face discriminator')
