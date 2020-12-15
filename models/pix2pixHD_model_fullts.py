@@ -21,7 +21,7 @@ class Pix2PixHDModel(BaseModel):
         if opt.resize_or_crop != 'none': # when training at full res this causes OOM
             torch.backends.cudnn.benchmark = True
         self.isTrain = opt.isTrain
-
+        self.img_idx = 0
         ##### define networks        
         # Generator network
         netG_input_nc = opt.label_nc
@@ -162,8 +162,8 @@ class Pix2PixHDModel(BaseModel):
         lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
         rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
         hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
-        cv2.imwrite("out_gen.png", gen_img)
-        
+        cv2.imwrite("tmp/out_gen_"+self.img_idx+".png", gen_img)
+        self.img_idx = self.img_idx + 1
         input_concat1 = torch.cat((next_label, I_0), dim=1)
 
         I_1 = self.netG.forward(input_concat1)
