@@ -9,6 +9,8 @@ import util.util as util
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
+import util.hand_utils as hand_utils
+import cv2
 
 class Pix2PixHDModel(BaseModel):
     def name(self):
@@ -154,8 +156,10 @@ class Pix2PixHDModel(BaseModel):
         input_concat = torch.cat((input_label, zeroshere), dim=1) 
 
         I_0 = self.netG.forward(input_concat)
-
-
+        gen_img = util.tensor2im(I_0.data[0])
+        gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
+        print(gen_img.shape)
+        
         input_concat1 = torch.cat((next_label, I_0), dim=1)
 
         I_1 = self.netG.forward(input_concat1)

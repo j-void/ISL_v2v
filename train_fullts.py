@@ -68,26 +68,27 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
         if no_nexts:
             cond_zeros = torch.zeros(data['label'].size()).float()
+            
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), infer=True)
 
-            if total_steps % 100 == 0:
-                gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
-                gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-                targets = torch.cat((data['image'], data['next_image']), dim=3)
-                real_img = util.tensor2im(targets[0])[:,:1024,:]
-                real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
-                lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
-                lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
-                rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
-                lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
-                lhpts_real = hand_utils.rescale_points(1024, 512, lhpts_real)
-                rhpts_real = hand_utils.rescale_points(1024, 512, rhpts_real)
-                hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
-                hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
-                cv2.imwrite("tmp/out_gen_"+str(i)+"_"+str(epoch)+".png", gen_img)
-                cv2.imwrite("tmp/out_real_"+str(i)+"_"+str(epoch)+".png", real_img)
+            # if total_steps % 100 == 0:
+            #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
+            #     gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
+            #     targets = torch.cat((data['image'], data['next_image']), dim=3)
+            #     real_img = util.tensor2im(targets[0])[:,:1024,:]
+            #     real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
+            #     lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
+            #     lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
+            #     rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
+            #     lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
+            #     lhpts_real = hand_utils.rescale_points(1024, 512, lhpts_real)
+            #     rhpts_real = hand_utils.rescale_points(1024, 512, rhpts_real)
+            #     hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
+            #     hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
+            #     cv2.imwrite("tmp/out_gen_"+str(i)+"_"+str(epoch)+".png", gen_img)
+            #     cv2.imwrite("tmp/out_real_"+str(i)+"_"+str(epoch)+".png", real_img)
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
