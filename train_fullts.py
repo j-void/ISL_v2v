@@ -74,7 +74,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
             if total_steps % 100 == 0:
                 gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
-                print(gen_img.shape, gen_img.dtype)
+                gen_img = cv2.cvtColor(gen_img, cv2.COLOR_BGR2RGB)
                 cv2.imwrite("tmp/gtds.png", gen_img)
                 # targets = torch.cat((data['image'], data['next_image']), dim=3)
                 # real_img = util.tensor2im(targets[0])[:,:1024,:]
