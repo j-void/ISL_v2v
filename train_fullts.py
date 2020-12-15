@@ -74,10 +74,10 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
             if total_steps % 100 == 0:
                 gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
-                gen_img.astype(np.uint8)
+                gen_img.astype(np.uint32)
                 targets = torch.cat((data['image'], data['next_image']), dim=3)
                 real_img = util.tensor2im(targets[0])[:,:1024,:]
-                real_img.astype(np.uint8)
+                real_img.astype(np.uint32)
                 lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
                 lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
                 hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
