@@ -22,6 +22,7 @@ def get_keypoints(frame, fix_coords=False):
     hand_side = [None] * 2
     hand_prob = [None] * 2
     if not results.multi_hand_landmarks:
+        print("No multi_hand_landmarks")
         return lefthnd_pts, righthnd_pts
     for idx, hand_handedness in enumerate(results.multi_handedness):
         handedness_dict = MessageToDict(hand_handedness)
@@ -54,6 +55,7 @@ def get_keypoints(frame, fix_coords=False):
                 else:
                     righthnd_pts = GetCoordForCurrentInstance(hand_landmarks)
             index = index + 1
+    print(lefthnd_pts, righthnd_pts)
     return lefthnd_pts, righthnd_pts
     
     
