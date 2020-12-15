@@ -5,10 +5,14 @@ from google.protobuf.json_format import MessageToDict
 
 mp_hands = mp.solutions.hands
 
-def get_keypoints(frame, confidence, fix_coords=False):
+confidence = 0.9
+
+hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=confidence)
+
+
+def get_keypoints(frame, fix_coords=False):
     lefthnd_pts = np.zeros((21, 2))
     righthnd_pts = np.zeros((21, 2))
-    hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=confidence)
     scale_n, translate_n = resize_scale(frame)
     image = fix_image(scale_n, translate_n, frame)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

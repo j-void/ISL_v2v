@@ -4,6 +4,7 @@ import time
 from collections import OrderedDict
 
 from numpy.lib import utils
+from torch._C import uint8
 from options.train_options import TrainOptions
 from data.data_loader import CreateDataLoader
 from models.models import create_model_fullts
@@ -72,11 +73,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     Variable(data['next_image']), Variable(cond_zeros), infer=True)
 
             if total_steps % 100 == 0:
-                gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
+                gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:].astype(uint8)
                 targets = torch.cat((data['image'], data['next_image']), dim=3)
-                real_img = util.tensor2im(targets[0])[:,:1024,:]
-                lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img, 0.9)
-                lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img, 0.9)
+                real_img = util.tensor2im(targets[0])[:,:1024,:].astype(uint8)
+                lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
+                lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
                 hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
                 hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
                 util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+str(epoch)+".png")
