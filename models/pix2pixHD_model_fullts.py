@@ -65,7 +65,8 @@ class Pix2PixHDModel(BaseModel):
             self.old_lr = opt.lr
 
             # define loss functions
-            self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)   
+            self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
+            self.criterionHandGAN = torch.nn.BCELoss()
             self.criterionFeat = torch.nn.L1Loss()
             if not opt.no_vgg_loss:             
                 self.criterionVGG = networks.VGGLoss(self.gpu_ids)
@@ -212,15 +213,19 @@ class Pix2PixHDModel(BaseModel):
         if self.opt.hand_discrim:
             pred_fake_lhand = self.discriminatehand(lhpts_fake_tensor)
             loss_D_fake_lhand = self.criterionGAN(pred_fake_lhand, False)
+            #loss_D_fake_lhand = self.criterionHandGAN(pred_fake_lhand, torch.zeros_like(pred_fake_lhand))
             
             pred_real_lhand = self.discriminatehand(lhpts_real_tensor)
             loss_D_real_lhand = self.criterionGAN(pred_real_lhand, True)
+            #loss_D_real_lhand = self.criterionHandGAN(pred_real_lhand, torch.ones_like(pred_real_lhand))
             
             pred_fake_rhand = self.discriminatehand(rhpts_fake_tensor)
             loss_D_fake_rhand = self.criterionGAN(pred_fake_rhand, False)
+            #loss_D_fake_rhand = self.criterionHandGAN(pred_fake_rhand, torch.zeros_like(pred_fake_rhand))
             
             pred_real_rhand = self.discriminatehand(rhpts_real_tensor)
             loss_D_real_rhand = self.criterionGAN(pred_real_rhand, True)
+            #loss_D_real_rhand = self.criterionHandGAN(pred_real_rhand, torch.ones_like(pred_real_rhand))
 
         # Fake Detection and Loss
         pred_fake_pool = self.discriminate_4(input_label, next_label, I_0, I_1, use_pool=True)
