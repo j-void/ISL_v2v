@@ -74,6 +74,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 gen_img = util.tensor2im(generated[0].data[0])
                 util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+str(epoch)+".png")
                 targets = torch.cat((data['image'], data['next_image']), dim=3)
+                print(gen_img.shape, len(generated[0].data[0]))
                 util.save_image(util.tensor2im(targets[0]), "tmp/out_real_"+str(i)+"_"+str(epoch)+".png")
 
             # sum per device losses
