@@ -72,8 +72,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
             if total_steps % 100 == 0:
                 gen_img = util.tensor2im(generated[0].data[0])
-                util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+epoch+".png")
-                util.save_image(util.tensor2im(Variable(data['image'])), "tmp/out_real_"+str(i)+"_"+epoch+".png")
+                util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+str(epoch)+".png")
+                util.save_image(util.tensor2im(Variable(data['image'])), "tmp/out_real_"+str(i)+"_"+str(epoch)+".png")
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
