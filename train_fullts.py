@@ -14,6 +14,7 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 import util.hand_utils as hand_utils
+import cv2
 
 opt = TrainOptions().parse()
 iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
@@ -79,8 +80,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
                 hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
                 hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
-                util.save_image(gen_img, "tmp/out_gen_"+str(i)+"_"+str(epoch)+".png")
-                util.save_image(real_img, "tmp/out_real_"+str(i)+"_"+str(epoch)+".png")
+                cv2.imwrite("tmp/out_gen_"+str(i)+"_"+str(epoch)+".png", gen_img)
+                cv2.imwrite("tmp/out_real_"+str(i)+"_"+str(epoch)+".png", real_img)
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
