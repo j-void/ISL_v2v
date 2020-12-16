@@ -43,8 +43,10 @@ print('#training images = %d' % dataset_size)
 model = create_model_fullts(opt)
 visualizer = Visualizer(opt)
 
-if not os.path.exists("tmp"):
-    os.makedirs("tmp")
+tmp_out_path = os.path.join(opt.checkpoints_dir, opt.name, "tmp")
+
+if not os.path.exists(tmp_out_path):
+    os.makedirs(tmp_out_path)
 
 total_steps = (start_epoch-1) * dataset_size + epoch_iter    
 for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
@@ -128,42 +130,60 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
             ### display output images
             
-            if save_fake and opt.hand_discrim:
-                syn = generated[0].data[0]
-                inputs = torch.cat((data['label'], data['next_label']), dim=3)
-                targets = torch.cat((data['image'], data['next_image']), dim=3)
-                syn_img_hand = util.tensor2im(syn)[:,:1024,:]
+            if total_steps % 100:
+                syn_img_hand = util.tensor2im(generated[0].data[0])[:,:1024,:]
                 syn_img_hand = cv2.cvtColor(syn_img_hand, cv2.COLOR_RGB2BGR)
-                lhpts_gen, rhpts_gen = hand_utils.get_keypoints(syn_img_hand)
-                lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
-                rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
-                hand_utils.display_hand_skleton(syn_img_hand, lhpts_gen, rhpts_gen)
-                syn_img_hand = cv2.cvtColor(syn_img_hand, cv2.COLOR_BGR2RGB)
                 real_hand_img = real_img.copy()
-                lhpts_real_r = hand_utils.rescale_points(1024, 512, lhpts_real)
-                rhpts_real_r = hand_utils.rescale_points(1024, 512, rhpts_real)
-                hand_utils.display_hand_skleton(real_hand_img, lhpts_real_r, rhpts_real_r)
-                real_hand_img = cv2.cvtColor(real_hand_img, cv2.COLOR_BGR2RGB)
-                visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
-                                           ('synthesized_image', util.tensor2im(syn)),
-                                           ('real_image', util.tensor2im(targets[0]),
-                                            ('syn_hand_image', syn_img_hand),
-                                            ('real_hand_image', real_hand_img))])
-                # if opt.face_generator: #display face generator on tensorboard
-                #     miny, maxy, minx, maxx = data['face_coords'][0]
-                #     res_face = generated[2].data[0]
-                #     syn_face = generated[1].data[0]
-                #     preres = generated[3].data[0]
-                #     visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
-                #                            ('synthesized_image', util.tensor2im(syn)),
-                #                            ('synthesized_face', util.tensor2im(syn_face)),
-                #                            ('residual', util.tensor2im(res_face)),
-                #                            ('real_face', util.tensor2im(data['image'][0][:, miny:maxy, minx:maxx])),
-                #                            # ('pre_residual', util.tensor2im(preres)),
-                #                            # ('pre_residual_face', util.tensor2im(preres[:, miny:maxy, minx:maxx])),
-                #                            ('input_face', util.tensor2im(data['label'][0][:, miny:maxy, minx:maxx], normalize=False)),
-                #                            ('real_image', util.tensor2im(targets[0]))])
-                visualizer.display_current_results(visuals, epoch, total_steps)
+                inputs = torch.cat((data['label'], data['next_label']), dim=3)
+                input_label = util.tensor2im(inputs[0])[:,:1024,:]
+                input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
+                if opt.hand_discrim:
+                    lhpts_gen, rhpts_gen = hand_utils.get_keypoints(syn_img_hand)
+                    lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
+                    rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
+                    hand_utils.display_hand_skleton(syn_img_hand, lhpts_gen, rhpts_gen)
+                    lhpts_real_r = hand_utils.rescale_points(1024, 512, lhpts_real)
+                    rhpts_real_r = hand_utils.rescale_points(1024, 512, rhpts_real)
+                    hand_utils.display_hand_skleton(real_hand_img, lhpts_real_r, rhpts_real_r)
+                output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])
+                cv2.imwrite(os.path.join(os.path.join, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
+            
+            # if save_fake and opt.hand_discrim:
+            #     syn = generated[0].data[0]
+            #     inputs = torch.cat((data['label'], data['next_label']), dim=3)
+            #     targets = torch.cat((data['image'], data['next_image']), dim=3)
+            #     syn_img_hand = util.tensor2im(syn)[:,:1024,:]
+            #     syn_img_hand = cv2.cvtColor(syn_img_hand, cv2.COLOR_RGB2BGR)
+            #     lhpts_gen, rhpts_gen = hand_utils.get_keypoints(syn_img_hand)
+            #     lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
+            #     rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
+            #     hand_utils.display_hand_skleton(syn_img_hand, lhpts_gen, rhpts_gen)
+            #     syn_img_hand = cv2.cvtColor(syn_img_hand, cv2.COLOR_BGR2RGB)
+            #     real_hand_img = real_img.copy()
+            #     lhpts_real_r = hand_utils.rescale_points(1024, 512, lhpts_real)
+            #     rhpts_real_r = hand_utils.rescale_points(1024, 512, rhpts_real)
+            #     hand_utils.display_hand_skleton(real_hand_img, lhpts_real_r, rhpts_real_r)
+            #     real_hand_img = cv2.cvtColor(real_hand_img, cv2.COLOR_BGR2RGB)
+            #     visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
+            #                                ('synthesized_image', util.tensor2im(syn)),
+            #                                ('real_image', util.tensor2im(targets[0]),
+            #                                 ('syn_hand_image', syn_img_hand),
+            #                                 ('real_hand_image', real_hand_img))])
+            #     # if opt.face_generator: #display face generator on tensorboard
+            #     #     miny, maxy, minx, maxx = data['face_coords'][0]
+            #     #     res_face = generated[2].data[0]
+            #     #     syn_face = generated[1].data[0]
+            #     #     preres = generated[3].data[0]
+            #     #     visuals = OrderedDict([('input_label', util.tensor2im(inputs[0], normalize=False)),
+            #     #                            ('synthesized_image', util.tensor2im(syn)),
+            #     #                            ('synthesized_face', util.tensor2im(syn_face)),
+            #     #                            ('residual', util.tensor2im(res_face)),
+            #     #                            ('real_face', util.tensor2im(data['image'][0][:, miny:maxy, minx:maxx])),
+            #     #                            # ('pre_residual', util.tensor2im(preres)),
+            #     #                            # ('pre_residual_face', util.tensor2im(preres[:, miny:maxy, minx:maxx])),
+            #     #                            ('input_face', util.tensor2im(data['label'][0][:, miny:maxy, minx:maxx], normalize=False)),
+            #     #                            ('real_image', util.tensor2im(targets[0]))])
+            #     visualizer.display_current_results(visuals, epoch, total_steps)
 
         ### save latest model
         if total_steps % opt.save_latest_freq == 0:
