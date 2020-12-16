@@ -130,7 +130,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
             ### display output images
             
-            if total_steps % 100:
+            if total_steps % opt.save_latest_freq == 0:
                 syn_img_hand = util.tensor2im(generated[0].data[0])[:,:1024,:]
                 syn_img_hand = cv2.cvtColor(syn_img_hand, cv2.COLOR_RGB2BGR)
                 real_hand_img = real_img.copy()
