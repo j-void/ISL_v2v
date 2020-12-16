@@ -92,19 +92,22 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
             cv2.circle(frame, (int(posepts[p*3]), int(posepts[p*3+1])), 6, pose_colors[p], -1)
         posepts_2d.append(pt)
         
-    for p in range(0, int(len(r_handpts)/3)):
+    for p in range(0, 21):
         pt = (int(r_handpts[p*3]), int(r_handpts[p*3+1]))
-        cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 4, hand_colors[p], -1)
+        if r_handpts[p*3] > 0 and r_handpts[p*3+1] > 0:
+            cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 4, hand_colors[p], -1)
         r_handpts_2d.append(pt)
         
-    for p in range(0, int(len(l_handpts)/3)):
+    for p in range(0, 21):
         pt = (int(l_handpts[p*3]), int(l_handpts[p*3+1]))
-        cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 4, hand_colors[p], -1)
+        if l_handpts[p*3] > 0 and l_handpts[p*3+1] > 0:
+            cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 4, hand_colors[p], -1)
         l_handpts_2d.append(pt)
         
     for p in range(0, int(len(facepts)/3)):
         pt = (int(facepts[p*3]), int(facepts[p*3+1]))
-        cv2.circle(frame, (int(facepts[p*3]), int(facepts[p*3+1])), 1, (0, 0, 0), -1)
+        if facepts[p*3] > 0 and facepts[p*3+1] > 0:
+            cv2.circle(frame, (int(facepts[p*3]), int(facepts[p*3+1])), 1, (0, 0, 0), -1)
         facepts_2d.append(pt)
     
     for k in range(len(limbSeq)):
