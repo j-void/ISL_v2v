@@ -144,7 +144,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     rhpts_real_r = hand_utils.rescale_points(1024, 512, rhpts_real)
                     hand_utils.display_hand_skleton(real_hand_img, lhpts_real_r, rhpts_real_r)
                 output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])
-                cv2.imwrite(os.path.join(os.path.join, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
+                cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
             # if save_fake and opt.hand_discrim:
             #     syn = generated[0].data[0]
