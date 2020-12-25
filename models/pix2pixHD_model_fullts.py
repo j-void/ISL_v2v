@@ -159,18 +159,18 @@ class Pix2PixHDModel(BaseModel):
     def discriminatehand(self, real_keypoints, use_pool=False):
         return self.netDhand.forward(real_keypoints)
 
-    def forward(self, label, next_label, image, next_image, zeroshere, lhpts_real, rhpts_real, infer=False):
+    def forward(self, label, next_label, image, next_image, zeroshere, lhsk_real, rhsk_real, hand_prob_real, infer=False):
         # Encode Inputs
         input_label, real_image, next_label, next_image, zeroshere = self.encode_input(label, image, \
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
 
-        lhpts_real_tensor = torch.tensor(lhpts_real, dtype=torch.float)
+        lhpts_real_tensor = torch.tensor(cv2.cvtColor(lhsk_real.copy(), cv2.COLOR_BGR2RGB))
         #print(lhpts_real_tensor)
-        lhpts_real_tensor = lhpts_real_tensor.view(1, 1, 21, 2).cuda()
+        lhpts_real_tensor = lhpts_real_tensor.view(1, lhsk_real.shape[2], lhsk_real.shape[0], lhsk_real.shape[1]).cuda()
         #print(lhpts_real_tensor)
         
-        rhpts_real_tensor = torch.tensor(rhpts_real, dtype=torch.float)
-        rhpts_real_tensor = rhpts_real_tensor.view(1, 1, 21, 2).cuda()
+        rhpts_real_tensor = torch.tensor(cv2.cvtColor(rhsk_real.copy(), cv2.COLOR_BGR2RGB))
+        rhpts_real_tensor = rhpts_real_tensor.view(1, rhsk_real.shape[2], rhsk_real.shape[0], rhsk_real.shape[1]).cuda()
 
         initial_I_0 = 0
 
@@ -181,13 +181,17 @@ class Pix2PixHDModel(BaseModel):
         
         gen_img = util.tensor2im(I_0.data[0])
         gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-        lhpts_fake, rhpts_fake = hand_utils.get_keypoints(gen_img)
+        lhpts_fake, rhpts_fake, hand_prob_fake = hand_utils.get_keypoints(gen_img)
+        lhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
+        rhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
+        hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake)
+        hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake)
         
-        lhpts_fake_tensor = torch.tensor(lhpts_fake, dtype=torch.float)
-        lhpts_fake_tensor = lhpts_fake_tensor.view(1, 1, 21, 2).cuda()
+        lhpts_fake_tensor = torch.tensor(cv2.cvtColor(lhsk_fake.copy(), cv2.COLOR_BGR2RGB))
+        lhpts_fake_tensor = lhpts_fake_tensor.view(1, lhsk_fake.shape[2], lhsk_fake.shape[0], lhsk_fake.shape[1]).cuda()
         
-        rhpts_fake_tensor = torch.tensor(rhpts_fake, dtype=torch.float)
-        rhpts_fake_tensor = rhpts_fake_tensor.view(1, 1, 21, 2).cuda()
+        rhpts_fake_tensor = torch.tensor(cv2.cvtColor(rhsk_fake.copy(), cv2.COLOR_BGR2RGB))
+        rhpts_fake_tensor = rhpts_fake_tensor.view(1, rhsk_fake.shape[2], rhsk_fake.shape[0], rhsk_fake.shape[1]).cuda()
         
         # if self.img_idx % 100 == 0:
         #     gen_img = util.tensor2im(I_0.data[0])
@@ -268,7 +272,7 @@ class Pix2PixHDModel(BaseModel):
             loss_G_VGG += (self.criterionL1(I_1, next_image)) * self.opt.lambda_A
         
         # Only return the fake_B image if necessary to save BW
-        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake, loss_D_fake_lhand, loss_D_real_lhand, loss_D_fake_rhand, loss_D_real_rhand], None if not infer else [torch.cat((I_0, I_1), dim=3), fake_face, face_residual, initial_I_0] ]
+        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake, loss_D_fake_lhand, loss_D_real_lhand, loss_D_fake_rhand, loss_D_real_rhand], None if not infer else [torch.cat((I_0, I_1), dim=3), fake_face, face_residual, initial_I_0, lhsk_fake, rhsk_fake] ]
 
     def inference(self, label, prevouts):
 

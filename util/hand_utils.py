@@ -20,10 +20,10 @@ def get_keypoints(frame, fix_coords=False):
     image.flags.writeable = False
     results = hands.process(image)
     hand_side = [None] * 2
-    hand_prob = [None] * 2
+    hand_prob = [0] * 2
     if not results.multi_hand_landmarks:
         #print("No multi_hand_landmarks")
-        return lefthnd_pts, righthnd_pts
+        return lefthnd_pts, righthnd_pts, hand_prob
     for idx, hand_handedness in enumerate(results.multi_handedness):
         handedness_dict = MessageToDict(hand_handedness)
         hand_side[idx] = handedness_dict["classification"][0]["label"]
@@ -56,7 +56,7 @@ def get_keypoints(frame, fix_coords=False):
                     righthnd_pts = GetCoordForCurrentInstance(hand_landmarks)
             index = index + 1
     #print(lefthnd_pts, righthnd_pts)
-    return lefthnd_pts, righthnd_pts
+    return lefthnd_pts, righthnd_pts, hand_prob
     
     
 def resize_scale(frame, myshape = (512, 1024, 3)):
