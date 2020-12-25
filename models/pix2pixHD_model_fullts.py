@@ -164,12 +164,12 @@ class Pix2PixHDModel(BaseModel):
         input_label, real_image, next_label, next_image, zeroshere = self.encode_input(label, image, \
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
 
-        lhpts_real_tensor = torch.tensor(cv2.cvtColor(lhsk_real.copy(), cv2.COLOR_BGR2RGB))
+        lhpts_real_tensor = torch.tensor(cv2.cvtColor(lhsk_real.copy(), cv2.COLOR_BGR2RGB)/255, dtype=torch.float)
         #print(lhpts_real_tensor)
         lhpts_real_tensor = lhpts_real_tensor.view(1, lhsk_real.shape[2], lhsk_real.shape[0], lhsk_real.shape[1]).cuda()
         #print(lhpts_real_tensor)
         
-        rhpts_real_tensor = torch.tensor(cv2.cvtColor(rhsk_real.copy(), cv2.COLOR_BGR2RGB))
+        rhpts_real_tensor = torch.tensor(cv2.cvtColor(rhsk_real.copy(), cv2.COLOR_BGR2RGB)/255, dtype=torch.float)
         rhpts_real_tensor = rhpts_real_tensor.view(1, rhsk_real.shape[2], rhsk_real.shape[0], rhsk_real.shape[1]).cuda()
 
         initial_I_0 = 0
@@ -187,10 +187,10 @@ class Pix2PixHDModel(BaseModel):
         hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake)
         hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake)
         
-        lhpts_fake_tensor = torch.tensor(cv2.cvtColor(lhsk_fake.copy(), cv2.COLOR_BGR2RGB))
+        lhpts_fake_tensor = torch.tensor(cv2.cvtColor(lhsk_fake.copy(), cv2.COLOR_BGR2RGB)/255, dtype=torch.float)
         lhpts_fake_tensor = lhpts_fake_tensor.view(1, lhsk_fake.shape[2], lhsk_fake.shape[0], lhsk_fake.shape[1]).cuda()
         
-        rhpts_fake_tensor = torch.tensor(cv2.cvtColor(rhsk_fake.copy(), cv2.COLOR_BGR2RGB))
+        rhpts_fake_tensor = torch.tensor(cv2.cvtColor(rhsk_fake.copy(), cv2.COLOR_BGR2RGB)/255, dtype=torch.float)
         rhpts_fake_tensor = rhpts_fake_tensor.view(1, rhsk_fake.shape[2], rhsk_fake.shape[0], rhsk_fake.shape[1]).cuda()
         
         # if self.img_idx % 100 == 0:
