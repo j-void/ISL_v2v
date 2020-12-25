@@ -159,7 +159,7 @@ class Pix2PixHDModel(BaseModel):
     def discriminatehand(self, real_keypoints, use_pool=False):
         return self.netDhand.forward(real_keypoints)
 
-    def forward(self, label, next_label, image, next_image, zeroshere, lhsk_real, rhsk_real, hand_prob_real, infer=False):
+    def forward(self, label, next_label, image, next_image, zeroshere, lhsk_real, rhsk_real, hand_state_real, infer=False):
         # Encode Inputs
         input_label, real_image, next_label, next_image, zeroshere = self.encode_input(label, image, \
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
@@ -181,7 +181,7 @@ class Pix2PixHDModel(BaseModel):
         
         gen_img = util.tensor2im(I_0.data[0])
         gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-        lhpts_fake, rhpts_fake, hand_prob_fake = hand_utils.get_keypoints(gen_img, fix_coords=True)
+        lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
         lhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
         rhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
         hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake)
@@ -219,7 +219,7 @@ class Pix2PixHDModel(BaseModel):
         loss_D_real_rhand = 0
         
         if self.opt.hand_discrim:
-            if hand_prob_real[0] > 0:
+            if hand_state_real[0] == True:
                 pred_fake_lhand = self.discriminatehand(lhpts_fake_tensor)
                 loss_D_fake_lhand = self.criterionGAN(pred_fake_lhand, False)
                 #loss_D_fake_lhand = self.criterionHandGAN(pred_fake_lhand, torch.zeros_like(pred_fake_lhand))
@@ -227,7 +227,7 @@ class Pix2PixHDModel(BaseModel):
                 loss_D_real_lhand = self.criterionGAN(pred_real_lhand, True)
                 #loss_D_real_lhand = self.criterionHandGAN(pred_real_lhand, torch.ones_like(pred_real_lhand))
                 
-            if hand_prob_real[1] > 0:
+            if hand_state_real[1] == True:
                 pred_fake_rhand = self.discriminatehand(rhpts_fake_tensor)
                 loss_D_fake_rhand = self.criterionGAN(pred_fake_rhand, False)
                 #loss_D_fake_rhand = self.criterionHandGAN(pred_fake_rhand, torch.zeros_like(pred_fake_rhand))

@@ -72,14 +72,14 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             targets = torch.cat((data['image'], data['next_image']), dim=3)
             real_img = util.tensor2im(targets[0])[:,:1024,:]
             real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
-            lhpts_real, rhpts_real, hand_prob_real = hand_utils.get_keypoints(real_img, fix_coords=True)
+            lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
             lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
             rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
             hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real)
             hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real)
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), lhsk_real, rhsk_real, hand_prob_real, infer=True)
+                    Variable(data['next_image']), Variable(cond_zeros), lhsk_real, rhsk_real, hand_state_real, infer=True)
 
             # if total_steps % 100 == 0:
             #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
