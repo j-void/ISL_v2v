@@ -140,9 +140,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 input_label = util.tensor2im(inputs[0])[:,:1024,:]
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
                 if opt.hand_discrim:
-                    handsk_fake = cv2.hconcat([generated[4], generated[5]])
+                    handsk_fake = cv2.hconcat([generated[5], generated[4]])
                     syn_img_hand[:handsk_fake.shape[0], :handsk_fake.shape[1], :] = handsk_fake
-                    handsk_real = cv2.hconcat([lhsk_real, rhsk_real])
+                    handsk_real = cv2.hconcat([rhsk_real, lhsk_real])
                     real_hand_img[:handsk_real.shape[0], :handsk_real.shape[1], :] = handsk_real
                 output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
