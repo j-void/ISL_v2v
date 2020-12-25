@@ -126,8 +126,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 visualizer.print_current_errors(epoch, epoch_iter, errors, t)
                 visualizer.plot_current_errors(errors, total_steps)
 
-            ### display output images
-            
+            ### display output images            
             if total_steps % opt.save_latest_freq == 0:
                 syn_img_hand = util.tensor2im(generated[0].data[0])[:,:1024,:]
                 syn_img_hand = cv2.cvtColor(syn_img_hand, cv2.COLOR_RGB2BGR)
