@@ -136,9 +136,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 input_label = util.tensor2im(inputs[0])[:,:1024,:]
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
                 if opt.hand_discrim:
-                    lhpts_gen, rhpts_gen = hand_utils.get_keypoints(syn_img_hand)
-                    lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
-                    rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
+                    lhpts_gen = hand_utils.rescale_points(1024, 512, generated[4])
+                    rhpts_gen = hand_utils.rescale_points(1024, 512, generated[5])
                     hand_utils.display_hand_skleton(syn_img_hand, lhpts_gen, rhpts_gen)
                     lhpts_real_r = hand_utils.rescale_points(1024, 512, lhpts_real)
                     rhpts_real_r = hand_utils.rescale_points(1024, 512, rhpts_real)

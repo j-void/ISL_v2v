@@ -179,6 +179,9 @@ class Pix2PixHDModel(BaseModel):
 
         I_0 = self.netG.forward(input_concat)
         
+        lhpts_fake = 0
+        rhpts_fake = 0
+        
         if self.opt.hand_discrim:
             gen_img = util.tensor2im(I_0.data[0])
             gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
@@ -269,7 +272,7 @@ class Pix2PixHDModel(BaseModel):
             loss_G_VGG += (self.criterionL1(I_1, next_image)) * self.opt.lambda_A
         
         # Only return the fake_B image if necessary to save BW
-        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake, loss_D_fake_lhand, loss_D_real_lhand, loss_D_fake_rhand, loss_D_real_rhand], None if not infer else [torch.cat((I_0, I_1), dim=3), fake_face, face_residual, initial_I_0] ]
+        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake, loss_D_fake_lhand, loss_D_real_lhand, loss_D_fake_rhand, loss_D_real_rhand], None if not infer else [torch.cat((I_0, I_1), dim=3), fake_face, face_residual, initial_I_0, lhpts_fake, rhpts_fake] ]
 
     def inference(self, label, prevouts):
 
