@@ -164,13 +164,13 @@ class Pix2PixHDModel(BaseModel):
         input_label, real_image, next_label, next_image, zeroshere = self.encode_input(label, image, \
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
 
-        lhpts_real_tensor = torch.tensor(lhpts_real, dtype=torch.float)
-        #print(lhpts_real_tensor)
-        lhpts_real_tensor = lhpts_real_tensor.view(1, 1, 21, 2).cuda()
-        #print(lhpts_real_tensor)
         
-        rhpts_real_tensor = torch.tensor(rhpts_real, dtype=torch.float)
-        rhpts_real_tensor = rhpts_real_tensor.view(1, 1, 21, 2).cuda()
+        if self.opt.hand_discrim:
+            lhpts_real_tensor = torch.tensor(lhpts_real, dtype=torch.float)
+            lhpts_real_tensor = lhpts_real_tensor.view(1, 1, 21, 2).cuda()
+            
+            rhpts_real_tensor = torch.tensor(rhpts_real, dtype=torch.float)
+            rhpts_real_tensor = rhpts_real_tensor.view(1, 1, 21, 2).cuda()
 
         initial_I_0 = 0
 
@@ -179,15 +179,16 @@ class Pix2PixHDModel(BaseModel):
 
         I_0 = self.netG.forward(input_concat)
         
-        gen_img = util.tensor2im(I_0.data[0])
-        gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-        lhpts_fake, rhpts_fake = hand_utils.get_keypoints(gen_img)
-        
-        lhpts_fake_tensor = torch.tensor(lhpts_fake, dtype=torch.float)
-        lhpts_fake_tensor = lhpts_fake_tensor.view(1, 1, 21, 2).cuda()
-        
-        rhpts_fake_tensor = torch.tensor(rhpts_fake, dtype=torch.float)
-        rhpts_fake_tensor = rhpts_fake_tensor.view(1, 1, 21, 2).cuda()
+        if self.opt.hand_discrim:
+            gen_img = util.tensor2im(I_0.data[0])
+            gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
+            lhpts_fake, rhpts_fake = hand_utils.get_keypoints(gen_img)
+            
+            lhpts_fake_tensor = torch.tensor(lhpts_fake, dtype=torch.float)
+            lhpts_fake_tensor = lhpts_fake_tensor.view(1, 1, 21, 2).cuda()
+            
+            rhpts_fake_tensor = torch.tensor(rhpts_fake, dtype=torch.float)
+            rhpts_fake_tensor = rhpts_fake_tensor.view(1, 1, 21, 2).cuda()
         
         # if self.img_idx % 100 == 0:
         #     gen_img = util.tensor2im(I_0.data[0])
