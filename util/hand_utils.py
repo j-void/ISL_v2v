@@ -5,7 +5,7 @@ from google.protobuf.json_format import MessageToDict
 
 mp_hands = mp.solutions.hands
 
-confidence = 0.8
+confidence = 0.7
 
 
 hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=confidence)
