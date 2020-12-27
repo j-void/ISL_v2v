@@ -185,7 +185,7 @@ class Pix2PixHDModel(BaseModel):
         if self.opt.hand_discrim:
             gen_img = util.tensor2im(I_0.data[0])
             gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-            lhpts_fake, rhpts_fake = hand_utils.get_keypoints(gen_img)
+            lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img)
             
             lhpts_fake_tensor = torch.tensor(lhpts_fake, dtype=torch.float)
             lhpts_fake_tensor = lhpts_fake_tensor.view(1, 1, 21, 2).cuda()

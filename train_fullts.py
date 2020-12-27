@@ -71,7 +71,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             targets = torch.cat((data['image'], data['next_image']), dim=3)
             real_img = util.tensor2im(targets[0])[:,:1024,:]
             real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
-            lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
+            lhpts_real, rhpts_real,_ = hand_utils.get_keypoints_holistic(real_img)
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), lhpts_real, rhpts_real, infer=True)

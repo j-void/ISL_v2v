@@ -57,6 +57,42 @@ def get_keypoints(frame, fix_coords=False):
             index = index + 1
     #print(lefthnd_pts, righthnd_pts)
     return lefthnd_pts, righthnd_pts
+
+mp_holistic = mp.solutions.holistic
+holistic = mp_holistic.Holistic( static_image_mode=True ,min_detection_confidence=confidence)
+
+def get_keypoints_holistic(frame, fix_coords=False):
+    lefthnd_pts = np.zeros((21, 2))
+    righthnd_pts = np.zeros((21, 2))
+    scale_n, translate_n = resize_scale(frame)
+    image = fix_image(scale_n, translate_n, frame)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image.flags.writeable = False
+    results = holistic.process(image)
+    hand_state = [False, False]
+    if results.left_hand_landmarks != None:
+        hand_state[0] = True
+        if fix_coords:
+            lefthnd_pts = rescale_points(1024, 512, GetCoordForCurrentInstance(results.left_hand_landmarks))
+            x_start_l, y_start_l, box_size_l = assert_bbox(lefthnd_pts)
+            lefthnd_pts = restructure_points(lefthnd_pts, x_start_l, y_start_l)
+            lefthnd_pts = lefthnd_pts / box_size_l
+            lefthnd_pts = rescale_points(128, 128, lefthnd_pts)
+        else:
+            lefthnd_pts = GetCoordForCurrentInstance(results.left_hand_landmarks)
+    
+    if results.right_hand_landmarks != None:
+        hand_state[1] = True
+        if fix_coords:
+            righthnd_pts = rescale_points(1024, 512, GetCoordForCurrentInstance(results.right_hand_landmarks))
+            x_start_r, y_start_r, box_size_r = assert_bbox(righthnd_pts)
+            righthnd_pts = restructure_points(righthnd_pts, x_start_r, y_start_r)
+            righthnd_pts = righthnd_pts / box_size_r
+            righthnd_pts = rescale_points(128, 128, righthnd_pts)
+        else:
+            righthnd_pts = GetCoordForCurrentInstance(results.right_hand_landmarks)
+            
+    return lefthnd_pts, righthnd_pts, hand_state
     
     
 def resize_scale(frame, myshape = (512, 1024, 3)):
