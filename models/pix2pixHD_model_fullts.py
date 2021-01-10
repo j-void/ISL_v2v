@@ -193,9 +193,8 @@ class Pix2PixHDModel(BaseModel):
             lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
             lhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
             rhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
-            
-        hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake)
-        hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake)
+            hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake)
+            hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake)
         
         lhpts_fake_tensor = torch.tensor(cv2.cvtColor(lhsk_fake.copy(), cv2.COLOR_BGR2RGB), dtype=torch.float)
         lhpts_fake_tensor = torch.div(lhpts_fake_tensor, 255)
