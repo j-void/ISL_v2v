@@ -153,8 +153,12 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 inputs = torch.cat((data['label'], data['next_label']), dim=3)
                 input_label = util.tensor2im(inputs[0])[:,:int(width/2),:]
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
-                scale_n, translate_n = hand_utils.resize_scale(input_label)
-                input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
+                if opt.netG == "global":
+                    scale_n, translate_n = hand_utils.resize_scale(input_label, myshape=(256, 512, 3))
+                    input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
+                else:
+                    scale_n, translate_n = hand_utils.resize_scale(input_label)
+                    input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
                 if opt.hand_discrim:
                     handsk_fake = cv2.hconcat([generated[5], generated[4]])
                     syn_img_hand[:handsk_fake.shape[0], :handsk_fake.shape[1], :] = handsk_fake
