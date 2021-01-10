@@ -17,7 +17,7 @@ hand_colors = [[230, 53, 40], [231,115,64], [233, 136, 31], [213,160,13],[217, 2
     [218, 83, 232], [229, 65, 189], [236, 61, 141], [255, 102, 145], \
     [255, 102, 145], [255, 102, 145], [255, 102, 145]]
 
-def get_keypoints(frame, fix_coords=False):
+def get_keypoints(frame, fix_coords=False, sz=128):
     lefthnd_pts = np.zeros((21, 2))
     righthnd_pts = np.zeros((21, 2))
     scale_n, translate_n = resize_scale(frame)
@@ -51,7 +51,7 @@ def get_keypoints(frame, fix_coords=False):
                     x_start_l, y_start_l, box_size_l = assert_bbox(lefthnd_pts)
                     lefthnd_pts = restructure_points(lefthnd_pts, x_start_l, y_start_l)
                     lefthnd_pts = lefthnd_pts / box_size_l
-                    lefthnd_pts = rescale_points(128, 128, lefthnd_pts)
+                    lefthnd_pts = rescale_points(sz, sz, lefthnd_pts)
                 else:
                     lefthnd_pts = GetCoordForCurrentInstance(hand_landmarks)
             elif hand_side[index] == "Right":
@@ -60,7 +60,7 @@ def get_keypoints(frame, fix_coords=False):
                     x_start_r, y_start_r, box_size_r = assert_bbox(righthnd_pts)
                     righthnd_pts = restructure_points(righthnd_pts, x_start_r, y_start_r)
                     righthnd_pts = righthnd_pts / box_size_r
-                    righthnd_pts = rescale_points(128, 128, righthnd_pts)
+                    righthnd_pts = rescale_points(sz, sz, righthnd_pts)
                 else:
                     righthnd_pts = GetCoordForCurrentInstance(hand_landmarks)
             index = index + 1
@@ -70,7 +70,7 @@ def get_keypoints(frame, fix_coords=False):
 mp_holistic = mp.solutions.holistic
 holistic = mp_holistic.Holistic( static_image_mode=True ,min_detection_confidence=confidence)
 
-def get_keypoints_holistic(frame, fix_coords=False):
+def get_keypoints_holistic(frame, fix_coords=False, sz=128):
     lefthnd_pts = np.zeros((21, 2))
     righthnd_pts = np.zeros((21, 2))
     scale_n, translate_n = resize_scale(frame)
@@ -86,7 +86,7 @@ def get_keypoints_holistic(frame, fix_coords=False):
             x_start_l, y_start_l, box_size_l = assert_bbox(lefthnd_pts)
             lefthnd_pts = restructure_points(lefthnd_pts, x_start_l, y_start_l)
             lefthnd_pts = lefthnd_pts / box_size_l
-            lefthnd_pts = rescale_points(128, 128, lefthnd_pts)
+            lefthnd_pts = rescale_points(sz, sz, lefthnd_pts)
         else:
             lefthnd_pts = GetCoordForCurrentInstance(results.left_hand_landmarks)
     
@@ -97,7 +97,7 @@ def get_keypoints_holistic(frame, fix_coords=False):
             x_start_r, y_start_r, box_size_r = assert_bbox(righthnd_pts)
             righthnd_pts = restructure_points(righthnd_pts, x_start_r, y_start_r)
             righthnd_pts = righthnd_pts / box_size_r
-            righthnd_pts = rescale_points(128, 128, righthnd_pts)
+            righthnd_pts = rescale_points(sz, sz, righthnd_pts)
         else:
             righthnd_pts = GetCoordForCurrentInstance(results.right_hand_landmarks)
             

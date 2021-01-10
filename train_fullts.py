@@ -74,9 +74,14 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             height, width, channels = real_img.shape
             real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
             cv2.resize(real_img, (1024, 512))
-            lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
-            lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
-            rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
+            if opt.netG == "global":
+                lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
+                lhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
+                rhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
+            else:
+                lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+                lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
+                rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
             hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real)
             hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real)
 
@@ -135,11 +140,12 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
             ### display output images            
             if total_steps % 100 == 0:
-                syn_img_hand = util.tensor2im(generated[0].data[0])[:,:1024,:]
-                syn_img_hand = cv2.cvtColor(syn_img_hand, cv2.COLOR_RGB2BGR)
+                syn_img_hand = util.tensor2im(generated[0].data[0])
+                height_s, width_s, channels_s = syn_img_hand.shape
+                syn_img_hand = cv2.cvtColor(syn_img_hand[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
                 real_hand_img = real_img.copy()
                 inputs = torch.cat((data['label'], data['next_label']), dim=3)
-                input_label = util.tensor2im(inputs[0])[:,:1024,:]
+                input_label = util.tensor2im(inputs[0])[:,:int(width/2),:]
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
                 if opt.hand_discrim:
                     handsk_fake = cv2.hconcat([generated[5], generated[4]])
