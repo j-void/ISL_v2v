@@ -181,6 +181,7 @@ class Pix2PixHDModel(BaseModel):
         
         gen_img = util.tensor2im(I_0.data[0])
         gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
+        cv2.resize(gen_img, (1024, 512))
         lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
         lhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
         rhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
@@ -219,21 +220,21 @@ class Pix2PixHDModel(BaseModel):
         loss_D_real_rhand = 0
         
         if self.opt.hand_discrim:
-            if hand_state_real[0] == True:
-                pred_fake_lhand = self.discriminatehand(lhpts_fake_tensor)
-                loss_D_fake_lhand = self.criterionGAN(pred_fake_lhand, False)
-                #loss_D_fake_lhand = self.criterionHandGAN(pred_fake_lhand, torch.zeros_like(pred_fake_lhand))
-                pred_real_lhand = self.discriminatehand(lhpts_real_tensor)
-                loss_D_real_lhand = self.criterionGAN(pred_real_lhand, True)
-                #loss_D_real_lhand = self.criterionHandGAN(pred_real_lhand, torch.ones_like(pred_real_lhand))
+#            if hand_state_real[0] == True:
+            pred_fake_lhand = self.discriminatehand(lhpts_fake_tensor)
+            loss_D_fake_lhand = self.criterionGAN(pred_fake_lhand, False)
+            #loss_D_fake_lhand = self.criterionHandGAN(pred_fake_lhand, torch.zeros_like(pred_fake_lhand))
+            pred_real_lhand = self.discriminatehand(lhpts_real_tensor)
+            loss_D_real_lhand = self.criterionGAN(pred_real_lhand, True)
+            #loss_D_real_lhand = self.criterionHandGAN(pred_real_lhand, torch.ones_like(pred_real_lhand))
                 
-            if hand_state_real[1] == True:
-                pred_fake_rhand = self.discriminatehand(rhpts_fake_tensor)
-                loss_D_fake_rhand = self.criterionGAN(pred_fake_rhand, False)
-                #loss_D_fake_rhand = self.criterionHandGAN(pred_fake_rhand, torch.zeros_like(pred_fake_rhand))
-                pred_real_rhand = self.discriminatehand(rhpts_real_tensor)
-                loss_D_real_rhand = self.criterionGAN(pred_real_rhand, True)
-                #loss_D_real_rhand = self.criterionHandGAN(pred_real_rhand, torch.ones_like(pred_real_rhand))
+#            if hand_state_real[1] == True:
+            pred_fake_rhand = self.discriminatehand(rhpts_fake_tensor)
+            loss_D_fake_rhand = self.criterionGAN(pred_fake_rhand, False)
+            #loss_D_fake_rhand = self.criterionHandGAN(pred_fake_rhand, torch.zeros_like(pred_fake_rhand))
+            pred_real_rhand = self.discriminatehand(rhpts_real_tensor)
+            loss_D_real_rhand = self.criterionGAN(pred_real_rhand, True)
+            #loss_D_real_rhand = self.criterionHandGAN(pred_real_rhand, torch.ones_like(pred_real_rhand))
 
         # Fake Detection and Loss
         pred_fake_pool = self.discriminate_4(input_label, next_label, I_0, I_1, use_pool=True)

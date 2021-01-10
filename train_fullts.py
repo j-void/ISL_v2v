@@ -70,8 +70,10 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         if no_nexts:
             cond_zeros = torch.zeros(data['label'].size()).float()
             targets = torch.cat((data['image'], data['next_image']), dim=3)
-            real_img = util.tensor2im(targets[0])[:,:1024,:]
-            real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
+            real_img = util.tensor2im(targets[0])
+            height, width, channels = real_img.shape
+            real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
+            cv2.resize(real_img, (1024, 512))
             lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
             lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
             rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
