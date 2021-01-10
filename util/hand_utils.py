@@ -231,7 +231,7 @@ def display_single_hand_skleton(frame, handpts):
         cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), hand_colors[k], 4)
 
     for p in range(handpts.shape[0]):
-        cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), 4, (255, 0, 255), -1)
+        cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), 4, (255, 255, 255), -1)
             
     return True
 
