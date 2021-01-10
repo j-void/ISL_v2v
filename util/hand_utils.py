@@ -14,7 +14,8 @@ hand_colors = [[230, 53, 40], [231,115,64], [233, 136, 31], [213,160,13],[217, 2
     [170, 210, 35], [139, 228, 48], [83, 214, 45], [77, 192, 46], \
     [83, 213, 133], [82, 223, 190], [80, 184, 197], [78, 140, 189], \
     [86, 112, 208], [83, 73, 217], [123,46,183], [189, 102,255], \
-    [218, 83, 232], [229, 65, 189], [236, 61, 141], [255, 102, 145]]
+    [218, 83, 232], [229, 65, 189], [236, 61, 141], [255, 102, 145], \
+    [255, 102, 145], [255, 102, 145], [255, 102, 145]]
 
 def get_keypoints(frame, fix_coords=False):
     lefthnd_pts = np.zeros((21, 2))
@@ -223,11 +224,10 @@ handSeq = [[0,1], [1,2], [2,3], [3,4], \
     [5,9], [9,13], [13,17]]
 
 def display_single_hand_skleton(frame, handpts):
-    print(len(handSeq))                
+                   
     for k in range(len(handSeq)):
         firstlimb_ind = handSeq[k][0]
         secondlimb_ind = handSeq[k][1]
-        print(k)
         cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), hand_colors[k], 4)
 
     for p in range(handpts.shape[0]):
