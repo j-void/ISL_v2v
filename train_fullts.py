@@ -75,6 +75,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
             
             if opt.netG == "global":
+                print("global")
                 scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
                 lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
