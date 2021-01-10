@@ -184,7 +184,7 @@ class Pix2PixHDModel(BaseModel):
         
         if self.opt.netG == "global":
             scale_n, translate_n = hand_utils.resize_scale(gen_img, myshape=(256, 512, 3))
-            gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img)
+            gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img, myshape=(256, 512, 3))
             lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
             lhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
             rhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)

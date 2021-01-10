@@ -76,13 +76,12 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             
             if opt.netG == "global":
                 scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
-                real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
+                real_img = hand_utils.fix_image(scale_n, translate_n, real_img, myshape=(256, 512, 3))
                 lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
                 lhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
                 rhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
                 hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real, sz=2)
                 hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real, sz=2)
-                print(real_img.shape)
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
@@ -156,7 +155,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
                 if opt.netG == "global":
                     scale_n, translate_n = hand_utils.resize_scale(input_label, myshape=(256, 512, 3))
-                    input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
+                    input_label = hand_utils.fix_image(scale_n, translate_n, input_label, myshape=(256, 512, 3))
                 else:
                     scale_n, translate_n = hand_utils.resize_scale(input_label)
                     input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
