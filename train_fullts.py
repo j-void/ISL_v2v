@@ -164,6 +164,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     syn_img_hand[:handsk_fake.shape[0], :handsk_fake.shape[1], :] = handsk_fake
                     handsk_real = cv2.hconcat([rhsk_real, lhsk_real])
                     real_hand_img[:handsk_real.shape[0], :handsk_real.shape[1], :] = handsk_real
+                print(syn_img_hand.shape, real_hand_img.shape, input_label.shape)
                 output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
