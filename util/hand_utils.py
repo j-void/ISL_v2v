@@ -223,7 +223,7 @@ handSeq = [[0,1], [1,2], [2,3], [3,4], \
     [5,9], [9,13], [13,17]]
 
 def display_single_hand_skleton(frame, handpts):
-                        
+    print(len(handSeq))                
     for k in range(len(handSeq)):
         firstlimb_ind = handSeq[k][0]
         secondlimb_ind = handSeq[k][1]
