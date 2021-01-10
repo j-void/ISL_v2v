@@ -181,9 +181,9 @@ class Pix2PixHDModel(BaseModel):
         
         gen_img = util.tensor2im(I_0.data[0])
         gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-        cv2.resize(gen_img, (1024, 512))
         
         if self.opt.netG == "global":
+            cv2.resize(gen_img, (512, 256))
             lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
             lhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
             rhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
