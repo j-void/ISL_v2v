@@ -227,6 +227,7 @@ def display_single_hand_skleton(frame, handpts):
     for k in range(len(handSeq)):
         firstlimb_ind = handSeq[k][0]
         secondlimb_ind = handSeq[k][1]
+        print(k)
         cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), hand_colors[k], 4)
 
     for p in range(handpts.shape[0]):
