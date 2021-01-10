@@ -42,7 +42,7 @@ class Pix2PixHDModel(BaseModel):
             
         if self.isTrain and self.opt.hand_discrim:
             use_sigmoid = opt.no_lsgan
-            self.netDhand = networks.define_D(3, 42, opt.n_layers_D, opt.norm, use_sigmoid, 
+            self.netDhand = networks.define_D(3, 64, opt.n_layers_D, opt.norm, use_sigmoid, 
                                           1, False, gpu_ids=self.gpu_ids, netD='hand')
 
             
@@ -187,6 +187,8 @@ class Pix2PixHDModel(BaseModel):
             lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
             lhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
             rhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
+            hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake, sz=2)
+            hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake, sz=2)
         else:
             lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
             lhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)

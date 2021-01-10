@@ -71,18 +71,19 @@ mp_holistic = mp.solutions.holistic
 holistic = mp_holistic.Holistic( static_image_mode=True ,min_detection_confidence=confidence)
 
 def get_keypoints_holistic(frame, fix_coords=False, sz=128):
+    height, width, channels = frame.shape
     lefthnd_pts = np.zeros((21, 2))
     righthnd_pts = np.zeros((21, 2))
-    scale_n, translate_n = resize_scale(frame)
-    image = fix_image(scale_n, translate_n, frame)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # scale_n, translate_n = resize_scale(frame)
+    # image = fix_image(scale_n, translate_n, frame)
+    image = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2RGB)
     image.flags.writeable = False
     results = holistic.process(image)
     hand_state = [False, False]
     if results.left_hand_landmarks != None:
         hand_state[0] = True
         if fix_coords:
-            lefthnd_pts = rescale_points(1024, 512, GetCoordForCurrentInstance(results.left_hand_landmarks))
+            lefthnd_pts = rescale_points(width, height, GetCoordForCurrentInstance(results.left_hand_landmarks))
             x_start_l, y_start_l, box_size_l = assert_bbox(lefthnd_pts)
             lefthnd_pts = restructure_points(lefthnd_pts, x_start_l, y_start_l)
             lefthnd_pts = lefthnd_pts / box_size_l
@@ -93,7 +94,7 @@ def get_keypoints_holistic(frame, fix_coords=False, sz=128):
     if results.right_hand_landmarks != None:
         hand_state[1] = True
         if fix_coords:
-            righthnd_pts = rescale_points(1024, 512, GetCoordForCurrentInstance(results.right_hand_landmarks))
+            righthnd_pts = rescale_points(width, height, GetCoordForCurrentInstance(results.right_hand_landmarks))
             x_start_r, y_start_r, box_size_r = assert_bbox(righthnd_pts)
             righthnd_pts = restructure_points(righthnd_pts, x_start_r, y_start_r)
             righthnd_pts = righthnd_pts / box_size_r
@@ -223,15 +224,15 @@ handSeq = [[0,1], [1,2], [2,3], [3,4], \
     [0,17], [17,18], [18,19], [19,20], \
     [5,9], [9,13], [13,17]]
 
-def display_single_hand_skleton(frame, handpts):
+def display_single_hand_skleton(frame, handpts, sz=4):
                    
     for k in range(len(handSeq)):
         firstlimb_ind = handSeq[k][0]
         secondlimb_ind = handSeq[k][1]
-        cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), hand_colors[k], 4)
+        cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), hand_colors[k], sz)
 
     for p in range(handpts.shape[0]):
-        cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), 4, (255, 255, 255), -1)
+        cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), sz, (255, 255, 255), -1)
             
     return True
 
