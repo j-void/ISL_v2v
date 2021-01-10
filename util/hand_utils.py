@@ -71,12 +71,12 @@ mp_holistic = mp.solutions.holistic
 holistic = mp_holistic.Holistic( static_image_mode=True ,min_detection_confidence=confidence)
 
 def get_keypoints_holistic(frame, fix_coords=False, sz=128):
-    height, width, channels = frame.shape
     lefthnd_pts = np.zeros((21, 2))
     righthnd_pts = np.zeros((21, 2))
     # scale_n, translate_n = resize_scale(frame)
     # image = fix_image(scale_n, translate_n, frame)
     image = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2RGB)
+    height, width, channels = image.shape
     image.flags.writeable = False
     results = holistic.process(image)
     hand_state = [False, False]

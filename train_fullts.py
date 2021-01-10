@@ -75,13 +75,16 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
             
             if opt.netG == "global":
-                cv2.resize(real_img, (512, 256))
+                scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
+                real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
                 lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
                 lhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
                 rhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
                 hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real, sz=2)
                 hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real, sz=2)
             else:
+                scale_n, translate_n = hand_utils.resize_scale(real_img)
+                real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
                 lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
                 lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
                 rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
