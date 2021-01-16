@@ -37,7 +37,7 @@ if args.output_vid:
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
     out = cv2.VideoWriter(args.output_vid, fourcc, fps, (width, height))
 
-print("Height:", height, ", Width:", width, ", FPS:", fps)
+print("Height:", height, ", Width:", width, ", FPS:", fps, ", Frames:", frame_count)
 
 fi = 0
 
