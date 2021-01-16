@@ -50,7 +50,7 @@ while(cap.isOpened()):
             out.write(out_frame)
         if args.output_frames:
             fcount = 000000000000 + fi
-            _filename = "frame_"+'{:0>12}'.format(fi)+".png"
+            _filename = name_split[0]+"_"+'{:0>12}'.format(fi)+".png"
             filename = os.path.join(args.output_frames, _filename)
             cv2.imwrite(filename, out_frame)
         if args.display:
