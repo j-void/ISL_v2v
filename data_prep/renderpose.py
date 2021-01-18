@@ -82,33 +82,46 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
     handSeq = [[0,1], [1,2], [2,3], [3,4], [0,5], [5,6], [6,7], [7,8], [0,9], [9,10], [10,11], [11,12], [0,13], [13,14], [14,15], [15,16], [0,17], [17,18], [18,19], [19,20]]
     
     posepts_2d = []
-    r_handpts_2d = []
-    l_handpts_2d = []
-    facepts_2d = []
+    r_handpts_2d = np.zeros((21, 3))
+    l_handpts_2d = np.zeros((21, 3))
+    facepts_2d  = np.zeros((70, 2), dtype=np.int)
     
     for p in range(0, int(len(posepts)/3)):
         pt = (int(posepts[p*3]), int(posepts[p*3+1]))
         if (p <= 7) or (p >= 15 and p <= 18):
+            # if (posepts[p*3+2] == 0):
+            #     return False
             cv2.circle(frame, (int(posepts[p*3]), int(posepts[p*3+1])), 6, pose_colors[p], -1)
         posepts_2d.append(pt)
         
-    for p in range(0, 21):
+    for p in range(21):
+        # if (r_handpts[p*3+2] < 0.1):
+        #     return False
         pt = (int(r_handpts[p*3]), int(r_handpts[p*3+1]))
-        if r_handpts[p*3] > 0 and r_handpts[p*3+1] > 0:
+        r_handpts_2d[p, 0] = int(r_handpts[p*3])
+        r_handpts_2d[p, 1] = int(r_handpts[p*3+1])
+        r_handpts_2d[p, 2] = r_handpts[p*3+2]
+        if r_handpts[p*3] > 0 and r_handpts[p*3+1] > 0 and r_handpts[p*3+2] > 0.3:
             cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 4, hand_colors[p], -1)
-        r_handpts_2d.append(pt)
+        #r_handpts_2d.append(pt)
         
-    for p in range(0, 21):
+    for p in range(21):
+        # if (l_handpts[p*3+2] < 0.1):
+        #     return False
         pt = (int(l_handpts[p*3]), int(l_handpts[p*3+1]))
-        if l_handpts[p*3] > 0 and l_handpts[p*3+1] > 0:
+        l_handpts_2d[p, 0] = int(l_handpts[p*3])
+        l_handpts_2d[p, 1] = int(l_handpts[p*3+1])
+        l_handpts_2d[p, 2] = l_handpts[p*3+2]
+        if l_handpts[p*3] > 0 and l_handpts[p*3+1] > 0 and l_handpts[p*3+2] > 0.3:
             cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 4, hand_colors[p], -1)
-        l_handpts_2d.append(pt)
+        #l_handpts_2d.append(pt)
         
     for p in range(0, int(len(facepts)/3)):
         pt = (int(facepts[p*3]), int(facepts[p*3+1]))
-        if facepts[p*3] > 0 and facepts[p*3+1] > 0:
+        if facepts[p*3] > 0 and facepts[p*3+1] > 0 and facepts[p*3+2] > 0.3:
             cv2.circle(frame, (int(facepts[p*3]), int(facepts[p*3+1])), 1, (0, 0, 0), -1)
-        facepts_2d.append(pt)
+            facepts_2d[p, 0] = int(facepts[p*3])
+            facepts_2d[p, 1] = int(facepts[p*3+1])
     
     for k in range(len(limbSeq)):
         firstlimb_ind = limbSeq[k][0]
@@ -120,17 +133,19 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
     for k in range(len(faceSeq)):
         firstlimb_ind = faceSeq[k][0]
         secondlimb_ind = faceSeq[k][1]
-        if facepts_2d[firstlimb_ind][0] > 0 and facepts_2d[secondlimb_ind][0] > 0:
-            cv2.line(frame, facepts_2d[firstlimb_ind], facepts_2d[secondlimb_ind], (0,0,0), 1)
+        fp = (facepts_2d[firstlimb_ind, 0], facepts_2d[firstlimb_ind, 1])
+        sp = (facepts_2d[secondlimb_ind, 0], facepts_2d[secondlimb_ind, 1])
+        if fp[0] > 0 and sp[0] > 0 and fp[1] > 0 and sp[1] > 0:
+            cv2.line(frame, fp, sp, (0,0,0), 1)
             
             
     for k in range(len(handSeq)):
         firstlimb_ind = handSeq[k][0]
         secondlimb_ind = handSeq[k][1]
-        if r_handpts_2d[firstlimb_ind][0] > 0 and r_handpts_2d[secondlimb_ind][0] > 0:
-            cv2.line(frame, r_handpts_2d[firstlimb_ind], r_handpts_2d[secondlimb_ind], hand_colors[k], 4)
-        if l_handpts_2d[firstlimb_ind][0] > 0 and l_handpts_2d[secondlimb_ind][0] > 0:
-            cv2.line(frame, l_handpts_2d[firstlimb_ind], l_handpts_2d[secondlimb_ind], hand_colors[k], 4)
+        if r_handpts_2d[firstlimb_ind, 2] > 0.3 and r_handpts_2d[secondlimb_ind, 2] > 0.3:
+            cv2.line(frame, (int(r_handpts_2d[firstlimb_ind, 0]), int(r_handpts_2d[firstlimb_ind, 1])), (int(r_handpts_2d[secondlimb_ind, 0]), int(r_handpts_2d[secondlimb_ind, 1])), hand_colors[k], 4)
+        if l_handpts_2d[firstlimb_ind, 2] > 0.3 and l_handpts_2d[secondlimb_ind, 2] > 0.3:
+            cv2.line(frame, (int(l_handpts_2d[firstlimb_ind, 0]), int(l_handpts_2d[firstlimb_ind, 1])), (int(l_handpts_2d[secondlimb_ind, 0]), int(l_handpts_2d[secondlimb_ind, 1])), hand_colors[k], 4)
             
     return True
             
