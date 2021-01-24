@@ -73,8 +73,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             real_img = util.tensor2im(targets[0])
             height, width, channels = real_img.shape
             real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
-            hsk_frame = np.zeros(real_img.shape, dtype=np.uint8)
-            hsk_frame.fill(255)
+            # hsk_frame = np.zeros(real_img.shape, dtype=np.uint8)
+            # hsk_frame.fill(255)
             
             if opt.netG == "global":
                 scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
@@ -86,8 +86,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rhsk_real.fill(255)
                 hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real, sz=2)
                 hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real, sz=2)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                # hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
+                # hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
@@ -98,8 +98,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rhsk_real.fill(255)
                 hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real)
                 hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                # hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
+                # hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), lhsk_real, rhsk_real, hand_state_real, infer=True)
@@ -175,7 +175,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     handsk_real = cv2.hconcat([rhsk_real, lhsk_real])
                     real_hand_img[:handsk_real.shape[0], :handsk_real.shape[1], :] = handsk_real
                 #print(syn_img_hand.shape, real_hand_img.shape, input_label.shape)
-                output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label, hsk_frame])
+                output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
             # if save_fake and opt.hand_discrim:
