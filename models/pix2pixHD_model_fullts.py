@@ -170,7 +170,7 @@ class Pix2PixHDModel(BaseModel):
         #print(input_label.size())
         # Fake Generation I_0
         
-        data_transforms = transforms.Compose(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+        data_transforms = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         
         real_handsk_tensor = torch.tensor(cv2.cvtColor(real_handsk.copy(), cv2.COLOR_BGR2RGB), dtype=torch.float)
         real_handsk_tensor = data_transforms(real_handsk_tensor)
