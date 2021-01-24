@@ -12,6 +12,8 @@ from util import html
 import numpy as np
 import torch
 import time
+import util.hand_utils as hand_utils
+import cv2
 
 initTime = time.time()
 
@@ -40,8 +42,28 @@ for i, data in enumerate(dataset):
       previous_cond = torch.zeros(data['label'].size())
       unset = False
 
+    targets = torch.cat((data['image'], data['next_image']), dim=3)
+    real_img = util.tensor2im(targets[0])
+    height, width, channels = real_img.shape
+    real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
+    hsk_frame = np.zeros(real_img.shape, dtype=np.uint8)
+    hsk_frame.fill(255)
+    
+    if opt.netG == "global":
+        scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
+        real_img = hand_utils.fix_image(scale_n, translate_n, real_img, myshape=(256, 512, 3))
+        lhpts_real, rhpts_real, hand_state_real, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
+        hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
+        hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+    else:
+        scale_n, translate_n = hand_utils.resize_scale(real_img)
+        real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
+        lhpts_real, rhpts_real, hand_state_real, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+        hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
+        hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+        
     #generated = model.inference(data['label'], previous_cond, data['face_coords'])
-    generated = model.inference(data['label'], previous_cond)
+    generated = model.inference(data['label'], previous_cond, hsk_frame)
 
     previous_cond = generated.data
 
