@@ -73,6 +73,8 @@ holistic = mp_holistic.Holistic( static_image_mode=True ,min_detection_confidenc
 def get_keypoints_holistic(frame, fix_coords=False, sz=128):
     lefthnd_pts = np.zeros((21, 2))
     righthnd_pts = np.zeros((21, 2))
+    flefthnd_pts = np.zeros((21, 2))
+    frighthnd_pts = np.zeros((21, 2))
     # scale_n, translate_n = resize_scale(frame)
     # image = fix_image(scale_n, translate_n, frame)
     image = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2RGB)
@@ -84,6 +86,7 @@ def get_keypoints_holistic(frame, fix_coords=False, sz=128):
         hand_state[0] = True
         if fix_coords:
             lefthnd_pts = rescale_points(width, height, GetCoordForCurrentInstance(results.left_hand_landmarks))
+            flefthnd_pts = lefthnd_pts.copy()
             x_start_l, y_start_l, box_size_l = assert_bbox(lefthnd_pts)
             lefthnd_pts = restructure_points(lefthnd_pts, x_start_l, y_start_l)
             lefthnd_pts = lefthnd_pts / box_size_l
@@ -95,6 +98,7 @@ def get_keypoints_holistic(frame, fix_coords=False, sz=128):
         hand_state[1] = True
         if fix_coords:
             righthnd_pts = rescale_points(width, height, GetCoordForCurrentInstance(results.right_hand_landmarks))
+            frighthnd_pts = righthnd_pts.copy()
             x_start_r, y_start_r, box_size_r = assert_bbox(righthnd_pts)
             righthnd_pts = restructure_points(righthnd_pts, x_start_r, y_start_r)
             righthnd_pts = righthnd_pts / box_size_r
@@ -102,7 +106,7 @@ def get_keypoints_holistic(frame, fix_coords=False, sz=128):
         else:
             righthnd_pts = GetCoordForCurrentInstance(results.right_hand_landmarks)
             
-    return lefthnd_pts, righthnd_pts, hand_state
+    return lefthnd_pts, righthnd_pts, hand_state, flefthnd_pts, frighthnd_pts
         
     
 def resize_scale(frame, myshape = (512, 1024, 3)):

@@ -44,7 +44,7 @@ for f in range(len(imgs)):
     real_img = cv2.cvtColor(_frame, cv2.COLOR_RGB2BGR)
     scale_n, translate_n = hand_utils.resize_scale(real_img)
     real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
-    lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+    lhpts_real, rhpts_real, hand_state_real, _, _ = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
     lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
     lhsk_real.fill(255)
     rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
