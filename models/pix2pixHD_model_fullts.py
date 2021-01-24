@@ -173,8 +173,7 @@ class Pix2PixHDModel(BaseModel):
         data_transforms = transforms.Compose([transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         
         real_handsk_tensor = torch.tensor(cv2.cvtColor(real_handsk.copy(), cv2.COLOR_BGR2RGB), dtype=torch.float)
-        print(real_handsk_tensor.size())
-        real_handsk_tensor = data_transforms(real_handsk_tensor)
+        real_handsk_tensor = data_transforms(real_handsk_tensor.view(real_handsk.shape[2], real_handsk.shape[0], real_handsk.shape[1]))
         real_handsk_tensor = real_handsk_tensor.view(1, real_handsk.shape[2], real_handsk.shape[0], real_handsk.shape[1]).cuda()
         
         input_concat = torch.cat((input_label, zeroshere, real_handsk_tensor), dim=1) 
