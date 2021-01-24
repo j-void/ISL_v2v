@@ -3,6 +3,9 @@ import argparse
 import os
 import cv2
 from renderpose import *
+import time
+
+initTime = time.time()
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -63,7 +66,8 @@ while(cap.isOpened()):
     else:
         break
  
-print("Process completed sucessfully")
+time_taken = time.time() - initTime
+print(f"Process completed sucessfully, Total time taken: {time_taken}s, Rate: {frame_count/time_taken} FPS")
  
 if args.output_vid:    
     out.release()

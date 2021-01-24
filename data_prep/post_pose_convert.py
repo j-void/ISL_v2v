@@ -4,6 +4,9 @@ import os
 import glob
 from renderpose import *
 import cv2
+import time
+
+initTime = time.time()
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--keypoints", type=str, help="keypoint directory")
@@ -65,5 +68,7 @@ for f in range(len(imgs)):
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             
-print(f"Summary -> Total frames: {len(imgs)}, Processed frames: {len(imgs) - skip_index}, Skipped: {skip_index}")
+
+time_taken = time.time() - initTime
+print(f"Summary -> Total frames: {len(imgs)}, Processed frames: {len(imgs) - skip_index}, Skipped: {skip_index}, Total time taken: {time_taken}s, Rate: {(len(imgs) - skip_index)/time_taken} FPS")
      

@@ -105,6 +105,9 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
             cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 4, hand_colors[p], -1)
         #r_handpts_2d.append(pt)
         
+    # if np.sum(r_handpts_2d[:,2])/21 < 0.2 and len(r_handpts) > 0:
+    #     return False
+        
     for p in range(21):
         # if (l_handpts[p*3+2] < 0.1):
         #     return False
@@ -115,6 +118,9 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
         if l_handpts[p*3] > 0 and l_handpts[p*3+1] > 0 and l_handpts[p*3+2] > 0.3:
             cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 4, hand_colors[p], -1)
         #l_handpts_2d.append(pt)
+        
+    if np.sum(l_handpts_2d[:,2])/21 < 0.2 and np.sum(r_handpts_2d[:,2])/21 < 0.2 and (len(l_handpts)>0 or len(r_handpts) > 0):
+        return False
         
     for p in range(0, int(len(facepts)/3)):
         pt = (int(facepts[p*3]), int(facepts[p*3+1]))
@@ -187,4 +193,41 @@ def fix_scale_coords(points, scale, translate):
     points[0::3] = scale * points[0::3] + translate[0]
     points[1::3] = scale * points[1::3] + translate[1]
     return list(points)
-    
+
+iHSeq_right = [[20,3], [3,2], [2,1], [1,0], \
+    [20,7], [7,6], [6,5], [5,4], \
+    [20,9], [9,8], [8,7], [7,6], \
+    [20,15], [15,14], [14,13], [13,12], \
+    [20,19], [19,18], [18,17], [17,16]]
+
+iHSeq_left = [[21,22], [22,23], [23,24], [24,41], \
+    [25,26], [26,27], [27,28], [28,41], \
+    [29,30], [30,31], [31,32], [32,41], \
+    [33,34], [34,35], [35,36], [36,41], \
+    [37,38], [38,39], [39,40], [40,41]]
+
+def display_single_hand_skleton_right(frame, handpts):
+                        
+    for k in range(len(iHSeq_right)):
+        firstlimb_ind = iHSeq_right[k][0]
+        secondlimb_ind = iHSeq_right[k][1]
+        cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), (255,255,255), 2)
+
+    for p in range(21):
+        cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), 4, hand_colors[p], -1)
+        #frame = cv2.putText(frame, str(p), (int(handpts[p,0]), int(handpts[p,1])), cv2.FONT_HERSHEY_SIMPLEX , 0.4, (255, 0, 0) , 1, cv2.LINE_AA) 
+            
+    return True
+
+def display_single_hand_skleton_left(frame, handpts):
+                        
+    for k in range(len(iHSeq_left)):
+        firstlimb_ind = iHSeq_left[k][1]
+        secondlimb_ind = iHSeq_left[k][0]
+        cv2.line(frame, (int(handpts[firstlimb_ind, 0]), int(handpts[firstlimb_ind, 1])), (int(handpts[secondlimb_ind, 0]), int(handpts[secondlimb_ind, 1])), (255,255,255), 2)
+
+    for p in range(21, 42):
+        cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), 4, hand_colors[p-21], -1)
+            
+    return True
+

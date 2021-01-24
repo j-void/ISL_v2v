@@ -79,7 +79,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img, myshape=(256, 512, 3))
                 lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
                 lhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
+                lhsk_real.fill(255)
                 rhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
+                rhsk_real.fill(255)
                 hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real, sz=2)
                 hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real, sz=2)
             else:
@@ -87,7 +89,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
                 lhpts_real, rhpts_real, hand_state_real = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
                 lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
+                lhsk_real.fill(255)
                 rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
+                rhsk_real.fill(255)
                 hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real)
                 hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real)
 

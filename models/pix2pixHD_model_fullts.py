@@ -182,22 +182,27 @@ class Pix2PixHDModel(BaseModel):
         gen_img = util.tensor2im(I_0.data[0])
         gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
         
-        if self.opt.netG == "global":
-            scale_n, translate_n = hand_utils.resize_scale(gen_img, myshape=(256, 512, 3))
-            gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img, myshape=(256, 512, 3))
-            lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
-            lhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
-            rhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
-            hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake, sz=2)
-            hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake, sz=2)
-        else:
-            scale_n, translate_n = hand_utils.resize_scale(gen_img)
-            gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img)
-            lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
-            lhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
-            rhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
-            hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake)
-            hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake)
+        if self.opt.hand_discrim:
+            if self.opt.netG == "global":
+                scale_n, translate_n = hand_utils.resize_scale(gen_img, myshape=(256, 512, 3))
+                gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img, myshape=(256, 512, 3))
+                lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
+                lhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
+                lhsk_fake.fill(255)
+                rhsk_fake = np.zeros((64, 64, 3), dtype=np.uint8)
+                rhsk_fake.fill(255)
+                hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake, sz=2)
+                hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake, sz=2)
+            else:
+                scale_n, translate_n = hand_utils.resize_scale(gen_img)
+                gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img)
+                lhpts_fake, rhpts_fake, _ = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
+                lhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
+                lhsk_fake.fill(255)
+                rhsk_fake = np.zeros((128, 128, 3), dtype=np.uint8)
+                rhsk_fake.fill(255)
+                hand_utils.display_single_hand_skleton(lhsk_fake, lhpts_fake)
+                hand_utils.display_single_hand_skleton(rhsk_fake, rhpts_fake)
         
         lhpts_fake_tensor = torch.tensor(cv2.cvtColor(lhsk_fake.copy(), cv2.COLOR_BGR2RGB), dtype=torch.float)
         lhpts_fake_tensor = torch.div(lhpts_fake_tensor, 255)

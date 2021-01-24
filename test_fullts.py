@@ -11,6 +11,9 @@ from util.visualizer import Visualizer
 from util import html
 import numpy as np
 import torch
+import time
+
+initTime = time.time()
 
 opt = TestOptions().parse(save=False)
 opt.nThreads = 1   # test code only supports nThreads = 1
@@ -48,3 +51,7 @@ for i, data in enumerate(dataset):
     visualizer.save_images(webpage, visuals, img_path)
 
 webpage.save()
+
+time_taken = time.time() - initTime
+print(f"Summary -> Total frames: {len(data_loader)}, Total time taken: {time_taken}s, Rate: {len(data_loader)/time_taken} FPS")
+
