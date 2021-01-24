@@ -219,6 +219,16 @@ def display_single_hand_skleton_right(frame, handpts):
             
     return True
 
+def get_keypoint_array(pts):
+    pts_arry = np.zeros((21,2))
+    prob = 0
+    for p in range(21):
+        pts_arry[p,0] = pts[p*3]
+        pts_arry[p,1] = pts[p*3+1]
+        prob = prob + pts[p*3+2]
+    
+    return pts_arry
+
 def display_single_hand_skleton_left(frame, handpts):
                         
     for k in range(len(iHSeq_left)):
