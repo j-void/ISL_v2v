@@ -166,7 +166,7 @@ class Pix2PixHDModel(BaseModel):
                     
 
         initial_I_0 = 0
-        print(input_label.size())
+        #print(input_label.size())
         # Fake Generation I_0
         input_concat = torch.cat((input_label, zeroshere), dim=1) 
 
