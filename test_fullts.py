@@ -14,6 +14,7 @@ import torch
 import time
 import util.hand_utils as hand_utils
 import cv2
+import glob
 
 initTime = time.time()
 
@@ -34,6 +35,10 @@ webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.na
 unset = True
 print('#testing images = %d' % len(data_loader))
 
+img_path = os.path.join(opt.dataroot, "test_img", "*.png")
+imgs = glob.glob(img_path)
+imgs.sort()
+
 for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break
@@ -42,10 +47,10 @@ for i, data in enumerate(dataset):
       previous_cond = torch.zeros(data['label'].size())
       unset = False
 
-    targets = torch.cat((data['image'], data['next_image']), dim=3)
-    real_img = util.tensor2im(targets[0])
+    #targets = torch.cat((data['image'], data['next_image']), dim=3)
+    real_img = cv2.cv2.imread(imgs[i]) #util.tensor2im(targets[0])
     height, width, channels = real_img.shape
-    real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
+    #real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
     hsk_frame = np.zeros(real_img.shape, dtype=np.uint8)
     hsk_frame.fill(255)
     
