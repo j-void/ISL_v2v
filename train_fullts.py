@@ -119,7 +119,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             loss_dict = dict(zip(model.module.loss_names, losses))
 
             # calculate final loss scalar
-            loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5 + (loss_dict['D_lhand_real'] + loss_dict['D_lhand_fake']) * 0.5 + (loss_dict['D_rhand_real'] + loss_dict['D_rhand_fake']) * 0.5
+            loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5 + (loss_dict['D_hand_real'] + loss_dict['D_hand_fake']) * 0.5
             loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG'] # + loss_dict['G_GANface']
 
             ############### Backward Pass ####################
