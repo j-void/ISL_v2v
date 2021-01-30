@@ -39,6 +39,8 @@ print(f"Initialize -> Total frames: {len(imgs)}")
 
 skip_index = 0
 
+bbox_sizes = []
+
 for f in range(len(imgs)):
     posepts, facepts, r_handpts, l_handpts = readkeypointsfile_json(keypoints[f])
     if not posepts or not facepts:
@@ -49,6 +51,10 @@ for f in range(len(imgs)):
     height, width, _ = _frame.shape
     output_frame = np.zeros((height, width, 3), np.uint8)
     output_frame.fill(255)
+    _, _, bsiz_l = assert_bbox(get_keypoint_array(l_handpts))
+    _, _, bsiz_r = assert_bbox(get_keypoint_array(r_handpts))
+    bbox_sizes.append(bsiz_l)
+    bbox_sizes.append(bsiz_r)
     #display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts)
     if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts) == False:
         print("Skipping frame: ", f)
@@ -68,7 +74,9 @@ for f in range(len(imgs)):
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             
-
+if args.save_dir:
+    with open(os.path.join(savedir, "bbox_size.txt"), 'w') as f:
+        f.write('%d' % max(bbox_sizes))
 time_taken = time.time() - initTime
 print(f"Summary -> Total frames: {len(imgs)}, Processed frames: {len(imgs) - skip_index}, Skipped: {skip_index}, Total time taken: {time_taken}s, Rate: {(len(imgs) - skip_index)/time_taken} FPS")
      

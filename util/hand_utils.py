@@ -106,7 +106,7 @@ def get_keypoints_holistic(frame, fix_coords=False, sz=128):
         else:
             righthnd_pts = GetCoordForCurrentInstance(results.right_hand_landmarks)
             
-    return lefthnd_pts, righthnd_pts, hand_state, flefthnd_pts, frighthnd_pts
+    return lefthnd_pts, righthnd_pts, flefthnd_pts, frighthnd_pts
         
     
 def resize_scale(frame, myshape = (512, 1024, 3)):
@@ -219,6 +219,27 @@ def assert_bbox(handpts):
         sy = 0
     
     return int(sx), int(sy), int(max_dis*1.5)
+
+def get_mid(handpts, size):
+    x_mid = int(np.average(handpts[:,0]))
+    y_mid = int(np.average(handpts[:,1]))
+    
+    if int(x_mid - size/2) > 0:
+        x = int(x_mid - size/2)
+    else:
+        x = 0
+    
+    if int(y_mid - size/2) > 0:
+        y = int(y_mid - size/2)
+    else:
+        y = 0
+    
+    if x == 0 and y == 0:
+        w = 0
+    else:
+        w = int(size/2)
+    
+    return x, y, w
 
 
 handSeq = [[0,1], [1,2], [2,3], [3,4], \

@@ -46,6 +46,9 @@ visualizer = Visualizer(opt)
 
 tmp_out_path = os.path.join(opt.checkpoints_dir, opt.name, "tmp")
 
+with open(os.path.join(opt.dataroot, "bbox_size.txt"), 'r') as f:
+    bbox_size = int(f.read())
+
 if not os.path.exists(tmp_out_path):
     os.makedirs(tmp_out_path)
 
@@ -73,36 +76,37 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             real_img = util.tensor2im(targets[0])
             height, width, channels = real_img.shape
             real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
-            # hsk_frame = np.zeros(real_img.shape, dtype=np.uint8)
-            # hsk_frame.fill(255)
+            hsk_frame = np.zeros(real_img.shape, dtype=np.uint8)
+            hsk_frame.fill(255)
             
             if opt.netG == "global":
                 scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img, myshape=(256, 512, 3))
-                lhpts_real, rhpts_real, hand_state_real, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
-                lhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
-                lhsk_real.fill(255)
-                rhsk_real = np.zeros((64, 64, 3), dtype=np.uint8)
-                rhsk_real.fill(255)
-                hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real, sz=2)
-                hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real, sz=2)
-                # hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                # hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
+                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
+                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                lx, ly, lw = hand_utils.get_mid(lfpts, int(bbox_size/2))
+                rx, ry, rw = hand_utils.get_mid(rfpts, int(bbox_size/2))
+                lh_label = hsk_frame[ly:ly+lw, lx:lx+lw, :]
+                rh_label = hsk_frame[ry:ry+rw, rx:rx+rw, :]
+                lh_image = real_img[ly:ly+lw, lx:lx+lw, :]
+                rh_image = real_img[ry:ry+rw, rx:rx+rw, :]
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
-                lhpts_real, rhpts_real, hand_state_real, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
-                lhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
-                lhsk_real.fill(255)
-                rhsk_real = np.zeros((128, 128, 3), dtype=np.uint8)
-                rhsk_real.fill(255)
-                hand_utils.display_single_hand_skleton(lhsk_real, lhpts_real)
-                hand_utils.display_single_hand_skleton(rhsk_real, rhpts_real)
-                # hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                # hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
+                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                lx, ly, lw = hand_utils.get_mid(lfpts, bbox_size)
+                rx, ry, rw = hand_utils.get_mid(rfpts, bbox_size)
+                lh_label = hsk_frame[ly:ly+lw, lx:lx+lw, :]
+                rh_label = hsk_frame[ry:ry+rw, rx:rx+rw, :]
+                lh_image = real_img[ly:ly+lw, lx:lx+lw, :]
+                rh_image = real_img[ry:ry+rw, rx:rx+rw, :]
+            
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), lhsk_real, rhsk_real, hand_state_real, infer=True)
+                    Variable(data['next_image']), Variable(cond_zeros), lh_label, lh_image, rh_label, rh_image, bbox_size, infer=True)
 
             # if total_steps % 100 == 0:
             #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
@@ -170,9 +174,13 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     scale_n, translate_n = hand_utils.resize_scale(input_label)
                     input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
                 if opt.hand_discrim:
-                    handsk_fake = cv2.hconcat([generated[5], generated[4]])
+                    handsk_fake_label = cv2.hconcat([generated[4], generated[6]])
+                    handsk_fake_image = cv2.hconcat([generated[5], generated[7]])
+                    handsk_fake = cv2.vconcat([handsk_fake_label, handsk_fake_image])
                     syn_img_hand[:handsk_fake.shape[0], :handsk_fake.shape[1], :] = handsk_fake
-                    handsk_real = cv2.hconcat([rhsk_real, lhsk_real])
+                    handsk_real_label = cv2.hconcat([lh_label, rh_label])
+                    handsk_real_image = cv2.hconcat([lh_image, rh_image])
+                    handsk_real = cv2.vconcat([handsk_real_label, handsk_real_image])
                     real_hand_img[:handsk_real.shape[0], :handsk_real.shape[1], :] = handsk_real
                 #print(syn_img_hand.shape, real_hand_img.shape, input_label.shape)
                 output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])

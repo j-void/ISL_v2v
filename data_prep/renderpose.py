@@ -221,11 +221,9 @@ def display_single_hand_skleton_right(frame, handpts):
 
 def get_keypoint_array(pts):
     pts_arry = np.zeros((21,2))
-    prob = 0
     for p in range(21):
         pts_arry[p,0] = pts[p*3]
         pts_arry[p,1] = pts[p*3+1]
-        prob = prob + pts[p*3+2]
     
     return pts_arry
 
@@ -240,4 +238,26 @@ def display_single_hand_skleton_left(frame, handpts):
         cv2.circle(frame, (int(handpts[p,0]), int(handpts[p,1])), 4, hand_colors[p-21], -1)
             
     return True
+
+def assert_bbox(handpts):
+    x_mid = int(np.average(handpts[:,0]))
+    y_mid = int(np.average(handpts[:,1]))
+    x_min = int(np.min(handpts[:,0]))
+    y_min = int(np.min(handpts[:,1]))
+    x_max = int(np.max(handpts[:,0]))
+    y_max = int(np.max(handpts[:,1]))
+    
+    max_dis = max(abs(x_max-x_min), abs(y_max-y_min))
+    
+    if x_mid - max_dis/2 > 0:
+        sx = x_mid - max_dis/2 - max_dis*0.25
+    else:
+        sx = 0
+    
+    if y_mid - max_dis/2 > 0:
+        sy = y_mid - max_dis/2 - max_dis*0.25
+    else:
+        sy = 0
+    
+    return int(sx), int(sy), int(max_dis*1.5)
 
