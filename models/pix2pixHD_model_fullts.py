@@ -226,8 +226,8 @@ class Pix2PixHDModel(BaseModel):
             hlabel_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(hsk_frame.copy(), cv2.COLOR_BGR2RGB)))
             hlabel_fake_tensor = hlabel_fake_tensor.view(1, hsk_frame.shape[2], hsk_frame.shape[0], hsk_frame.shape[1]).cuda()
             
-            print("Fake: ", hlabel_fake_tensor.shape, I_0.shape)
-            print("Real: ", hlabel_real_tensor.shape, image.shape)
+            #print("Fake: ", hlabel_fake_tensor.shape, I_0.shape)
+            #print("Real: ", hlabel_real_tensor.shape, image.shape)
                         
             pred_fake_hand = self.discriminatehand_cgan(hlabel_fake_tensor, I_0)
             loss_D_fake_hand = self.criterionGAN(pred_fake_hand, False)
