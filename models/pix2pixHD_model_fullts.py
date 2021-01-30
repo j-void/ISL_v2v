@@ -257,7 +257,7 @@ class Pix2PixHDModel(BaseModel):
                 lh_image_fake = gen_img[ly:ly+lw, lx:lx+lw, :]
                 rh_image_fake = gen_img[ry:ry+rw, rx:rx+rw, :]
         
-            print(lh_label_fake)
+            print(lx, ly, lw, rx, ry, rw)
             lh_label_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_fake.copy(), cv2.COLOR_BGR2RGB)))
             lh_label_fake_tensor = lh_label_fake_tensor.view(1, lh_label_fake.shape[2], lh_label_fake.shape[0], lh_label_fake.shape[1]).cuda()
             
