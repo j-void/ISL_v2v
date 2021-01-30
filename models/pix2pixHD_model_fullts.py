@@ -184,7 +184,6 @@ class Pix2PixHDModel(BaseModel):
         rh_image_fake_tensor = 0
         
         if self.opt.hand_discrim:
-            print(lh_label_real)
             lh_label_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_real.copy(), cv2.COLOR_BGR2RGB)))
             lh_label_real_tensor = lh_label_real_tensor.view(1, lh_label_real.shape[2], lh_label_real.shape[0], lh_label_real.shape[1]).cuda()
             
@@ -225,6 +224,11 @@ class Pix2PixHDModel(BaseModel):
         loss_D_real_lhand = 0
         loss_D_fake_rhand = 0
         loss_D_real_rhand = 0
+        
+        lh_label_fake = 0
+        rh_label_fake = 0
+        lh_image_fake = 0
+        rh_image_fake = 0
                 
         if self.opt.hand_discrim:
             
