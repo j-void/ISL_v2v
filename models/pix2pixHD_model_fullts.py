@@ -186,10 +186,10 @@ class Pix2PixHDModel(BaseModel):
         if self.opt.hand_discrim:
             lh_label_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_real.copy(), cv2.COLOR_BGR2RGB)))
             lh_label_real_tensor = lh_label_real_tensor.view(1, lh_label_real.shape[2], lh_label_real.shape[0], lh_label_real.shape[1]).cuda()
-            print("lh_label_real_tensor", lh_label_real_tensor.shape)
+            print("lh_label_real_tensor", lh_label_real_tensor.shape, lh_label_real.shape)
             lh_image_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_image_real.copy(), cv2.COLOR_BGR2RGB)))
             lh_image_real_tensor = lh_image_real_tensor.view(1, lh_image_real.shape[2], lh_image_real.shape[0], lh_image_real.shape[1]).cuda()
-            print("lh_image_real_tensor", lh_image_real_tensor.shape)
+            print("lh_image_real_tensor", lh_image_real_tensor.shape, lh_image_real.shape)
             rh_label_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_label_real.copy(), cv2.COLOR_BGR2RGB)))
             rh_label_real_tensor = rh_label_real_tensor.view(1, rh_label_real.shape[2], rh_label_real.shape[0], rh_label_real.shape[1]).cuda()
             print("rh_label_real_tensor", rh_label_real_tensor.shape)
