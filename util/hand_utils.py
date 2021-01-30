@@ -237,7 +237,7 @@ def get_mid(handpts, size):
     if x == 0 and y == 0:
         w = 0
     else:
-        w = int(size/2)
+        w = int(size)
     
     return x, y, w
 
