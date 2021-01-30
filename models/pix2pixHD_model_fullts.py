@@ -186,15 +186,16 @@ class Pix2PixHDModel(BaseModel):
         if self.opt.hand_discrim:
             lh_label_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_real.copy(), cv2.COLOR_BGR2RGB)))
             lh_label_real_tensor = lh_label_real_tensor.view(1, lh_label_real.shape[2], lh_label_real.shape[0], lh_label_real.shape[1]).cuda()
-            
+            print("lh_label_real_tensor", lh_label_real_tensor.shape)
             lh_image_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_image_real.copy(), cv2.COLOR_BGR2RGB)))
             lh_image_real_tensor = lh_image_real_tensor.view(1, lh_image_real.shape[2], lh_image_real.shape[0], lh_image_real.shape[1]).cuda()
-            
+            print("lh_image_real_tensor", lh_image_real_tensor.shape)
             rh_label_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_label_real.copy(), cv2.COLOR_BGR2RGB)))
             rh_label_real_tensor = rh_label_real_tensor.view(1, rh_label_real.shape[2], rh_label_real.shape[0], rh_label_real.shape[1]).cuda()
-            
+            print("rh_label_real_tensor", rh_label_real_tensor.shape)
             rh_image_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_image_real.copy(), cv2.COLOR_BGR2RGB)))
             rh_image_real_tensor = rh_image_real_tensor.view(1, rh_image_real.shape[2], rh_image_real.shape[0], rh_image_real.shape[1]).cuda()
+            print("rh_image_real_tensor", rh_image_real_tensor.shape)
         
         initial_I_0 = 0
         #print(input_label.size())
@@ -280,16 +281,16 @@ class Pix2PixHDModel(BaseModel):
         
             lh_label_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_fake.copy(), cv2.COLOR_BGR2RGB)))
             lh_label_fake_tensor = lh_label_fake_tensor.view(1, lh_label_fake.shape[2], lh_label_fake.shape[0], lh_label_fake.shape[1]).cuda()
-            
+            print("lh_label_fake_tensor", lh_label_fake_tensor.shape)
             lh_image_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_image_fake.copy(), cv2.COLOR_BGR2RGB)))
             lh_image_fake_tensor = lh_image_fake_tensor.view(1, lh_image_fake.shape[2], lh_image_fake.shape[0], lh_image_fake.shape[1]).cuda()
-            
+            print("lh_image_fake_tensor", lh_image_fake_tensor.shape)
             rh_label_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_label_fake.copy(), cv2.COLOR_BGR2RGB)))
             rh_label_fake_tensor = rh_label_fake_tensor.view(1, rh_label_fake.shape[2], rh_label_fake.shape[0], rh_label_fake.shape[1]).cuda()
-            
+            print("rh_label_fake_tensor", rh_label_fake_tensor.shape)
             rh_image_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_image_fake.copy(), cv2.COLOR_BGR2RGB)))
             rh_image_fake_tensor = rh_image_fake_tensor.view(1, rh_image_fake.shape[2], rh_image_fake.shape[0], rh_image_fake.shape[1]).cuda()
-            
+            print("rh_image_fake_tensor", rh_image_fake_tensor.shape)
             pred_fake_lhand = self.discriminatehand_cgan(lh_label_fake_tensor, lh_image_fake_tensor)
             loss_D_fake_lhand = self.criterionGAN(pred_fake_lhand, False)
             pred_real_lhand = self.discriminatehand_cgan(lh_label_real_tensor, lh_image_real_tensor)
@@ -311,7 +312,7 @@ class Pix2PixHDModel(BaseModel):
         # GAN loss (Fake Passability Loss)        
         pred_fake = self.netD.forward(torch.cat((input_label, next_label, I_0, I_1), dim=1))        
         loss_G_GAN = self.criterionGAN(pred_fake, True)
-        print(lh_image_fake_tensor.shape, lh_image_real_tensor.shape)
+        
         
         # GAN feature matching loss
         loss_G_GAN_Feat = 0
