@@ -243,15 +243,15 @@ class Pix2PixHDModel(BaseModel):
                 lh_image_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
                 lh_image_fake.fill(255)
                 if lw != 0:
-                    lh_label_fake = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image_fake = gen_img[ly:ly+lw, lx:lx+lw, :]
+                    lh_label_fake[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
+                    lh_image_fake[:lw, :lw, :] = gen_img[ly:ly+lw, lx:lx+lw, :]
                 rh_label_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
                 rh_label_fake.fill(255)
                 rh_image_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
                 rh_image_fake.fill(255)
                 if rw != 0:
-                    rh_label_fake = hsk_frame[ry:ry+rw, rx:rx+rw, :]
-                    rh_image_fake = gen_img[ry:ry+rw, rx:rx+rw, :]
+                    rh_label_fake[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]
+                    rh_image_fake[:rw, :rw, :] = gen_img[ry:ry+rw, rx:rx+rw, :]
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(gen_img)
@@ -266,15 +266,15 @@ class Pix2PixHDModel(BaseModel):
                 lh_image_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
                 lh_image_fake.fill(255)
                 if lw != 0:
-                    lh_label_fake = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image_fake = gen_img[ly:ly+lw, lx:lx+lw, :]
+                    lh_label_fake[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
+                    lh_image_fake[:lw, :lw, :] = gen_img[ly:ly+lw, lx:lx+lw, :]
                 rh_label_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
                 rh_label_fake.fill(255)
                 rh_image_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
                 rh_image_fake.fill(255)
                 if rw != 0:
-                    rh_label_fake = hsk_frame[ry:ry+rw, rx:rx+rw, :]
-                    rh_image_fake = gen_img[ry:ry+rw, rx:rx+rw, :]
+                    rh_label_fake[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]
+                    rh_image_fake[:rw, :rw, :] = gen_img[ry:ry+rw, rx:rx+rw, :]
         
             lh_label_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_fake.copy(), cv2.COLOR_BGR2RGB)))
             lh_label_fake_tensor = lh_label_fake_tensor.view(1, lh_label_fake.shape[2], lh_label_fake.shape[0], lh_label_fake.shape[1]).cuda()

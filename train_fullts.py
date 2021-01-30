@@ -92,16 +92,16 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 lh_image = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
                 lh_image.fill(255)
                 if lw != 0:
-                    lh_label = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image = real_img[ly:ly+lw, lx:lx+lw, :]
+                    lh_label[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
+                    lh_image[:lw, :lw, :] = real_img[ly:ly+lw, lx:lx+lw, :]
 
                 rh_label = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
                 rh_label.fill(255)
                 rh_image = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
                 rh_image.fill(255)
                 if rw != 0:
-                    rh_label = hsk_frame[ry:ry+rw, rx:rx+rw, :]                
-                    rh_image = real_img[ry:ry+rw, rx:rx+rw, :]
+                    rh_label[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]                
+                    rh_image[:rw, :rw, :] = real_img[ry:ry+rw, rx:rx+rw, :]
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
@@ -116,16 +116,16 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 lh_image = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
                 lh_image.fill(255)
                 if lw != 0:
-                    lh_label = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image = real_img[ly:ly+lw, lx:lx+lw, :]
+                    lh_label[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
+                    lh_image[:lw, :lw, :] = real_img[ly:ly+lw, lx:lx+lw, :]
 
                 rh_label = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
                 rh_label.fill(255)
                 rh_image = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
                 rh_image.fill(255)
                 if rw != 0:
-                    rh_label = hsk_frame[ry:ry+rw, rx:rx+rw, :]                
-                    rh_image = real_img[ry:ry+rw, rx:rx+rw, :]
+                    rh_label[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]                
+                    rh_image[:rw, :rw, :] = real_img[ry:ry+rw, rx:rx+rw, :]
 
             
 
