@@ -311,7 +311,7 @@ class Pix2PixHDModel(BaseModel):
         # GAN loss (Fake Passability Loss)        
         pred_fake = self.netD.forward(torch.cat((input_label, next_label, I_0, I_1), dim=1))        
         loss_G_GAN = self.criterionGAN(pred_fake, True)
-        
+        print(lh_image_fake_tensor.shape, lh_image_real_tensor.shape)
         
         # GAN feature matching loss
         loss_G_GAN_Feat = 0
