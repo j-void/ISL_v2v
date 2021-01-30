@@ -85,23 +85,6 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                lx, ly, lw = hand_utils.get_mid(lfpts, int(bbox_size/2))
-                rx, ry, rw = hand_utils.get_mid(rfpts, int(bbox_size/2))
-                lh_label = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                lh_label.fill(255)
-                lh_image = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                lh_image.fill(255)
-                if lw != 0:
-                    lh_label[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image[:lw, :lw, :] = real_img[ly:ly+lw, lx:lx+lw, :]
-
-                rh_label = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                rh_label.fill(255)
-                rh_image = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                rh_image.fill(255)
-                if rw != 0:
-                    rh_label[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]                
-                    rh_image[:rw, :rw, :] = real_img[ry:ry+rw, rx:rx+rw, :]
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
@@ -109,28 +92,10 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                lx, ly, lw = hand_utils.get_mid(lfpts, bbox_size)
-                rx, ry, rw = hand_utils.get_mid(rfpts, bbox_size)
-                lh_label = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                lh_label.fill(255)
-                lh_image = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                lh_image.fill(255)
-                if lw != 0:
-                    lh_label[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image[:lw, :lw, :] = real_img[ly:ly+lw, lx:lx+lw, :]
-
-                rh_label = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                rh_label.fill(255)
-                rh_image = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                rh_image.fill(255)
-                if rw != 0:
-                    rh_label[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]                
-                    rh_image[:rw, :rw, :] = real_img[ry:ry+rw, rx:rx+rw, :]
-
             
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), lh_label, lh_image, rh_label, rh_image, bbox_size, infer=True)
+                    Variable(data['next_image']), Variable(cond_zeros), hsk_frame, infer=True)
 
             # if total_steps % 100 == 0:
             #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
@@ -197,17 +162,17 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 else:
                     scale_n, translate_n = hand_utils.resize_scale(input_label)
                     input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
-                if opt.hand_discrim:
-                    handsk_fake_label = cv2.hconcat([generated[4], generated[6]])
-                    handsk_fake_image = cv2.hconcat([generated[5], generated[7]])
-                    handsk_fake = cv2.vconcat([handsk_fake_label, handsk_fake_image])
-                    syn_img_hand[:handsk_fake.shape[0], :handsk_fake.shape[1], :] = handsk_fake
-                    handsk_real_label = cv2.hconcat([lh_label, rh_label])
-                    handsk_real_image = cv2.hconcat([lh_image, rh_image])
-                    handsk_real = cv2.vconcat([handsk_real_label, handsk_real_image])
-                    real_hand_img[:handsk_real.shape[0], :handsk_real.shape[1], :] = handsk_real
-                #print(syn_img_hand.shape, real_hand_img.shape, input_label.shape)
+                
                 output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])
+                if opt.hand_discrim:
+                    if opt.netG == "global":
+                        scale_n, translate_n = hand_utils.resize_scale(hsk_frame, myshape=(256, 512, 3))
+                        hsk_frame = hand_utils.fix_image(scale_n, translate_n, hsk_frame, myshape=(256, 512, 3))
+                    else:
+                        scale_n, translate_n = hand_utils.resize_scale(hsk_frame)
+                        hsk_frame = hand_utils.fix_image(scale_n, translate_n, hsk_frame)
+                    output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label, hsk_frame])
+                
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
             # if save_fake and opt.hand_discrim:

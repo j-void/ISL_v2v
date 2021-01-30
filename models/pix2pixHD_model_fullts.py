@@ -78,7 +78,7 @@ class Pix2PixHDModel(BaseModel):
                 self.criterionL1 = torch.nn.L1Loss()
         
             # Loss names
-            self.loss_names = ['G_GAN', 'G_GAN_Feat', 'G_VGG', 'D_real', 'D_fake', 'D_lhand_fake', 'D_lhand_real', 'D_rhand_fake', 'D_rhand_real']
+            self.loss_names = ['G_GAN', 'G_GAN_Feat', 'G_VGG', 'D_real', 'D_fake', 'D_hand_fake', 'D_hand_real']
 
             # initialize optimizers
             # optimizer G
@@ -167,35 +167,18 @@ class Pix2PixHDModel(BaseModel):
         input_concat = torch.cat((label, image.detach()), dim=1)
         return self.netDhand.forward(input_concat)
 
-    def forward(self, label, next_label, image, next_image, zeroshere, lh_label_real, lh_image_real, rh_label_real, rh_image_real, bbox_size, infer=False):
+    def forward(self, label, next_label, image, next_image, zeroshere, hlabel_real, infer=False):
         # Encode Inputs
         input_label, real_image, next_label, next_image, zeroshere = self.encode_input(label, image, \
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
                     
 
-        lh_label_real_tensor = 0
-        lh_image_real_tensor = 0
-        rh_label_real_tensor = 0
-        rh_image_real_tensor = 0
-        
-        lh_label_fake_tensor = 0
-        lh_image_fake_tensor = 0
-        rh_label_fake_tensor = 0
-        rh_image_fake_tensor = 0
+        hlabel_real_tensor = 0
+        hlabel_fake_tensor = 0
         
         if self.opt.hand_discrim:
-            lh_label_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_real.copy(), cv2.COLOR_BGR2RGB)))
-            lh_label_real_tensor = lh_label_real_tensor.view(1, lh_label_real.shape[2], lh_label_real.shape[0], lh_label_real.shape[1]).cuda()
-            print("lh_label_real_tensor", lh_label_real_tensor.shape, lh_label_real.shape)
-            lh_image_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_image_real.copy(), cv2.COLOR_BGR2RGB)))
-            lh_image_real_tensor = lh_image_real_tensor.view(1, lh_image_real.shape[2], lh_image_real.shape[0], lh_image_real.shape[1]).cuda()
-            print("lh_image_real_tensor", lh_image_real_tensor.shape, lh_image_real.shape)
-            rh_label_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_label_real.copy(), cv2.COLOR_BGR2RGB)))
-            rh_label_real_tensor = rh_label_real_tensor.view(1, rh_label_real.shape[2], rh_label_real.shape[0], rh_label_real.shape[1]).cuda()
-            print("rh_label_real_tensor", rh_label_real_tensor.shape)
-            rh_image_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_image_real.copy(), cv2.COLOR_BGR2RGB)))
-            rh_image_real_tensor = rh_image_real_tensor.view(1, rh_image_real.shape[2], rh_image_real.shape[0], rh_image_real.shape[1]).cuda()
-            print("rh_image_real_tensor", rh_image_real_tensor.shape)
+            hlabel_real_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(hlabel_real.copy(), cv2.COLOR_BGR2RGB)))
+            hlabel_real_tensor = hlabel_real_tensor.view(1, hlabel_real.shape[2], hlabel_real.shape[0], hlabel_real.shape[1]).cuda()
         
         initial_I_0 = 0
         #print(input_label.size())
@@ -221,10 +204,8 @@ class Pix2PixHDModel(BaseModel):
         fake_face_0 = fake_face_1 = real_face_0 = real_face_1 = 0
         fake_face = real_face = face_residual = 0
         
-        loss_D_fake_lhand = 0
-        loss_D_real_lhand = 0
-        loss_D_fake_rhand = 0
-        loss_D_real_rhand = 0
+        loss_D_fake_hand = 0
+        loss_D_real_hand = 0
         
 
                 
@@ -236,22 +217,6 @@ class Pix2PixHDModel(BaseModel):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                lx, ly, lw = hand_utils.get_mid(lfpts, int(bbox_size/2))
-                rx, ry, rw = hand_utils.get_mid(rfpts, int(bbox_size/2))
-                lh_label_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                lh_label_fake.fill(255)
-                lh_image_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                lh_image_fake.fill(255)
-                if lw != 0:
-                    lh_label_fake[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image_fake[:lw, :lw, :] = gen_img[ly:ly+lw, lx:lx+lw, :]
-                rh_label_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                rh_label_fake.fill(255)
-                rh_image_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
-                rh_image_fake.fill(255)
-                if rw != 0:
-                    rh_label_fake[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]
-                    rh_image_fake[:rw, :rw, :] = gen_img[ry:ry+rw, rx:rx+rw, :]
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(gen_img)
@@ -259,44 +224,18 @@ class Pix2PixHDModel(BaseModel):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                lx, ly, lw = hand_utils.get_mid(lfpts, bbox_size)
-                rx, ry, rw = hand_utils.get_mid(rfpts, bbox_size)
-                lh_label_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                lh_label_fake.fill(255)
-                lh_image_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                lh_image_fake.fill(255)
-                if lw != 0:
-                    lh_label_fake[:lw, :lw, :] = hsk_frame[ly:ly+lw, lx:lx+lw, :]
-                    lh_image_fake[:lw, :lw, :] = gen_img[ly:ly+lw, lx:lx+lw, :]
-                rh_label_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                rh_label_fake.fill(255)
-                rh_image_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
-                rh_image_fake.fill(255)
-                if rw != 0:
-                    rh_label_fake[:rw, :rw, :] = hsk_frame[ry:ry+rw, rx:rx+rw, :]
-                    rh_image_fake[:rw, :rw, :] = gen_img[ry:ry+rw, rx:rx+rw, :]
         
-            lh_label_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_label_fake.copy(), cv2.COLOR_BGR2RGB)))
-            lh_label_fake_tensor = lh_label_fake_tensor.view(1, lh_label_fake.shape[2], lh_label_fake.shape[0], lh_label_fake.shape[1]).cuda()
-            print("lh_label_fake_tensor", lh_label_fake_tensor.shape)
-            lh_image_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(lh_image_fake.copy(), cv2.COLOR_BGR2RGB)))
-            lh_image_fake_tensor = lh_image_fake_tensor.view(1, lh_image_fake.shape[2], lh_image_fake.shape[0], lh_image_fake.shape[1]).cuda()
-            print("lh_image_fake_tensor", lh_image_fake_tensor.shape)
-            rh_label_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_label_fake.copy(), cv2.COLOR_BGR2RGB)))
-            rh_label_fake_tensor = rh_label_fake_tensor.view(1, rh_label_fake.shape[2], rh_label_fake.shape[0], rh_label_fake.shape[1]).cuda()
-            print("rh_label_fake_tensor", rh_label_fake_tensor.shape)
-            rh_image_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(rh_image_fake.copy(), cv2.COLOR_BGR2RGB)))
-            rh_image_fake_tensor = rh_image_fake_tensor.view(1, rh_image_fake.shape[2], rh_image_fake.shape[0], rh_image_fake.shape[1]).cuda()
-            print("rh_image_fake_tensor", rh_image_fake_tensor.shape)
-            pred_fake_lhand = self.discriminatehand_cgan(lh_label_fake_tensor, lh_image_fake_tensor)
-            loss_D_fake_lhand = self.criterionGAN(pred_fake_lhand, False)
-            pred_real_lhand = self.discriminatehand_cgan(lh_label_real_tensor, lh_image_real_tensor)
-            loss_D_real_lhand = self.criterionGAN(pred_real_lhand, True)
+            hlabel_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(hsk_frame.copy(), cv2.COLOR_BGR2RGB)))
+            hlabel_fake_tensor = hlabel_fake_tensor.view(1, hsk_frame.shape[2], hsk_frame.shape[0], hsk_frame.shape[1]).cuda()
+            
+            print("Fake: ", hlabel_fake_tensor.shape, I_0.shape)
+            print("Real: ", hlabel_real_tensor.shape, image.shape)
+                        
+            pred_fake_hand = self.discriminatehand_cgan(hlabel_fake_tensor, I_0)
+            loss_D_fake_hand = self.criterionGAN(pred_fake_hand, False)
+            pred_real_hand = self.discriminatehand_cgan(hlabel_real_tensor, image)
+            loss_D_real_hand = self.criterionGAN(pred_real_hand, True)
                 
-            pred_fake_rhand = self.discriminatehand_cgan(rh_label_fake_tensor, rh_image_fake_tensor)
-            loss_D_fake_rhand = self.criterionGAN(pred_fake_rhand, False)
-            pred_real_rhand = self.discriminatehand_cgan(rh_label_real_tensor, rh_image_real_tensor)
-            loss_D_real_rhand = self.criterionGAN(pred_real_rhand, True)
 
         # Fake Detection and Loss
         pred_fake_pool = self.discriminate_4(input_label, next_label, I_0, I_1, use_pool=True)
@@ -329,15 +268,15 @@ class Pix2PixHDModel(BaseModel):
             loss_G_VGG = loss_G_VGG0 + loss_G_VGG1 
             if self.opt.netG == 'global': #need 2x VGG for artifacts when training local
                 loss_G_VGG *= 0.5
-            if self.opt.hand_discrim:
-                loss_G_VGG += 0.5 * self.criterionVGG(lh_image_fake_tensor, lh_image_real_tensor) * self.opt.lambda_feat
-                loss_G_VGG += 0.5 * self.criterionVGG(rh_image_fake_tensor, rh_image_real_tensor) * self.opt.lambda_feat
+            # if self.opt.hand_discrim:
+            #     loss_G_VGG += 0.5 * self.criterionVGG(lh_image_fake_tensor, lh_image_real_tensor) * self.opt.lambda_feat
+            #     loss_G_VGG += 0.5 * self.criterionVGG(rh_image_fake_tensor, rh_image_real_tensor) * self.opt.lambda_feat
 
         if self.opt.use_l1:
             loss_G_VGG += (self.criterionL1(I_1, next_image)) * self.opt.lambda_A
         
         # Only return the fake_B image if necessary to save BW
-        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake, loss_D_fake_lhand, loss_D_real_lhand, loss_D_fake_rhand, loss_D_real_rhand], None if not infer else [torch.cat((I_0, I_1), dim=3), fake_face, face_residual, initial_I_0, lh_label_fake, lh_image_fake, rh_label_fake, rh_image_fake] ]
+        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake, loss_D_fake_hand, loss_D_real_hand], None if not infer else [torch.cat((I_0, I_1), dim=3), fake_face, face_residual, initial_I_0, lh_label_fake, lh_image_fake, rh_label_fake, rh_image_fake] ]
 
     def inference(self, label, prevouts):
 
