@@ -112,6 +112,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
                 lx, ly, lw = hand_utils.get_mid(lfpts, bbox_size)
                 rx, ry, rw = hand_utils.get_mid(rfpts, bbox_size)
+                print(lw, rw)
                 if lw != 0:
                     lh_label = hsk_frame[ly:ly+lw, lx:lx+lw, :]
                     lh_image = real_img[ly:ly+lw, lx:lx+lw, :]
