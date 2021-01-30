@@ -167,7 +167,7 @@ class Pix2PixHDModel(BaseModel):
         input_concat = torch.cat((label, image.detach()), dim=1)
         return self.netDhand.forward(input_concat)
 
-    def forward(self, label, next_label, image, next_image, zeroshere, lh_label_real, lh_image_real, rh_label_real, rh_image_real, bbox_size, infer=False):
+    def forward(self, label, next_label, image, next_image, zeroshere, lh_label_real, lh_image_real, rh_label_real, rh_image_real, lx, ly, lw, rx, ry, rw, infer=False):
         # Encode Inputs
         input_label, real_image, next_label, next_image, zeroshere = self.encode_input(label, image, \
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
@@ -236,8 +236,6 @@ class Pix2PixHDModel(BaseModel):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                lx, ly, lw = hand_utils.get_mid(lfpts, int(bbox_size/2))
-                rx, ry, rw = hand_utils.get_mid(rfpts, int(bbox_size/2))
                 lh_label_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
                 lh_label_fake.fill(255)
                 lh_image_fake = np.zeros((int(bbox_size/2), int(bbox_size/2), 3), dtype=np.uint8)
@@ -259,8 +257,6 @@ class Pix2PixHDModel(BaseModel):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                lx, ly, lw = hand_utils.get_mid(lfpts, bbox_size)
-                rx, ry, rw = hand_utils.get_mid(rfpts, bbox_size)
                 lh_label_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)
                 lh_label_fake.fill(255)
                 lh_image_fake = np.zeros((bbox_size, bbox_size, 3), dtype=np.uint8)

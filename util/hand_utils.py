@@ -220,6 +220,29 @@ def assert_bbox(handpts):
     
     return int(sx), int(sy), int(max_dis*1.5)
 
+def assert_bbox2(handpts):
+    x_mid = int(np.average(handpts[:,0]))
+    y_mid = int(np.average(handpts[:,1]))
+    x_min = int(np.min(handpts[:,0]))
+    y_min = int(np.min(handpts[:,1]))
+    x_max = int(np.max(handpts[:,0]))
+    y_max = int(np.max(handpts[:,1]))
+    
+    x_dis = abs(x_max-x_min)
+    y_dis = abs(y_max-y_min)
+    
+    if x_mid - x_dis/2 > 0:
+        sx = x_mid - x_dis/2 - x_dis*0.25
+    else:
+        sx = 0
+    
+    if y_mid - y_dis/2 > 0:
+        sy = y_mid - y_dis/2 - y_dis*0.25
+    else:
+        sy = 0
+    
+    return int(sx), int(sy), int(x_dis*1.5), int(y_dis*1.5)
+
 def get_mid(handpts, size):
     x_mid = int(np.average(handpts[:,0]))
     y_mid = int(np.average(handpts[:,1]))

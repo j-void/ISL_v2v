@@ -130,7 +130,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), lh_label, lh_image, rh_label, rh_image, bbox_size, infer=True)
+                    Variable(data['next_image']), Variable(cond_zeros), lh_label, lh_image, rh_label, rh_image, lx, ly, lw, rx, ry, rw, infer=True)
 
             # if total_steps % 100 == 0:
             #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
