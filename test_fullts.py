@@ -35,6 +35,9 @@ webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.na
 unset = True
 print('#testing images = %d' % len(data_loader))
 
+if not os.path.exists("test_tmp"):
+    os.makedirs("test_tmp")
+
 img_path = os.path.join(opt.dataroot, "test_img", "*.png")
 imgs = glob.glob(img_path)
 imgs.sort()
