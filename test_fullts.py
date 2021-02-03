@@ -67,6 +67,7 @@ for i, data in enumerate(dataset):
         hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
         hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
         
+    cv2.imwrite(os.path.join("test_tmp", "output_image_"+str(i)+"_"+'{:0>12}'.format(i)+".png"), hsk_frame)
     #generated = model.inference(data['label'], previous_cond, data['face_coords'])
     generated = model.inference(data['label'], previous_cond, hsk_frame)
 
