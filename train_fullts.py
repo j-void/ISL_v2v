@@ -148,7 +148,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 visualizer.plot_current_errors(errors, total_steps)
 
             ### display output images            
-            if total_steps % opt.save_latest_freq == 0:
+            if total_steps % 100 == 0:
                 syn_img_hand = util.tensor2im(generated[0].data[0])
                 height_s, width_s, channels_s = syn_img_hand.shape
                 syn_img_hand = cv2.cvtColor(syn_img_hand[:,:int(width/2),:], cv2.COLOR_RGB2BGR)

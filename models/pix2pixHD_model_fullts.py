@@ -44,8 +44,10 @@ class Pix2PixHDModel(BaseModel):
             
         if self.isTrain and self.opt.hand_discrim:
             use_sigmoid = opt.no_lsgan
+            # self.netDhand = networks.define_D(6, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
+            #                               1, False, gpu_ids=self.gpu_ids, netD='hand')
             self.netDhand = networks.define_D(6, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
-                                          1, False, gpu_ids=self.gpu_ids, netD='hand')
+                                          opt.num_D, False, gpu_ids=self.gpu_ids)
 
         
         self.data_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])    
