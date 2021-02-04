@@ -215,8 +215,8 @@ class Pix2PixHDModel(BaseModel):
                 scale_n, translate_n = hand_utils.resize_scale(gen_img, myshape=(256, 512, 3))
                 gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img, myshape=(256, 512, 3))
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)
+                hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(gen_img)

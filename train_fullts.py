@@ -83,8 +83,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img, myshape=(256, 512, 3))
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)
+                hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
