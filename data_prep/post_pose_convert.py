@@ -58,7 +58,7 @@ for f in range(len(imgs)):
     bbox_sizes.append(bsiz_l)
     bbox_sizes.append(bsiz_r)
     
-    posepts_arr = posepts_arr + get_keypoint_array(posepts)
+    posepts_arr = posepts_arr + get_keypoint_array_pose(posepts)
     
     #display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts)
     if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts) == False:

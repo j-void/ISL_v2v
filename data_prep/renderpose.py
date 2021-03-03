@@ -220,9 +220,16 @@ def display_single_hand_skleton_right(frame, handpts):
     return True
 
 def get_keypoint_array(pts):
-    size = int(len(pts)/3)
-    pts_arry = np.zeros((size,2))
-    for p in range(size):
+    pts_arry = np.zeros((21,2))
+    for p in range(21):
+        pts_arry[p,0] = pts[p*3]
+        pts_arry[p,1] = pts[p*3+1]
+    
+    return pts_arry
+
+def get_keypoint_array_pose(pts):
+    pts_arry = np.zeros((25,2))
+    for p in range(25):
         pts_arry[p,0] = pts[p*3]
         pts_arry[p,1] = pts[p*3+1]
     
