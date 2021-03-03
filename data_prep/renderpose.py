@@ -220,8 +220,9 @@ def display_single_hand_skleton_right(frame, handpts):
     return True
 
 def get_keypoint_array(pts):
-    pts_arry = np.zeros((21,2))
-    for p in range(21):
+    size = int(len(pts)/3)
+    pts_arry = np.zeros((size,2))
+    for p in range(size):
         pts_arry[p,0] = pts[p*3]
         pts_arry[p,1] = pts[p*3+1]
     
@@ -260,4 +261,12 @@ def assert_bbox(handpts):
         sy = 0
     
     return int(sx), int(sy), int(max_dis*1.5)
+
+def apply_transformation(keypoints, translation, scale):
+    i = 0
+    while i < len(keypoints):
+        keypoints[i] = (keypoints[i] * scale) + translation[0]
+        keypoints[i+1] = (keypoints[i+1] * scale) + translation[1]
+        i += 3
+    return keypoints
 

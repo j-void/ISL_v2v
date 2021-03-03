@@ -41,6 +41,8 @@ skip_index = 0
 
 bbox_sizes = []
 
+posepts_arr = np.zeros((25, 2))
+
 for f in range(len(imgs)):
     posepts, facepts, r_handpts, l_handpts = readkeypointsfile_json(keypoints[f])
     if not posepts or not facepts:
@@ -55,6 +57,9 @@ for f in range(len(imgs)):
     _, _, bsiz_r = assert_bbox(get_keypoint_array(r_handpts))
     bbox_sizes.append(bsiz_l)
     bbox_sizes.append(bsiz_r)
+    
+    posepts_arr = posepts_arr + get_keypoint_array(posepts)
+    
     #display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts)
     if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts) == False:
         print("Skipping frame: ", f)
@@ -74,7 +79,10 @@ for f in range(len(imgs)):
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             
+processed_frames = len(imgs) - skip_index
+posepts_arr = posepts_arr / processed_frames
 if args.save_dir:
+    np.savetxt("avg_pose.txt", posepts_arr)
     with open(os.path.join(savedir, "bbox_size.txt"), 'w') as f:
         f.write('%d' % max(bbox_sizes))
 time_taken = time.time() - initTime
