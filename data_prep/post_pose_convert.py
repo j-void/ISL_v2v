@@ -79,7 +79,7 @@ for f in range(len(imgs)):
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             
-posepts_arr = posepts_arr / len(posepts_arr)
+posepts_arr = posepts_arr / (len(imgs) - skip_index)
 avg_pose_frame = np.zeros((512, 1024, 3), np.uint8)
 avg_pose_frame.fill(255)
 display_skleton_arr(avg_pose_frame, posepts_arr)
