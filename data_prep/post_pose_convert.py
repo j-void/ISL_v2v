@@ -79,8 +79,7 @@ for f in range(len(imgs)):
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
             
-processed_frames = len(imgs) - skip_index
-posepts_arr = posepts_arr / processed_frames
+posepts_arr = posepts_arr / len(posepts_arr)
 if args.save_dir:
     np.savetxt(os.path.join(savedir, "avg_pose.txt"), posepts_arr)
     with open(os.path.join(savedir, "bbox_size.txt"), 'w') as f:

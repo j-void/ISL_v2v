@@ -154,6 +154,35 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
             cv2.line(frame, (int(l_handpts_2d[firstlimb_ind, 0]), int(l_handpts_2d[firstlimb_ind, 1])), (int(l_handpts_2d[secondlimb_ind, 0]), int(l_handpts_2d[secondlimb_ind, 1])), hand_colors[k], 4)
             
     return True
+
+def display_skleton_arr(frame, posepts_arr):
+        
+    limbSeq = [[0,1], [1, 2], [1, 5], [2, 3], [3, 4], [5, 6], [6, 7], [0, 15], [0, 16], [15, 17], [16, 18]]#, \
+			# [9, 10], [10, 11], [11, 22], [11, 24], [12, 13], [13, 14], [14, 19], [14, 21], \
+			# [19, 20], [22, 23]]
+    
+    
+    posepts_2d = []
+    r_handpts_2d = np.zeros((21, 3))
+    l_handpts_2d = np.zeros((21, 3))
+    facepts_2d  = np.zeros((70, 2), dtype=np.int)
+    
+    for p in range(0, int(len(posepts_arr))):
+        if (p <= 7) or (p >= 15 and p <= 18):
+            cv2.circle(frame, (int(posepts_arr[p, 0]), int(posepts_arr[p,1])), 6, pose_colors[p], -1)
+        posepts_2d.append((int(posepts_arr[p, 0]), int(posepts_arr[p,1])))
+        
+
+    
+    for k in range(len(limbSeq)):
+        firstlimb_ind = limbSeq[k][0]
+        secondlimb_ind = limbSeq[k][1]
+        if posepts_2d[firstlimb_ind][0] > 0 and posepts_2d[secondlimb_ind][0] > 0:
+            cv2.line(frame, posepts_2d[firstlimb_ind], posepts_2d[secondlimb_ind], pose_colors[k], 5)
+    
+
+            
+            
             
 def resize_scale(frame, myshape = (512, 1024, 3)):
     curshape = frame.shape
@@ -275,5 +304,11 @@ def apply_transformation(keypoints, translation, scale):
         keypoints[i] = (keypoints[i] * scale) + translation[0]
         keypoints[i+1] = (keypoints[i+1] * scale) + translation[1]
         i += 3
+    return keypoints
+
+def apply_transformation_arr(keypoints, translation, scale):
+    for i in range(len(keypoints)):
+        keypoints[i, 0] = (keypoints[i, 0] * scale) + translation[0]
+        keypoints[i, 1] = (keypoints[i, 1] * scale) + translation[1]
     return keypoints
 
