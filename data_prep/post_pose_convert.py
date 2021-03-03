@@ -80,7 +80,13 @@ for f in range(len(imgs)):
                 break
             
 posepts_arr = posepts_arr / len(posepts_arr)
+avg_pose_frame = np.zeros((512, 1024, 3), np.uint8)
+avg_pose_frame.fill(255)
+display_skleton_arr(avg_pose_frame, posepts_arr)
+
 if args.save_dir:
+    _fpl = os.path.join(savedir, "avg_pose_out.png")
+    cv2.imwrite(_fpl, avg_pose_frame)
     np.savetxt(os.path.join(savedir, "avg_pose.txt"), posepts_arr)
     with open(os.path.join(savedir, "bbox_size.txt"), 'w') as f:
         f.write('%d' % max(bbox_sizes))
