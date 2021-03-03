@@ -82,7 +82,7 @@ for f in range(len(imgs)):
 processed_frames = len(imgs) - skip_index
 posepts_arr = posepts_arr / processed_frames
 if args.save_dir:
-    np.savetxt("avg_pose.txt", posepts_arr)
+    np.savetxt(os.path.join(savedir, "avg_pose.txt"), posepts_arr)
     with open(os.path.join(savedir, "bbox_size.txt"), 'w') as f:
         f.write('%d' % max(bbox_sizes))
 time_taken = time.time() - initTime
