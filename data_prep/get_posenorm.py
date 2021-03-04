@@ -101,7 +101,6 @@ for f in range(len(imgs)):
         
     #out_frame = fix_image(1.3, (0.0, -40.0), frame)
     #display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts)
-    
     if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts) == False:
         print("Skipping frame: ", f)
         skip_index = skip_index + 1
