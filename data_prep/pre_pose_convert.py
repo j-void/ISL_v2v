@@ -13,6 +13,7 @@ parser.add_argument("--input_vid", type=str, help='input video file')
 parser.add_argument("--output_vid", type=str, help='ouput video file')
 parser.add_argument("--output_frames", type=str, help='ouput frame directory')
 parser.add_argument("--display", help='display the output', action="store_true")
+parser.add_argument("--skip_frame", type=int, help="number of frames to skip")
 args = parser.parse_args()
 
 if args.output_frames:
@@ -35,18 +36,27 @@ fps = cap.get(cv2.CAP_PROP_FPS)
 height = 512
 width  = 1024
 frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+
+print("Height:", height, ", Width:", width, ", FPS:", fps, ", Frames:", frame_count)
+
+if args.skip_frame:
+    fps = fps / (args.skip_frame + 1)
+    frame_count = frame_count / (args.skip_frame + 1)
  
 if args.output_vid:
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
     out = cv2.VideoWriter(args.output_vid, fourcc, fps, (width, height))
 
-print("Height:", height, ", Width:", width, ", FPS:", fps, ", Frames:", frame_count)
 
 fi = 0
+_skp_idx = 0
 
 while(cap.isOpened()):
     res, frame = cap.read()
     if res == True:
+        if _skp_idx == args.skip_frame:
+            _skp_idx = 0
+        _skp_idx = _skp_idx + 1
         scale_n, translate_n = resize_scale(frame)
         out_frame = fix_image(scale_n, translate_n, frame)
         if args.output_vid:
@@ -68,8 +78,9 @@ while(cap.isOpened()):
  
 time_taken = time.time() - initTime
 print(f"Process completed sucessfully, Total time taken: {time_taken}s, Rate: {frame_count/time_taken} FPS")
- 
-if args.output_vid:    
+print(f"Output processed at FPS: {fps}, and frames:{frame_count}")
+
+if args.output_vid:
     out.release()
 cap.release()
 
