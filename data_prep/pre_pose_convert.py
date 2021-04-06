@@ -41,7 +41,7 @@ print("Height:", height, ", Width:", width, ", FPS:", fps, ", Frames:", frame_co
 
 if args.skip_frame:
     fps = fps / (args.skip_frame + 1)
-    frame_count = frame_count / (args.skip_frame + 1)
+    frame_count = int(frame_count / (args.skip_frame + 1))
  
 if args.output_vid:
     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
@@ -56,6 +56,7 @@ while(cap.isOpened()):
     if res == True:
         if _skp_idx == args.skip_frame:
             _skp_idx = 0
+            continue
         _skp_idx = _skp_idx + 1
         scale_n, translate_n = resize_scale(frame)
         out_frame = fix_image(scale_n, translate_n, frame)
