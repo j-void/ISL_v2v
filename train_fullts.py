@@ -172,7 +172,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                         scale_n, translate_n = hand_utils.resize_scale(hsk_frame)
                         hsk_frame = hand_utils.fix_image(scale_n, translate_n, hsk_frame)
                     
-                    output_image = cv2.hconcat([syn_img_hand, real_hand_img, , input_label, generated[5], generated[4], generated[6], hsk_frame])
+                    output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label, generated[5], generated[4], generated[6], hsk_frame])
                 
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
