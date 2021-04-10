@@ -222,10 +222,10 @@ class Pix2PixHDModel(BaseModel):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
                 lbx, lby, lbw = left_bbox
                 rbx, rby, rbw = right_bbox
-                hand_frame_fake[lbx:lbx+lbw, lby:lby+lbw, :] = gen_img[lbx:lbx+lbw, lby:lby+lbw, :]
-                hand_frame_fake[rbx:rbx+rbw, rby:rby+rbw, :] = gen_img[rbx:rbx+rbw, rby:rby+rbw, :]
-                hand_frame_real[lbx:lbx+lbw, lby:lby+lbw, :] = real_frame_cv[lbx:lbx+lbw, lby:lby+lbw, :]
-                hand_frame_real[rbx:rbx+rbw, rby:rby+rbw, :] = real_frame_cv[rbx:rbx+rbw, rby:rby+rbw, :]
+                hand_frame_fake[lby:lby+lbw, lbx:lbx+lbw, :] = gen_img[lby:lby+lbw, lbx:lbx+lbw, :]
+                hand_frame_fake[rby:rby+rbw, rbx:rbx+rbw, :] = gen_img[rby:rby+rbw, rbx:rbx+rbw, :]
+                hand_frame_real[lby:lby+lbw, lbx:lbx+lbw, :] = real_frame_cv[lby:lby+lbw, lbx:lbx+lbw, :]
+                hand_frame_real[rby:rby+rbw, rbx:rbx+rbw, :] = real_frame_cv[rby:rby+rbw, rbx:rbx+rbw, :]
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
 
@@ -236,10 +236,10 @@ class Pix2PixHDModel(BaseModel):
                 lbx, lby, lbw = left_bbox
                 rbx, rby, rbw = right_bbox
                 #print(lfpts, rfpts)
-                hand_frame_fake[lbx:lbx+lbw, lby:lby+lbw, :] = gen_img[lbx:lbx+lbw, lby:lby+lbw, :]
-                hand_frame_fake[rbx:rbx+rbw, rby:rby+rbw, :] = gen_img[rbx:rbx+rbw, rby:rby+rbw, :]
-                hand_frame_real[lbx:lbx+lbw, lby:lby+lbw, :] = real_frame_cv[lbx:lbx+lbw, lby:lby+lbw, :]
-                hand_frame_real[rbx:rbx+rbw, rby:rby+rbw, :] = real_frame_cv[rbx:rbx+rbw, rby:rby+rbw, :]
+                hand_frame_fake[lby:lby+lbw, lbx:lbx+lbw, :] = gen_img[lby:lby+lbw, lbx:lbx+lbw, :]
+                hand_frame_fake[rby:rby+rbw, rbx:rbx+rbw, :] = gen_img[rby:rby+rbw, rbx:rbx+rbw, :]
+                hand_frame_real[lby:lby+lbw, lbx:lbx+lbw, :] = real_frame_cv[lby:lby+lbw, lbx:lbx+lbw, :]
+                hand_frame_real[rby:rby+rbw, rbx:rbx+rbw, :] = real_frame_cv[rby:rby+rbw, rbx:rbx+rbw, :]
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
         
