@@ -226,8 +226,8 @@ class Pix2PixHDModel(BaseModel):
                 hand_frame_fake[rbx:rbx+rbw, rby:rby+rbw, :] = gen_img[rbx:rbx+rbw, rby:rby+rbw, :]
                 hand_frame_real[lbx:lbx+lbw, lby:lby+lbw, :] = real_frame_cv[lbx:lbx+lbw, lby:lby+lbw, :]
                 hand_frame_real[rbx:rbx+rbw, rby:rby+rbw, :] = real_frame_cv[rbx:rbx+rbw, rby:rby+rbw, :]
-                hand_utils.display_hand_skleton(hsk_frame, rfpts, lfpts, sz=2)
-                #hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
+                hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)
+                hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(gen_img)
@@ -240,8 +240,8 @@ class Pix2PixHDModel(BaseModel):
                 hand_frame_fake[rbx:rbx+rbw, rby:rby+rbw, :] = gen_img[rbx:rbx+rbw, rby:rby+rbw, :]
                 hand_frame_real[lbx:lbx+lbw, lby:lby+lbw, :] = real_frame_cv[lbx:lbx+lbw, lby:lby+lbw, :]
                 hand_frame_real[rbx:rbx+rbw, rby:rby+rbw, :] = real_frame_cv[rbx:rbx+rbw, rby:rby+rbw, :]
-                hand_utils.display_hand_skleton(hsk_frame, rfpts, lfpts, sz=4)
-                #hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
+                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
         
             
             hand_frame_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(hand_frame_fake.copy(), cv2.COLOR_BGR2RGB)))
