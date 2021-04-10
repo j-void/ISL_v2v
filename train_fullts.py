@@ -89,8 +89,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
                 hsk_frame = cv2.rectangle(hsk_frame, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
                 hsk_frame = cv2.rectangle(hsk_frame, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
-                real_img = cv2.rectangle(real_img, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
-                real_img = cv2.rectangle(real_img, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
+                # real_img = cv2.rectangle(real_img, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
+                # real_img = cv2.rectangle(real_img, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
@@ -100,10 +100,12 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                hsk_frame = cv2.rectangle(hsk_frame, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
-                hsk_frame = cv2.rectangle(hsk_frame, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
-                real_img = cv2.rectangle(real_img, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
-                real_img = cv2.rectangle(real_img, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
+                # hsk_frame = cv2.rectangle(hsk_frame, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
+                # hsk_frame = cv2.rectangle(hsk_frame, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
+                # real_img = cv2.rectangle(real_img, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
+                # real_img = cv2.rectangle(real_img, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
+                hsk_frame[lbx:lbx+lbw, lby:lby+lbw, :] = real_img[lbx:lbx+lbw, lby:lby+lbw, :]
+                hsk_frame[rbx:rbx+rbw, rby:rby+rbw, :] = real_img[rbx:rbx+rbw, rby:rby+rbw, :]
             
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
