@@ -169,7 +169,7 @@ class Pix2PixHDModel(BaseModel):
         input_concat = torch.cat((label, image.detach()), dim=1)
         return self.netDhand.forward(input_concat)
 
-    def forward(self, label, next_label, image, next_image, zeroshere, hlabel_real, real_frame_cv, infer=False):
+    def forward(self, label, next_label, image, next_image, zeroshere, hlabel_real, real_frame_cv, left_bbox, right_bbox, infer=False):
         # Encode Inputs
         input_label, real_image, next_label, next_image, zeroshere = self.encode_input(label, image, \
                      next_label=next_label, next_image=next_image, zeroshere=zeroshere)
@@ -220,28 +220,28 @@ class Pix2PixHDModel(BaseModel):
                 scale_n, translate_n = hand_utils.resize_scale(gen_img, myshape=(256, 512, 3))
                 gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img, myshape=(256, 512, 3))
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True, sz=64)
-                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
-                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+                lbx, lby, lbw = left_bbox
+                rbx, rby, rbw = right_bbox
                 hand_frame_fake[lbx:lbx+lbw, lby:lby+lbw, :] = gen_img[lbx:lbx+lbw, lby:lby+lbw, :]
                 hand_frame_fake[rbx:rbx+rbw, rby:rby+rbw, :] = gen_img[rbx:rbx+rbw, rby:rby+rbw, :]
                 hand_frame_real[lbx:lbx+lbw, lby:lby+lbw, :] = real_frame_cv[lbx:lbx+lbw, lby:lby+lbw, :]
                 hand_frame_real[rbx:rbx+rbw, rby:rby+rbw, :] = real_frame_cv[rbx:rbx+rbw, rby:rby+rbw, :]
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
+                hand_utils.display_hand_skleton(hsk_frame, rfpts, lfpts, sz=2)
+                #hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(gen_img)
                 gen_img = hand_utils.fix_image(scale_n, translate_n, gen_img)
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
-                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
-                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+                lbx, lby, lbw = left_bbox
+                rbx, rby, rbw = right_bbox
                 #print(lfpts, rfpts)
                 hand_frame_fake[lbx:lbx+lbw, lby:lby+lbw, :] = gen_img[lbx:lbx+lbw, lby:lby+lbw, :]
                 hand_frame_fake[rbx:rbx+rbw, rby:rby+rbw, :] = gen_img[rbx:rbx+rbw, rby:rby+rbw, :]
                 hand_frame_real[lbx:lbx+lbw, lby:lby+lbw, :] = real_frame_cv[lbx:lbx+lbw, lby:lby+lbw, :]
                 hand_frame_real[rbx:rbx+rbw, rby:rby+rbw, :] = real_frame_cv[rbx:rbx+rbw, rby:rby+rbw, :]
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                hand_utils.display_hand_skleton(hsk_frame, rfpts, lfpts, sz=4)
+                #hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
         
             
             hand_frame_fake_tensor = self.data_transforms(Image.fromarray(cv2.cvtColor(hand_frame_fake.copy(), cv2.COLOR_BGR2RGB)))

@@ -261,17 +261,17 @@ def display_single_hand_skleton(frame, handpts, sz=4):
             
     return True
 
-def display_hand_skleton(frame, r_handpts, l_handpts):
+def display_hand_skleton(frame, r_handpts, l_handpts, sz=4):
         
                 
     for k in range(len(handSeq)):
         firstlimb_ind = handSeq[k][0]
         secondlimb_ind = handSeq[k][1]
-        cv2.line(frame, (int(r_handpts[firstlimb_ind, 0]), int(r_handpts[firstlimb_ind, 1])), (int(r_handpts[secondlimb_ind, 0]), int(r_handpts[secondlimb_ind, 1])), (255,255,255), 4)
-        cv2.line(frame, (int(l_handpts[firstlimb_ind, 0]), int(l_handpts[firstlimb_ind, 1])), (int(l_handpts[secondlimb_ind, 0]), int(l_handpts[secondlimb_ind, 1])), (255,255,255), 4)
+        cv2.line(frame, (int(r_handpts[firstlimb_ind, 0]), int(r_handpts[firstlimb_ind, 1])), (int(r_handpts[secondlimb_ind, 0]), int(r_handpts[secondlimb_ind, 1])), (255,255,255), sz)
+        cv2.line(frame, (int(l_handpts[firstlimb_ind, 0]), int(l_handpts[firstlimb_ind, 1])), (int(l_handpts[secondlimb_ind, 0]), int(l_handpts[secondlimb_ind, 1])), (255,255,255), sz)
 
     for p in range(r_handpts.shape[0]):
-        cv2.circle(frame, (int(r_handpts[p,0]), int(r_handpts[p,1])), 4, (255, 0, 255), -1)
-        cv2.circle(frame, (int(l_handpts[p,0]), int(l_handpts[p,1])), 4, (255, 0, 255), -1)   
+        cv2.circle(frame, (int(r_handpts[p,0]), int(r_handpts[p,1])), sz, (255, 0, 255), -1)
+        cv2.circle(frame, (int(l_handpts[p,0]), int(l_handpts[p,1])), sz, (255, 0, 255), -1)   
             
     return True

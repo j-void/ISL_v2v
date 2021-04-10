@@ -83,19 +83,23 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img, myshape=(256, 512, 3))
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
+                hand_utils.display_hand_skleton(hsk_frame, rfpts,lfpts, sz=2)
+                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+                #hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
                 real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+                hand_utils.display_hand_skleton(hsk_frame, rfpts, lfpts, sz=4)
+                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+                #hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
             
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), hsk_frame, real_img, infer=True)
+                    Variable(data['next_image']), Variable(cond_zeros), hsk_frame, real_img, [lbx, lby, lbw], [rbx, rby, rbw], infer=True)
 
             # if total_steps % 100 == 0:
             #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
