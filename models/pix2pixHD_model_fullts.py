@@ -235,7 +235,7 @@ class Pix2PixHDModel(BaseModel):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(gen_img, fix_coords=True)
                 lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
-                print(lfpts, rfpts)
+                #print(lfpts, rfpts)
                 hand_frame_fake[lbx:lbx+lbw, lby:lby+lbw, :] = gen_img[lbx:lbx+lbw, lby:lby+lbw, :]
                 hand_frame_fake[rbx:rbx+rbw, rby:rby+rbw, :] = gen_img[rbx:rbx+rbw, rby:rby+rbw, :]
                 hand_frame_real[lbx:lbx+lbw, lby:lby+lbw, :] = real_frame_cv[lbx:lbx+lbw, lby:lby+lbw, :]
