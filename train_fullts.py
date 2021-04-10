@@ -104,7 +104,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 # hsk_frame = cv2.rectangle(hsk_frame, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
                 # real_img = cv2.rectangle(real_img, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
                 # real_img = cv2.rectangle(real_img, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
-                hsk_frame[lbx:lbx+lbw, lby:lby+lbw, :] = real_img[lbx:lbx+lbw, lby:lby+lbw, :]
+                hsk_frame[lby:lby+lbw, lbx:lbx+lbw, :] = real_img[lby:lby+lbw, lbx:lbx+lbw, :]
                 hsk_frame[rbx:rbx+rbw, rby:rby+rbw, :] = real_img[rbx:rbx+rbw, rby:rby+rbw, :]
             
 
