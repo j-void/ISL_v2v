@@ -44,7 +44,7 @@ if args.skip_frame:
     frame_count = int(frame_count / (args.skip_frame + 1))
  
 if args.output_vid:
-    fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     out = cv2.VideoWriter(args.output_vid, fourcc, fps, (width, height))
 
 

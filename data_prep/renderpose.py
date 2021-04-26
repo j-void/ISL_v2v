@@ -42,21 +42,26 @@ faceSeq = [[0,1], [1,2], [2,3], [3,4], [4,5], [5,6], [6,7], [7,8], [8,9], [9,10]
     [48,49], [49,50], [50,51], [51,52], [52,53], [53,54], [54,55], [55,56], [56,57], [57,58], [58,59], [59,48], [60,61], [61,62], [62,63], [63,64], [64,65], [65,66], [66,67], [67,60]]
 
 def readkeypointsfile_json(myfile):
-	import json
-	f = open(myfile, 'r')
-	json_dict = json.load(f)
-	people = json_dict['people']
-	posepts =[]
-	facepts = []
-	r_handpts = []
-	l_handpts = []
-	for p in people:
-		posepts += p['pose_keypoints_2d']
-		facepts += p['face_keypoints_2d']
-		r_handpts += p['hand_right_keypoints_2d']
-		l_handpts += p['hand_left_keypoints_2d']
+    import json
+    pcount = 0
+    f = open(myfile, 'r')
+    json_dict = json.load(f)
+    people = json_dict['people']
+    posepts =[]
+    facepts = []
+    r_handpts = []
+    l_handpts = []
+    for p in people:
+        #if pcount == 0:
+        if p['pose_keypoints_2d'][0] < 512:
+            continue
+        posepts += p['pose_keypoints_2d']
+        facepts += p['face_keypoints_2d']
+        r_handpts += p['hand_right_keypoints_2d']
+        l_handpts += p['hand_left_keypoints_2d']
+        pcount = pcount + 1
 
-	return posepts, facepts, r_handpts, l_handpts
+    return posepts, facepts, r_handpts, l_handpts
 
 def display_keypoints(frame, posepts, facepts, r_handpts, l_handpts):
     for p in range(0, int(len(posepts)/3)):
@@ -67,6 +72,10 @@ def display_keypoints(frame, posepts, facepts, r_handpts, l_handpts):
         cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 4, hand_colors[p], -1)
     for p in range(0, int(len(l_handpts)/3)):
         cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 4, hand_colors[p], -1)
+        
+def display_single_keypoints_list(frame, pts):
+    for p in range(0, int(len(pts)/3)):
+        cv2.circle(frame, (int(pts[p*3]), int(pts[p*3+1])), 2, (0, 0, 0), -1)
 
 def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
     
@@ -91,6 +100,7 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
         if (p <= 7) or (p >= 15 and p <= 18):
             # if (posepts[p*3+2] == 0):
             #     return False
+            #if int(posepts[p*3+1])>100:
             cv2.circle(frame, (int(posepts[p*3]), int(posepts[p*3+1])), 6, pose_colors[p], -1)
         posepts_2d.append(pt)
         
@@ -101,7 +111,7 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
         r_handpts_2d[p, 0] = int(r_handpts[p*3])
         r_handpts_2d[p, 1] = int(r_handpts[p*3+1])
         r_handpts_2d[p, 2] = r_handpts[p*3+2]
-        if r_handpts[p*3] > 0 and r_handpts[p*3+1] > 0 and r_handpts[p*3+2] > 0.3:
+        if r_handpts[p*3] > 0 and r_handpts[p*3+1] > 0 and r_handpts[p*3+2] > 0.1:
             cv2.circle(frame, (int(r_handpts[p*3]), int(r_handpts[p*3+1])), 4, hand_colors[p], -1)
         #r_handpts_2d.append(pt)
         
@@ -115,16 +125,16 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
         l_handpts_2d[p, 0] = int(l_handpts[p*3])
         l_handpts_2d[p, 1] = int(l_handpts[p*3+1])
         l_handpts_2d[p, 2] = l_handpts[p*3+2]
-        if l_handpts[p*3] > 0 and l_handpts[p*3+1] > 0 and l_handpts[p*3+2] > 0.3:
+        if l_handpts[p*3] > 0 and l_handpts[p*3+1] > 0 and l_handpts[p*3+2] > 0.1:
             cv2.circle(frame, (int(l_handpts[p*3]), int(l_handpts[p*3+1])), 4, hand_colors[p], -1)
         #l_handpts_2d.append(pt)
         
     # if np.sum(l_handpts_2d[:,2])/21 < 0.2 and np.sum(r_handpts_2d[:,2])/21 < 0.2 and (len(l_handpts)>0 or len(r_handpts) > 0):
     #     return False
         
-    for p in range(0, int(len(facepts)/3)):
+    for p in range(70):
         pt = (int(facepts[p*3]), int(facepts[p*3+1]))
-        if facepts[p*3] > 0 and facepts[p*3+1] > 0 and facepts[p*3+2] > 0.3:
+        if facepts[p*3] > 0 and facepts[p*3+1] > 0 and facepts[p*3+2] > 0.3 and facepts[p*3] < 1024 and facepts[p*3+1] < 512:
             cv2.circle(frame, (int(facepts[p*3]), int(facepts[p*3+1])), 1, (0, 0, 0), -1)
             facepts_2d[p, 0] = int(facepts[p*3])
             facepts_2d[p, 1] = int(facepts[p*3+1])
@@ -132,7 +142,7 @@ def display_skleton(frame, posepts, facepts, r_handpts, l_handpts):
     for k in range(len(limbSeq)):
         firstlimb_ind = limbSeq[k][0]
         secondlimb_ind = limbSeq[k][1]
-        if posepts_2d[firstlimb_ind][0] > 0 and posepts_2d[secondlimb_ind][0] and posepts_2d[firstlimb_ind][1] > 0 and posepts_2d[secondlimb_ind][1] > 0:
+        if posepts_2d[firstlimb_ind][0] > 0 and posepts_2d[secondlimb_ind][0] > 0 and posepts_2d[firstlimb_ind][1] > 0 and posepts_2d[secondlimb_ind][1] > 0:# and posepts_2d[firstlimb_ind][0] < 1024 and posepts_2d[secondlimb_ind][0] < 1024 and posepts_2d[firstlimb_ind][1] < 512 and posepts_2d[secondlimb_ind][1] < 512:
             cv2.line(frame, posepts_2d[firstlimb_ind], posepts_2d[secondlimb_ind], pose_colors[k], 5)
     
     
