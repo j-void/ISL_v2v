@@ -232,8 +232,14 @@ class Pix2PixHDModel(BaseModel):
         # Fake Generation I_0
         input_concat = torch.cat((input_label, zeroshere), dim=1) 
 
-        hand_label_left_0 = input_label[:, :, left_bbox[1]:left_bbox[1]+left_bbox[2], left_bbox[0]:left_bbox[0]+left_bbox[2]]
-        hand_label_right_0 = input_label[:, :, right_bbox[1]:right_bbox[1]+right_bbox[2], right_bbox[0]:right_bbox[0]+right_bbox[0]]
+        if left_bbox[2] == 0:
+            hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128)
+        else:
+            hand_label_left_0 = input_label[:, :, left_bbox[1]:left_bbox[1]+left_bbox[2], left_bbox[0]:left_bbox[0]+left_bbox[2]]
+        if right_bbox[2] == 0:
+            hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128)
+        else:
+            hand_label_right_0 = input_label[:, :, right_bbox[1]:right_bbox[1]+right_bbox[2], right_bbox[0]:right_bbox[0]+right_bbox[2]]
 
         hand_left_residual_0 = 0
         hand_right_residual_0 = 0
@@ -264,8 +270,14 @@ class Pix2PixHDModel(BaseModel):
         self.img_idx = self.img_idx + 1
         input_concat1 = torch.cat((next_label, I_0), dim=1)
         
-        hand_label_left_1 = next_label[:, :, left_bbox[1]:left_bbox[1]+left_bbox[2], left_bbox[0]:left_bbox[0]+left_bbox[2]]
-        hand_label_right_1 = next_label[:, :, right_bbox[1]:right_bbox[1]+right_bbox[2], right_bbox[0]:right_bbox[0]+right_bbox[0]]
+        if left_bbox[2] == 0:
+            hand_label_left_1 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128)
+        else:
+            hand_label_left_1 = next_label[:, :, left_bbox[1]:left_bbox[1]+left_bbox[2], left_bbox[0]:left_bbox[0]+left_bbox[2]]
+        if right_bbox[2] == 0:
+            hand_label_right_1 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128)
+        else:
+            hand_label_right_1 = next_label[:, :, right_bbox[1]:right_bbox[1]+right_bbox[2], right_bbox[0]:right_bbox[0]+right_bbox[2]]
 
         hand_left_residual_1 = 0
         hand_right_residual_1 = 0
