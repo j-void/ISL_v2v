@@ -87,10 +87,6 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)                
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
-                #hsk_frame = cv2.rectangle(hsk_frame, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
-                #hsk_frame = cv2.rectangle(hsk_frame, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
-                # real_img = cv2.rectangle(real_img, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
-                # real_img = cv2.rectangle(real_img, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
 
             else:
                 scale_n, translate_n = hand_utils.resize_scale(real_img)
@@ -100,41 +96,21 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
                 hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
-                # hsk_frame = cv2.rectangle(hsk_frame, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
-                # hsk_frame = cv2.rectangle(hsk_frame, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
-                # real_img = cv2.rectangle(real_img, (lbx, lby), (lbx+lbw, lby+lbw), (255, 0, 0), 2)
-                # real_img = cv2.rectangle(real_img, (rbx, rby), (rbx+rbw, rby+rbw), (255, 0, 0), 2)
-                #hsk_frame[lby:lby+lbw, lbx:lbx+lbw, :] = real_img[lby:lby+lbw, lbx:lbx+lbw, :]
-                #hsk_frame[rbx:rbx+rbw, rby:rby+rbw, :] = real_img[rbx:rbx+rbw, rby:rby+rbw, :]
             
 
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), hsk_frame, real_img, [lbx, lby, lbw], [rbx, rby, rbw], infer=True)
 
-            # if total_steps % 100 == 0:
-            #     gen_img = util.tensor2im(generated[0].data[0])[:,:1024,:]
-            #     gen_img = cv2.cvtColor(gen_img, cv2.COLOR_RGB2BGR)
-            #     targets = torch.cat((data['image'], data['next_image']), dim=3)
-            #     real_img = util.tensor2im(targets[0])[:,:1024,:]
-            #     real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
-            #     lhpts_gen, rhpts_gen = hand_utils.get_keypoints(gen_img)
-            #     lhpts_gen = hand_utils.rescale_points(1024, 512, lhpts_gen)
-            #     rhpts_gen = hand_utils.rescale_points(1024, 512, rhpts_gen)
-            #     lhpts_real, rhpts_real = hand_utils.get_keypoints(real_img)
-            #     lhpts_real = hand_utils.rescale_points(1024, 512, lhpts_real)
-            #     rhpts_real = hand_utils.rescale_points(1024, 512, rhpts_real)
-            #     hand_utils.display_hand_skleton(gen_img, lhpts_gen, rhpts_gen)
-            #     hand_utils.display_hand_skleton(real_img, lhpts_real, rhpts_real)
-            #     cv2.imwrite("tmp/out_gen_"+str(i)+"_"+str(epoch)+".png", gen_img)
-            #     cv2.imwrite("tmp/out_real_"+str(i)+"_"+str(epoch)+".png", real_img)
 
             # sum per device losses
             losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
             loss_dict = dict(zip(model.module.loss_names, losses))
 
             # calculate final loss scalar
-            loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5 + (loss_dict['D_hand_real'] + loss_dict['D_hand_fake']) * 0.5
-            loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG'] # + loss_dict['G_GANface']
+            loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5 + (loss_dict['D_hand_real'] + loss_dict['D_hand_fake']) * 0.5 \
+                (loss_dict['D_hand_left_real'] + loss_dict['D_hand_left_fake']) * 0.5 \
+                    + (loss_dict['D_hand_right_real'] + loss_dict['D_hand_right_fake']) * 0.5 
+            loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG'] + loss_dict['G_GAN_hand_left'] + loss_dict['G_GAN_hand_right']
 
             ############### Backward Pass ####################
             # update generator weights
@@ -162,7 +138,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 visualizer.plot_current_errors(errors, total_steps)
 
             ### display output images            
-            if total_steps % opt.save_latest_freq == 0:
+            if total_steps % 100 == 0:
                 syn_img_hand = util.tensor2im(generated[0].data[0])
                 height_s, width_s, channels_s = syn_img_hand.shape
                 syn_img_hand = cv2.cvtColor(syn_img_hand[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
@@ -188,6 +164,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     
                     output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label, generated[5], generated[4], generated[6], hsk_frame])
                 
+                if opt.shand_gen:
+                    if generated[7] != 0:
+                        cv2.imwrite(os.path.join(tmp_out_path, "output_hand_left_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[7].data[0]), cv2.COLOR_RGB2BGR))
+                    if generated[7] != 0:
+                        cv2.imwrite(os.path.join(tmp_out_path, "output_hand_right_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[8].data[0]), cv2.COLOR_RGB2BGR))
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
             # if save_fake and opt.hand_discrim:

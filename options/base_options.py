@@ -58,6 +58,10 @@ class BaseOptions():
 
         # for hand keypoint loss
         self.parser.add_argument('--hand_discrim', action='store_true', help='if specified, add conditional GAN for hand keypoints')
+        
+        self.parser.add_argument('--shand_gen', action='store_true', help='if specified, add single hand generators')
+        self.parser.add_argument('--shand_dis', action='store_true', help='if specified, add single hand discriminators')
+        self.parser.add_argument('--shandGtype', type=str, default='unet', help='selects architecture to use for hand generator, choose from a UNet generator or global generator [unet|global]')
 
         # for face discriminator
         self.parser.add_argument('--face_discrim', action='store_true', help='if specified, add a face discriminator')
