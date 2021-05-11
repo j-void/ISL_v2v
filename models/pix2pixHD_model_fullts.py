@@ -118,7 +118,7 @@ class Pix2PixHDModel(BaseModel):
             else:
                 params = list(self.netG.parameters())
 
-            if opt.shandGen:
+            if opt.shand_gen:
                 params = list(self.shandGen.parameters())
             else:
                 if opt.niter_fix_main == 0:
