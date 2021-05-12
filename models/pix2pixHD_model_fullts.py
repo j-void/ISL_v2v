@@ -414,15 +414,15 @@ class Pix2PixHDModel(BaseModel):
                 real_hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = real_image[:, :, lby:lby+lbw, lbx:lbx+lbw]
                 real_hand_left_1[:,:,:hand_size_left_1[0],:hand_size_left_1[1]] = next_image[:, :, lby:lby+lbw, lbx:lbx+lbw]
                 
-                fake_hand_left_0 = F.interpolate(fake_hand_left_0, size=128)
-                fake_hand_left_1 = F.interpolate(fake_hand_left_1, size=128)
-                real_hand_left_0 = F.interpolate(real_hand_left_0, size=128)
-                real_hand_left_1 = F.interpolate(real_hand_left_1, size=128)
+                fake_hand_left_0 = F.interpolate(fake_hand_left_0, size=128).cuda()
+                fake_hand_left_1 = F.interpolate(fake_hand_left_1, size=128).cuda()
+                real_hand_left_0 = F.interpolate(real_hand_left_0, size=128).cuda()
+                real_hand_left_1 = F.interpolate(real_hand_left_1, size=128).cuda()
             else:
-                fake_hand_left_0 = torch.zeros(I_0.shape[0], I_0.shape[1], 128, 128)
-                fake_hand_left_1 = torch.zeros(I_1.shape[0], I_1.shape[1], 128, 128)
-                real_hand_left_0 = torch.zeros(real_image.shape[0], real_image.shape[1], 128, 128)
-                real_hand_left_1 = torch.zeros(next_image.shape[0], next_image.shape[1], 128, 128)
+                fake_hand_left_0 = torch.zeros(I_0.shape[0], I_0.shape[1], 128, 128).cuda()
+                fake_hand_left_1 = torch.zeros(I_1.shape[0], I_1.shape[1], 128, 128).cuda()
+                real_hand_left_0 = torch.zeros(real_image.shape[0], real_image.shape[1], 128, 128).cuda()
+                real_hand_left_1 = torch.zeros(next_image.shape[0], next_image.shape[1], 128, 128).cuda()
             
             if rbw != 0:
                 fake_hand_right_0 = torch.zeros(I_0.shape[0], I_0.shape[1], rbw, rbw)
@@ -435,15 +435,15 @@ class Pix2PixHDModel(BaseModel):
                 real_hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = real_image[:, :, rby:rby+rbw, rbx:rbx+rbw]
                 real_hand_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = next_image[:, :, rby:rby+rbw, rbx:rbx+rbw]
                 
-                fake_hand_right_0 = F.interpolate(fake_hand_right_0, size=128)
-                fake_hand_right_1 = F.interpolate(fake_hand_right_1, size=128)
-                real_hand_right_0 = F.interpolate(real_hand_right_0, size=128)
-                real_hand_right_1 = F.interpolate(real_hand_right_1, size=128)
+                fake_hand_right_0 = F.interpolate(fake_hand_right_0, size=128).cuda()
+                fake_hand_right_1 = F.interpolate(fake_hand_right_1, size=128).cuda()
+                real_hand_right_0 = F.interpolate(real_hand_right_0, size=128).cuda()
+                real_hand_right_1 = F.interpolate(real_hand_right_1, size=128).cuda()
             else:
-                fake_hand_right_0 = torch.zeros(I_0.shape[0], I_0.shape[1], 128, 128)
-                fake_hand_right_1 = torch.zeros(I_1.shape[0], I_0.shape[1], 128, 128)
-                real_hand_right_0 = torch.zeros(real_image.shape[0], I_0.shape[1], 128, 128)
-                real_hand_right_1 = torch.zeros(next_image.shape[0], I_0.shape[1], 128, 128)
+                fake_hand_right_0 = torch.zeros(I_0.shape[0], I_0.shape[1], 128, 128).cuda()
+                fake_hand_right_1 = torch.zeros(I_1.shape[0], I_0.shape[1], 128, 128).cuda()
+                real_hand_right_0 = torch.zeros(real_image.shape[0], I_0.shape[1], 128, 128).cuda()
+                real_hand_right_1 = torch.zeros(next_image.shape[0], I_0.shape[1], 128, 128).cuda()
             
             pred_fake_pool_left_0 = self.discriminateshand(hand_label_left_0, fake_hand_left_0, use_pool=True)
             pred_fake_pool_left_1 = self.discriminateshand(hand_label_left_1, fake_hand_left_1, use_pool=True)
