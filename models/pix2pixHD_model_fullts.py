@@ -240,13 +240,13 @@ class Pix2PixHDModel(BaseModel):
         else:
             hand_label_left_0 = input_label[:, :, left_bbox[1]:left_bbox[1]+left_bbox[2], left_bbox[0]:left_bbox[0]+left_bbox[2]]
             sf_left_0 = max(hand_label_left_0.shape[2], hand_label_left_0.shape[3])/128
-            hand_label_left_0 = F.interpolate(hand_label_left_0, scale_factor=sf_left_0)
+            hand_label_left_0 = F.interpolate(hand_label_left_0, scale_factor=sf_left_0, recompute_scale_factor=True)
         if right_bbox[2] == 0:
             hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128)
         else:
             hand_label_right_0 = input_label[:, :, right_bbox[1]:right_bbox[1]+right_bbox[2], right_bbox[0]:right_bbox[0]+right_bbox[2]]
             sf_right_0 = max(hand_label_right_0.shape[2], hand_label_right_0.shape[3])/128
-            hand_label_right_0 = F.interpolate(hand_label_right_0, scale_factor=sf_right_0)
+            hand_label_right_0 = F.interpolate(hand_label_right_0, scale_factor=sf_right_0, recompute_scale_factor=True)
 
         hand_left_residual_0 = 0
         hand_right_residual_0 = 0
@@ -254,12 +254,12 @@ class Pix2PixHDModel(BaseModel):
             initial_I_0 = self.netG.forward(input_concat)
             lbx, lby, lbw = left_bbox
             rbx, rby, rbw = right_bbox
-            hand_left_residual_0 = self.shandGen.forward(torch.cat((hand_label_left_0, F.interpolate(initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0)), dim=1))
-            hand_right_residual_0 = self.shandGen.forward(torch.cat((hand_label_right_0, F.interpolate(initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0)), dim=1))
+            hand_left_residual_0 = self.shandGen.forward(torch.cat((hand_label_left_0, F.interpolate(initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0, recompute_scale_factor=True)), dim=1))
+            hand_right_residual_0 = self.shandGen.forward(torch.cat((hand_label_right_0, F.interpolate(initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0, recompute_scale_factor=True)), dim=1))
             I_0 = initial_I_0.clone()
             print(initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw].shape, F.interpolate(hand_left_residual_0, scale_factor=1/sf_left_0).shape)
-            I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_0, scale_factor=1/sf_left_0)
-            I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_0, scale_factor=1/sf_right_0)
+            I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_0, scale_factor=1/sf_left_0, recompute_scale_factor=True)
+            I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_0, scale_factor=1/sf_right_0, recompute_scale_factor=True)
         else:
             I_0 = self.netG.forward(input_concat)
         
@@ -286,14 +286,14 @@ class Pix2PixHDModel(BaseModel):
         else:
             hand_label_left_1 = next_label[:, :, left_bbox[1]:left_bbox[1]+left_bbox[2], left_bbox[0]:left_bbox[0]+left_bbox[2]]
             sf_left_1 = max(hand_label_left_1.shape[2], hand_label_left_1.shape[3])/128
-            hand_label_left_1 = F.interpolate(hand_label_left_1, scale_factor=sf_left_1)
+            hand_label_left_1 = F.interpolate(hand_label_left_1, scale_factor=sf_left_1, recompute_scale_factor=True)
             
         if right_bbox[2] == 0:
             hand_label_right_1 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128)
         else:
             hand_label_right_1 = next_label[:, :, right_bbox[1]:right_bbox[1]+right_bbox[2], right_bbox[0]:right_bbox[0]+right_bbox[2]]
             sf_right_1 = max(hand_label_right_1.shape[2], hand_label_right_1.shape[3])/128
-            hand_label_right_1 = F.interpolate(hand_label_right_1, scale_factor=sf_right_1)
+            hand_label_right_1 = F.interpolate(hand_label_right_1, scale_factor=sf_right_1, recompute_scale_factor=True)
 
         hand_left_residual_1 = 0
         hand_right_residual_1 = 0
@@ -301,11 +301,11 @@ class Pix2PixHDModel(BaseModel):
             initial_I_1 = self.netG.forward(input_concat)
             lbx, lby, lbw = left_bbox
             rbx, rby, rbw = right_bbox
-            hand_left_residual_1 = self.shandGen.forward(torch.cat((hand_label_left_1, F.interpolate(initial_I_1[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_1)), dim=1))
-            hand_right_residual_1 = self.shandGen.forward(torch.cat((hand_label_right_1, F.interpolate(initial_I_1[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_1)), dim=1))
+            hand_left_residual_1 = self.shandGen.forward(torch.cat((hand_label_left_1, F.interpolate(initial_I_1[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_1, recompute_scale_factor=True)), dim=1))
+            hand_right_residual_1 = self.shandGen.forward(torch.cat((hand_label_right_1, F.interpolate(initial_I_1[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_1, recompute_scale_factor=True)), dim=1))
             I_1 = initial_I_1.clone()
-            I_1[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_1, scale_factor=1/sf_left_1)
-            I_1[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_1, scale_factor=1/sf_right_1)
+            I_1[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_1, scale_factor=1/sf_left_1, recompute_scale_factor=True)
+            I_1[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_1, scale_factor=1/sf_right_1, recompute_scale_factor=True)
         else:
             I_1 = self.netG.forward(input_concat1)
 
@@ -378,15 +378,15 @@ class Pix2PixHDModel(BaseModel):
             lbx, lby, lbw = left_bbox
             rbx, rby, rbw = right_bbox
             
-            fake_hand_left_0 = F.interpolate(I_0[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0)
-            fake_hand_left_1 = F.interpolate(I_1[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_1)
-            real_hand_left_0 = F.interpolate(real_image[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0)
-            real_hand_left_1 = F.interpolate(next_image[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_1)
+            fake_hand_left_0 = F.interpolate(I_0[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0, recompute_scale_factor=True)
+            fake_hand_left_1 = F.interpolate(I_1[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_1, recompute_scale_factor=True)
+            real_hand_left_0 = F.interpolate(real_image[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0, recompute_scale_factor=True)
+            real_hand_left_1 = F.interpolate(next_image[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_1, recompute_scale_factor=True)
             
-            fake_hand_right_0 = F.interpolate(I_0[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0)
-            fake_hand_right_1 = F.interpolate(I_1[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_1)
-            real_hand_right_0 = F.interpolate(real_image[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0)
-            real_hand_right_1 = F.interpolate(next_image[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_1)
+            fake_hand_right_0 = F.interpolate(I_0[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0, recompute_scale_factor=True)
+            fake_hand_right_1 = F.interpolate(I_1[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_1, recompute_scale_factor=True)
+            real_hand_right_0 = F.interpolate(real_image[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0, recompute_scale_factor=True)
+            real_hand_right_1 = F.interpolate(next_image[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_1, recompute_scale_factor=True)
             
             pred_fake_pool_left_0 = self.discriminateshand(hand_label_left_0, fake_hand_left_0, use_pool=True)
             pred_fake_pool_left_1 = self.discriminateshand(hand_label_left_1, fake_hand_left_1, use_pool=True)
@@ -482,11 +482,11 @@ class Pix2PixHDModel(BaseModel):
             sf_right_0 = rbw / 128
             sf_left_0 = max(hand_label_left_0.shape[2], hand_label_left_0.shape[3])/128
             sf_right_0 = max(hand_label_right_0.shape[2], hand_label_right_0.shape[3])/128
-            hand_left_residual_0 = self.shandGen.forward(torch.cat((F.interpolate(hand_label_left_0, scale_factor=sf_left_0), F.interpolate(initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0)), dim=1))
-            hand_right_residual_0 = self.shandGen.forward(torch.cat((F.interpolate(hand_label_right_0, scale_factor=sf_right_0), F.interpolate(initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0)), dim=1))
+            hand_left_residual_0 = self.shandGen.forward(torch.cat((F.interpolate(hand_label_left_0, scale_factor=sf_left_0, recompute_scale_factor=True), F.interpolate(initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw], scale_factor=sf_left_0)), dim=1, recompute_scale_factor=True))
+            hand_right_residual_0 = self.shandGen.forward(torch.cat((F.interpolate(hand_label_right_0, scale_factor=sf_right_0, recompute_scale_factor=True), F.interpolate(initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw], scale_factor=sf_right_0)), dim=1, recompute_scale_factor=True))
             I_0 = initial_I_0.clone()
-            I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_0, scale_factor=1/sf_left_0)
-            I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_0, scale_factor=1/sf_right_0)
+            I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_0, scale_factor=1/sf_left_0, recompute_scale_factor=True)
+            I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_0, scale_factor=1/sf_right_0, recompute_scale_factor=True)
             fake_hand_left_0 = I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
             fake_hand_right_0 = I_0[:, :, rby:rby+rbw, rbx:rbx+rbw]
             return I_0
