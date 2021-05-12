@@ -163,10 +163,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label, generated[5], generated[4], generated[6], hsk_frame])
                 
                 if opt.shand_gen:
-                    if generated[7] != 0:
-                        cv2.imwrite(os.path.join(tmp_out_path, "output_hand_left_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[7].data[0]), cv2.COLOR_RGB2BGR))
-                    if generated[7] != 0:
-                        cv2.imwrite(os.path.join(tmp_out_path, "output_hand_right_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[8].data[0]), cv2.COLOR_RGB2BGR))
+                    cv2.imwrite(os.path.join(tmp_out_path, "output_hand_left_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[7].data[0]), cv2.COLOR_RGB2BGR))
+                    cv2.imwrite(os.path.join(tmp_out_path, "output_hand_right_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[8].data[0]), cv2.COLOR_RGB2BGR))
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
             # if save_fake and opt.hand_discrim:

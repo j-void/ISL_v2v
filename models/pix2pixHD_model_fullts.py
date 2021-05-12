@@ -524,9 +524,7 @@ class Pix2PixHDModel(BaseModel):
 
         if self.opt.use_l1:
             loss_G_VGG += (self.criterionL1(I_1, next_image)) * self.opt.lambda_A
-        
-        print(hand_left_out.data[0])
-        
+                
         # Only return the fake_B image if necessary to save BW
         return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake, loss_D_fake_hand, \
             loss_D_real_hand, loss_G_GAN_hand_left, loss_D_real_hand_left, loss_D_fake_hand_left, loss_G_GAN_hand_right, loss_D_real_hand_right, \
