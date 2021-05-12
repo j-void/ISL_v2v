@@ -559,8 +559,8 @@ class Pix2PixHDModel(BaseModel):
                 hand_right_0 = torch.zeros(input_label.shape[0], input_label.shape[1], rbw, rbw)
                 hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw]
                 
-            hand_left_residual_0 = self.shandGen.forward(torch.cat(hand_label_left_0, hand_left_0), dim=1))
-            hand_right_residual_0 = self.shandGen.forward(torch.cat(hand_label_right_0, hand_right_0), dim=1))
+            hand_left_residual_0 = self.shandGen.forward(torch.cat((hand_label_left_0, hand_left_0), dim=1))
+            hand_right_residual_0 = self.shandGen.forward(torch.cat((hand_label_right_0, hand_right_0), dim=1))
             I_0 = initial_I_0.clone()
             if lbw != 0:
                 I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_0, size=lbw)[:,:,:hand_size_left_0[0],:hand_size_left_0[1]]
