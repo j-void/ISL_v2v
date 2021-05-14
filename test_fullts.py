@@ -42,16 +42,18 @@ for i, data in enumerate(dataset):
       previous_cond = torch.zeros(data['label'].size())
       unset = False
 
-    if opt.shand_gen:
-      targets = torch.cat((data['image'], data['next_image']), dim=3)
-      real_img = util.tensor2im(targets[0])
-      height, width, channels = real_img.shape
-      real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
-      scale_n, translate_n = hand_utils.resize_scale(real_img)
-      real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
-      lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
-      lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
-      rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+    lbx = lby = lbw = rbx = rby = rbw = 0
+
+    # if opt.shand_gen:
+    #   targets = torch.cat((data['image'], data['next_image']), dim=3)
+    #   real_img = util.tensor2im(targets[0])
+    #   height, width, channels = real_img.shape
+    #   real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
+    #   scale_n, translate_n = hand_utils.resize_scale(real_img)
+    #   real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
+    #   lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+    #   lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+    #   rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
   
     #generated = model.inference(data['label'], previous_cond, data['face_coords'])
     generated = model.inference(data['label'], previous_cond, [lbx, lby, lbw], [rbx, rby, rbw])
