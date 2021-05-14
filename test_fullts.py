@@ -45,8 +45,8 @@ for i, data in enumerate(dataset):
     lbx = lby = lbw = rbx = rby = rbw = 0
 
     if opt.shand_gen:
-      targets = torch.cat((data['image'], data['next_image']), dim=3)
-      real_img = util.tensor2im(targets[0])
+      #targets = torch.cat((data['image'], data['next_image']), dim=3)
+      real_img = util.tensor2im(data['image'])
       height, width, channels = real_img.shape
       real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
       scale_n, translate_n = hand_utils.resize_scale(real_img)
