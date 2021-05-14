@@ -540,6 +540,7 @@ class Pix2PixHDModel(BaseModel):
         # Fake Generation
 
         input_concat = torch.cat((input_label, prevouts), dim=1) 
+        print(input_concat.shape)
         initial_I_0 = self.netG.forward(input_concat)
         
         # if self.opt.shand_gen:
