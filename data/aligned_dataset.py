@@ -19,6 +19,10 @@ class AlignedDataset(BaseDataset):
         ### label maps    
         self.dir_label = os.path.join(opt.dataroot, opt.phase + '_label')              
         self.label_paths = sorted(make_dataset(self.dir_label))
+        
+        if opt.shand_gen and not opt.isTrain:
+            self.dir_image = os.path.join(opt.dataroot, opt.phase + '_img')  
+            self.image_paths = sorted(make_dataset(self.dir_image))
 
         ### real images
         if opt.isTrain:
