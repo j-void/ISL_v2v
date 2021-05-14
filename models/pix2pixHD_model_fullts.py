@@ -557,7 +557,7 @@ class Pix2PixHDModel(BaseModel):
                 hand_label_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = _hand_label_left_0
                 hand_label_left_0 = F.interpolate(hand_label_left_0, size=128)
                 hand_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], lbw, lbw).cuda()
-                hand_left_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
+                hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
                 hand_left_0 = F.interpolate(hand_left_0, size=128)
             
             if right_bbox[2] == 0:
