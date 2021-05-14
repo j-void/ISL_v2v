@@ -20,12 +20,9 @@ class AlignedDataset(BaseDataset):
         self.dir_label = os.path.join(opt.dataroot, opt.phase + '_label')              
         self.label_paths = sorted(make_dataset(self.dir_label))
         
-        if opt.shand_gen and not opt.isTrain:
-            self.dir_image = os.path.join(opt.dataroot, opt.phase + '_img')  
-            self.image_paths = sorted(make_dataset(self.dir_image))
 
         ### real images
-        if opt.isTrain:
+        if opt.isTrain or opt.shand_gen:
             self.dir_image = os.path.join(opt.dataroot, opt.phase + '_img')  
             self.image_paths = sorted(make_dataset(self.dir_image))
 
@@ -60,7 +57,7 @@ class AlignedDataset(BaseDataset):
 
         image_tensor = next_label = next_image = face_tensor = handpts_real_tensor = handpts_fake_tensor = 0
         ### real images 
-        if self.opt.isTrain:
+        if self.opt.isTrain or self.opt.shand_gen:
             image_path = self.image_paths[index]   
             image = Image.open(image_path).convert('RGB')    
             transform_image = get_transform(self.opt, params)     
@@ -80,7 +77,7 @@ class AlignedDataset(BaseDataset):
             transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
             next_label = transform_label(label).float()
             
-            if self.opt.isTrain:
+            if self.opt.isTrain or self.opt.shand_gen:
                 image_path = self.image_paths[index+1]   
                 image = Image.open(image_path).convert('RGB')
                 transform_image = get_transform(self.opt, params)      
