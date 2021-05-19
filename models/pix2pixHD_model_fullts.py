@@ -238,6 +238,8 @@ class Pix2PixHDModel(BaseModel):
         hand_size_left_0 = (128, 128)
         hand_size_right_0 = (128, 128)
         
+        cond_zeros_hand = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
+        
         if left_bbox[2] == 0:
             hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
         else:
@@ -256,29 +258,19 @@ class Pix2PixHDModel(BaseModel):
             hand_label_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = _hand_label_right_0
             hand_label_right_0 = F.interpolate(hand_label_right_0, size=128).cuda()
 
-        hand_left_residual_0 = 0
-        hand_right_residual_0 = 0
+        I_hand_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
+        I_hand_right_0 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
         if self.opt.shand_gen:
             initial_I_0 = self.netG.forward(input_concat)
             lbx, lby, lbw = left_bbox
             rbx, rby, rbw = right_bbox
-            if lbw != 0:
-                _hand_left_0 = torch.zeros(initial_I_0.shape[0], initial_I_0.shape[1], lbw, lbw).cuda()
-                _hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
-            else:
-                _hand_left_0 = torch.zeros(initial_I_0.shape[0], initial_I_0.shape[1], 128, 128).cuda()
-            if rbw != 0:    
-                _hand_right_0 = torch.zeros(initial_I_0.shape[0], initial_I_0.shape[1], rbw, rbw).cuda()
-                _hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw]
-            else:
-                _hand_right_0 = torch.zeros(initial_I_0.shape[0], initial_I_0.shape[1], 128, 128).cuda()
-            hand_left_residual_0 = self.shandGen.forward(torch.cat((hand_label_left_0, F.interpolate(_hand_left_0, size=128)), dim=1))
-            hand_right_residual_0 = self.shandGen.forward(torch.cat((hand_label_right_0, F.interpolate(_hand_right_0, size=128)), dim=1))
+            I_hand_left_0 = self.shandGen.forward(torch.cat((hand_label_left_0, cond_zeros_hand), dim=1))
+            I_hand_right_0 = self.shandGen.forward(torch.cat((hand_label_right_0, cond_zeros_hand), dim=1))
             I_0 = initial_I_0.clone()
             if lbw != 0:
-                I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_0, size=lbw)[:,:,:hand_size_left_0[0],:hand_size_left_0[1]]
+                I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = F.interpolate(I_hand_left_0, size=lbw)[:,:,:hand_size_left_0[0],:hand_size_left_0[1]]
             if rbw != 0:
-                I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_0, size=rbw)[:,:,:hand_size_right_0[0],:hand_size_right_0[1]]
+                I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = F.interpolate(I_hand_right_0, size=rbw)[:,:,:hand_size_right_0[0],:hand_size_right_0[1]]
         else:
             I_0 = self.netG.forward(input_concat)
         
@@ -321,29 +313,29 @@ class Pix2PixHDModel(BaseModel):
             hand_label_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = _hand_label_right_1
             hand_label_right_1 = F.interpolate(hand_label_right_1, size=128).cuda()
 
-        hand_left_residual_1 = 0
-        hand_right_residual_1 = 0
+        I_hand_left_1 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
+        I_hand_right_1 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
         if self.opt.shand_gen:
             initial_I_1 = self.netG.forward(input_concat)
             lbx, lby, lbw = left_bbox
             rbx, rby, rbw = right_bbox
             if lbw != 0:
-                _hand_left_1 = torch.zeros(initial_I_1.shape[0], initial_I_1.shape[1], lbw, lbw).cuda()
-                _hand_left_1[:,:,:hand_size_left_1[0],:hand_size_left_1[1]] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
+                _hand_left_0 = torch.zeros(I_0.shape[0], I_0.shape[1], lbw, lbw).cuda()
+                _hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
             else:
-                _hand_left_1 = torch.zeros(initial_I_1.shape[0], initial_I_1.shape[1], 128, 128).cuda()
-            if rbw != 0:
-                _hand_right_1 = torch.zeros(initial_I_1.shape[0], initial_I_1.shape[1], rbw, rbw).cuda()
-                _hand_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = initial_I_1[:, :, rby:rby+rbw, rbx:rbx+rbw]
+                _hand_left_0 = torch.zeros(I_0.shape[0], I_0.shape[1], 128, 128).cuda()
+            if rbw != 0:    
+                _hand_right_0 = torch.zeros(I_0.shape[0], I_0.shape[1], rbw, rbw).cuda()
+                _hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = I_0[:, :, rby:rby+rbw, rbx:rbx+rbw]
             else:
-                _hand_right_1 = torch.zeros(initial_I_1.shape[0], initial_I_1.shape[1], 128, 128).cuda()
-            hand_left_residual_1 = self.shandGen.forward(torch.cat((hand_label_left_1, F.interpolate(_hand_left_1, size=128)), dim=1))
-            hand_right_residual_1 = self.shandGen.forward(torch.cat((hand_label_right_1, F.interpolate(_hand_right_1, size=128)), dim=1))
+                _hand_right_0 = torch.zeros(I_0.shape[0], I_0.shape[1], 128, 128).cuda()
+            I_hand_left_1 = self.shandGen.forward(torch.cat((hand_label_left_1, F.interpolate(_hand_left_0, size=128)), dim=1))
+            I_hand_right_1 = self.shandGen.forward(torch.cat((hand_label_right_1, F.interpolate(_hand_right_0, size=128)), dim=1))
             I_1 = initial_I_1.clone()
             if lbw != 0:
-                I_1[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_1, size=lbw)[:,:,:hand_size_left_1[0],:hand_size_left_1[1]]
+                I_1[:, :, lby:lby+lbw, lbx:lbx+lbw] = F.interpolate(I_hand_left_1, size=lbw)[:,:,:hand_size_left_1[0],:hand_size_left_1[1]]
             if rbw != 0:
-                I_1[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_1, size=rbw)[:,:,:hand_size_right_1[0],:hand_size_right_1[1]]
+                I_1[:, :, rby:rby+rbw, rbx:rbx+rbw] = F.interpolate(I_hand_right_1, size=rbw)[:,:,:hand_size_right_1[0],:hand_size_right_1[1]]
         else:
             I_1 = self.netG.forward(input_concat1)
 
@@ -457,32 +449,50 @@ class Pix2PixHDModel(BaseModel):
                 real_hand_right_0 = torch.zeros(real_image.shape[0], I_0.shape[1], 128, 128).cuda()
                 real_hand_right_1 = torch.zeros(next_image.shape[0], I_0.shape[1], 128, 128).cuda()
             
-            pred_fake_pool_left_0 = self.discriminateshand(hand_label_left_0, fake_hand_left_0, use_pool=True)
-            pred_fake_pool_left_1 = self.discriminateshand(hand_label_left_1, fake_hand_left_1, use_pool=True)
-            loss_D_fake_hand_left = 0.5*(self.criterionGAN(pred_fake_pool_left_0, False) +   self.criterionGAN(pred_fake_pool_left_1, False))    
+            # pred_fake_pool_left_0 = self.discriminateshand(hand_label_left_0, fake_hand_left_0, use_pool=True)
+            # pred_fake_pool_left_1 = self.discriminateshand(hand_label_left_1, fake_hand_left_1, use_pool=True)
+            # loss_D_fake_hand_left = 0.5*(self.criterionGAN(pred_fake_pool_left_0, False) +   self.criterionGAN(pred_fake_pool_left_1, False))    
 
-            pred_real_left_0 = self.discriminateshand(hand_label_left_0, real_hand_left_0)
-            pred_real_left_1 = self.discriminateshand(hand_label_left_1, real_hand_left_1)
-            loss_D_real_hand_left = 0.5 * (self.criterionGAN(pred_real_left_0, True) + self.criterionGAN(pred_real_left_1, True))
+            # pred_real_left_0 = self.discriminateshand(hand_label_left_0, real_hand_left_0)
+            # pred_real_left_1 = self.discriminateshand(hand_label_left_1, real_hand_left_1)
+            # loss_D_real_hand_left = 0.5 * (self.criterionGAN(pred_real_left_0, True) + self.criterionGAN(pred_real_left_1, True))
             
-            pred_fake_pool_right_0 = self.discriminateshand(hand_label_right_0, fake_hand_right_0, use_pool=True)
-            pred_fake_pool_right_1 = self.discriminateshand(hand_label_right_1, fake_hand_right_1, use_pool=True)
-            loss_D_fake_hand_right = 0.5*(self.criterionGAN(pred_fake_pool_right_0, False) + self.criterionGAN(pred_fake_pool_right_1, False))        
+            # pred_fake_pool_right_0 = self.discriminateshand(hand_label_right_0, fake_hand_right_0, use_pool=True)
+            # pred_fake_pool_right_1 = self.discriminateshand(hand_label_right_1, fake_hand_right_1, use_pool=True)
+            # loss_D_fake_hand_right = 0.5*(self.criterionGAN(pred_fake_pool_right_0, False) + self.criterionGAN(pred_fake_pool_right_1, False))        
 
-            pred_real_right_0 = self.discriminateshand(hand_label_right_0, real_hand_right_0)
-            pred_real_right_1 = self.discriminateshand(hand_label_right_1, real_hand_right_1)
-            loss_D_real_hand_right = 0.5*(self.criterionGAN(pred_real_right_0, True) + self.criterionGAN(pred_real_right_1, True))
+            # pred_real_right_0 = self.discriminateshand(hand_label_right_0, real_hand_right_0)
+            # pred_real_right_1 = self.discriminateshand(hand_label_right_1, real_hand_right_1)
+            # loss_D_real_hand_right = 0.5*(self.criterionGAN(pred_real_right_0, True) + self.criterionGAN(pred_real_right_1, True))
             
-            pred_fake_hand_left_gen_0 = self.netDshand.forward(torch.cat((hand_label_left_0, fake_hand_left_0), dim=1))
-            pred_fake_hand_left_gen_1 = self.netDshand.forward(torch.cat((hand_label_left_1, fake_hand_left_1), dim=1))      
-            loss_G_GAN_hand_left = 0.5 * (self.criterionGAN(pred_fake_hand_left_gen_0, True) + self.criterionGAN(pred_fake_hand_left_gen_1, True))
+            # pred_fake_hand_left_gen_0 = self.netDshand.forward(torch.cat((hand_label_left_0, fake_hand_left_0), dim=1))
+            # pred_fake_hand_left_gen_1 = self.netDshand.forward(torch.cat((hand_label_left_1, fake_hand_left_1), dim=1))      
+            # loss_G_GAN_hand_left = 0.5 * (self.criterionGAN(pred_fake_hand_left_gen_0, True) + self.criterionGAN(pred_fake_hand_left_gen_1, True))
             
-            pred_fake_hand_right_gen_0 = self.netDshand.forward(torch.cat((hand_label_right_0, fake_hand_right_0), dim=1))
-            pred_fake_hand_right_gen_1 = self.netDshand.forward(torch.cat((hand_label_right_1, fake_hand_right_1), dim=1))      
-            loss_G_GAN_hand_right = 0.5 * (self.criterionGAN(pred_fake_hand_right_gen_0, True) + self.criterionGAN(pred_fake_hand_right_gen_1, True))
+            # pred_fake_hand_right_gen_0 = self.netDshand.forward(torch.cat((hand_label_right_0, fake_hand_right_0), dim=1))
+            # pred_fake_hand_right_gen_1 = self.netDshand.forward(torch.cat((hand_label_right_1, fake_hand_right_1), dim=1))      
+            # loss_G_GAN_hand_right = 0.5 * (self.criterionGAN(pred_fake_hand_right_gen_0, True) + self.criterionGAN(pred_fake_hand_right_gen_1, True))
             
-            hand_left_out = torch.cat((fake_hand_left_0, real_hand_left_0, hand_label_left_0, hand_left_residual_0), dim=3)
-            hand_right_out = torch.cat((fake_hand_right_0, real_hand_right_0, hand_label_right_0, hand_right_residual_0), dim=3)
+            pred_fake_pool_left = self.discriminate_4(hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1, use_pool=True)
+            loss_D_fake_hand_left = self.criterionGAN(pred_fake_pool_left, False)
+            
+            pred_real_left = self.discriminate_4(hand_label_left_0, hand_label_left_1, real_hand_left_0, real_hand_left_1)
+            loss_D_real_hand_left = self.criterionGAN(pred_real_left, True)
+            
+            pred_fake_left = self.netD.forward(torch.cat((hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1), dim=1))
+            loss_G_GAN_hand_left = self.criterionGAN(pred_fake_left, True)
+            
+            pred_fake_pool_right = self.discriminate_4(hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1, use_pool=True)
+            loss_D_fake_hand_right = self.criterionGAN(pred_fake_pool_right, False)
+            
+            pred_real_right = self.discriminate_4(hand_label_right_0, hand_label_right_1, real_hand_right_0, real_hand_right_1)
+            loss_D_real_hand_right = self.criterionGAN(pred_real_right, True)
+            
+            pred_fake_right = self.netD.forward(torch.cat((hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1), dim=1))
+            loss_G_GAN_hand_right = self.criterionGAN(pred_fake_right, True)
+            
+            hand_left_out = torch.cat((fake_hand_left_0, real_hand_left_0, hand_label_left_0), dim=3)
+            hand_right_out = torch.cat((fake_hand_right_0, real_hand_right_0, hand_label_right_0), dim=3)
         
         # Fake Detection and Loss
         pred_fake_pool = self.discriminate_4(input_label, next_label, I_0, I_1, use_pool=True)
@@ -557,7 +567,7 @@ class Pix2PixHDModel(BaseModel):
                 hand_label_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = _hand_label_left_0
                 hand_label_left_0 = F.interpolate(hand_label_left_0, size=128)
                 hand_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], lbw, lbw).cuda()
-                hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
+                hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = prevouts[:, :, lby:lby+lbw, lbx:lbx+lbw]
                 hand_left_0 = F.interpolate(hand_left_0, size=128)
             
             if right_bbox[2] == 0:
@@ -570,16 +580,16 @@ class Pix2PixHDModel(BaseModel):
                 hand_label_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = _hand_label_right_0
                 hand_label_right_0 = F.interpolate(hand_label_right_0, size=128)
                 hand_right_0 = torch.zeros(input_label.shape[0], input_label.shape[1], rbw, rbw).cuda()
-                hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw]
+                hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = prevouts[:, :, rby:rby+rbw, rbx:rbx+rbw]
                 hand_right_0 = F.interpolate(hand_right_0, size=128)
                 
-            hand_left_residual_0 = self.shandGen.forward(torch.cat((hand_label_left_0, hand_left_0), dim=1))
-            hand_right_residual_0 = self.shandGen.forward(torch.cat((hand_label_right_0, hand_right_0), dim=1))
+            I_hand_left_0 = self.shandGen.forward(torch.cat((hand_label_left_0, hand_left_0), dim=1))
+            I_hand_right_0 = self.shandGen.forward(torch.cat((hand_label_right_0, hand_right_0), dim=1))
             I_0 = initial_I_0.clone()
             if lbw != 0:
-                I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = initial_I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] + F.interpolate(hand_left_residual_0, size=lbw)[:,:,:hand_size_left_0[0],:hand_size_left_0[1]]
+                I_0[:, :, lby:lby+lbw, lbx:lbx+lbw] = F.interpolate(I_hand_left_0, size=lbw)[:,:,:hand_size_left_0[0],:hand_size_left_0[1]]
             if rbw != 0:
-                I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = initial_I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] + F.interpolate(hand_right_residual_0, size=rbw)[:,:,:hand_size_right_0[0],:hand_size_right_0[1]]
+                I_0[:, :, rby:rby+rbw, rbx:rbx+rbw] = F.interpolate(I_hand_right_0, size=rbw)[:,:,:hand_size_right_0[0],:hand_size_right_0[1]]
             fake_hand_left_0 = I_0[:, :, lby:lby+lbw, lbx:lbx+lbw]
             fake_hand_right_0 = I_0[:, :, rby:rby+rbw, rbx:rbx+rbw]
             return I_0
