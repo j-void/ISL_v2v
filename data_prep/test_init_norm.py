@@ -127,7 +127,7 @@ for f in range(len(imgs)):
     r_handpts_list.append(r_handpts)
     l_handpts_list.append(l_handpts)
     
-    if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts) == False:
+    if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts, [0,0]) == False:
         print("Skipping frame: ", f)
         skip_index = skip_index + 1
         continue
