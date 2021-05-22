@@ -48,7 +48,7 @@ for i, data in enumerate(dataset):
       #targets = torch.cat((data['image'], data['next_image']), dim=3)
       real_img = util.tensor2im(data['image'][0])
       real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
-      cv2.imwrite("tmp.png", real_img)
+      #cv2.imwrite("tmp.png", real_img)
       scale_n, translate_n = hand_utils.resize_scale(real_img)
       real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
       lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
