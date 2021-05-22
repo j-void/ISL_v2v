@@ -142,7 +142,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 syn_img_hand = cv2.cvtColor(syn_img_hand[:,int(width/2):,:], cv2.COLOR_RGB2BGR)
                 real_hand_img = real_img.copy()
                 inputs = torch.cat((data['label'], data['next_label']), dim=3)
-                input_label = util.tensor2im(inputs[0])[:,:int(width/2),:]
+                input_label = util.tensor2im(inputs[0])[:,int(width/2):,:]
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
                 if opt.netG == "global":
                     scale_n, translate_n = hand_utils.resize_scale(input_label, myshape=(256, 512, 3))
