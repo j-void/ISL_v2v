@@ -139,7 +139,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             if total_steps % opt.save_latest_freq == 0:
                 syn_img_hand = util.tensor2im(generated[0].data[0])
                 height_s, width_s, channels_s = syn_img_hand.shape
-                syn_img_hand = cv2.cvtColor(syn_img_hand[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
+                syn_img_hand = cv2.cvtColor(syn_img_hand[:,int(width/2):,:], cv2.COLOR_RGB2BGR)
                 real_hand_img = real_img.copy()
                 inputs = torch.cat((data['label'], data['next_label']), dim=3)
                 input_label = util.tensor2im(inputs[0])[:,:int(width/2),:]
