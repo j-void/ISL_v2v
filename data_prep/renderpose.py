@@ -63,6 +63,12 @@ def readkeypointsfile_json(myfile):
 
     return posepts, facepts, r_handpts, l_handpts
 
+def check_detected(pts):
+    for pt in pts:
+        if pt > 0:
+            return True
+    return False
+
 def display_keypoints(frame, posepts, facepts, r_handpts, l_handpts):
     for p in range(0, int(len(posepts)/3)):
         cv2.circle(frame, (int(posepts[p*3]), int(posepts[p*3+1])), 4, pose_colors[p], -1)

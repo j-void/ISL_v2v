@@ -5,6 +5,11 @@ import glob
 from renderpose import *
 import cv2
 import time
+import sys
+
+sys.path.append("/Users/janmesh007/Documents/IIITB/ISL_v2v/")
+print(sys.path)
+import util.hand_utils as hand_utils
 
 initTime = time.time()
 
@@ -35,6 +40,8 @@ keypoint_path = os.path.join(args.keypoints, "*.json")
 keypoints = glob.glob(keypoint_path)
 keypoints.sort()
 
+bbox_list = []
+
 print(f"Initialize -> Total frames: {len(imgs)}")
 
 skip_index = 0
@@ -53,15 +60,22 @@ for f in range(len(imgs)):
     height, width, _ = _frame.shape
     output_frame = np.zeros((height, width, 3), np.uint8)
     output_frame.fill(255)
-    _, _, bsiz_l = assert_bbox(get_keypoint_array(l_handpts))
-    _, _, bsiz_r = assert_bbox(get_keypoint_array(r_handpts))
-    bbox_sizes.append(bsiz_l)
-    bbox_sizes.append(bsiz_r)
+    lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(_frame, fix_coords=True)
+    lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+    rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+    if check_detected(r_handpts) ==  False:
+        rbw = 0
+    if check_detected(l_handpts) == False:
+        lbw = 0
+    bbox_sizes.append(lbw)
+    bbox_sizes.append(rbw)
     
+    bbox_list.append([lbx, lby, lbw, rbx, rby, rbw])
+
     posepts_arr = posepts_arr + get_keypoint_array_pose(posepts)
     
     #display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts)
-    if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts) == False:
+    if display_skleton(output_frame, posepts, facepts, r_handpts, l_handpts, [0, 0]) == False:
         print("Skipping frame: ", f)
         skip_index = skip_index + 1
         continue
@@ -88,6 +102,11 @@ if args.save_dir:
     _fpl = os.path.join(savedir, "avg_pose_out.png")
     cv2.imwrite(_fpl, avg_pose_frame)
     np.savetxt(os.path.join(savedir, "avg_pose.txt"), posepts_arr)
+    keypoints_dict = {'max_bbox' : max(bbox_sizes), 'bbox_list':bbox_list}
+    outfile = open(os.path.join(savedir, "bbox_out.pkl"), 'wb')
+    import pickle
+    pickle.dump(keypoints_dict, outfile)
+    outfile.close()
     with open(os.path.join(savedir, "bbox_size.txt"), 'w') as f:
         f.write('%d' % max(bbox_sizes))
 time_taken = time.time() - initTime
