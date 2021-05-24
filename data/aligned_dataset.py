@@ -9,7 +9,7 @@ from data.image_folder import make_dataset
 from PIL import Image
 import numpy as np
 import glob
-from data_prep.renderpose import *
+import joblib
 
 class AlignedDataset(BaseDataset):
     def initialize(self, opt):
@@ -42,7 +42,11 @@ class AlignedDataset(BaseDataset):
         #     self.test_keypoints = glob.glob(_test_keypoint_path)
         #     self.test_keypoints.sort()
         #     print("Test Keypoints Loaded")
-
+        
+        bbox_file = joblib.load(os.path.join(opt.dataroot, 'bbox_out.pkl'))
+        
+        self.bbox_list = bbox_file["bbox_list"]
+        self.max_bbox = bbox_file["max_bbox"]
         self.dataset_size = len(self.label_paths) 
       
     def __getitem__(self, index):        
@@ -56,12 +60,15 @@ class AlignedDataset(BaseDataset):
         original_label_path = label_path
 
         image_tensor = next_label = next_image = face_tensor = handpts_real_tensor = handpts_fake_tensor = 0
+        hand_bbox = hand_bbox_next = 0
         ### real images 
         if self.opt.isTrain or self.opt.shand_gen:
             image_path = self.image_paths[index]   
             image = Image.open(image_path).convert('RGB')    
             transform_image = get_transform(self.opt, params)     
             image_tensor = transform_image(image).float()
+
+        hand_bbox = self.bbox_list[index]
 
         is_next = index < len(self) - 1
         if self.opt.gestures:
@@ -76,6 +83,8 @@ class AlignedDataset(BaseDataset):
             params = get_params(self.opt, label.size)          
             transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
             next_label = transform_label(label).float()
+            
+            hand_bbox_next = self.bbox_list[index+1]
             
             if self.opt.isTrain or self.opt.shand_gen:
                 image_path = self.image_paths[index+1]   
@@ -94,20 +103,11 @@ class AlignedDataset(BaseDataset):
         #               'next_label': next_label, 'next_image': next_image }
         
         """ If using for hand keypoints """
-        # if self.opt.train_hand:
-        #     _, facepts_r, r_handpts_r, l_handpts_r = readkeypointsfile_json(self.train_keypoints[index])
-        #     _, facepts_f, r_handpts_f, l_handpts_f = readkeypointsfile_json(self.test_keypoints[index])
-        #     handpts_real = r_handpts_r + l_handpts_r
-        #     handpts_fake = r_handpts_f + l_handpts_f
-        #     handpts_real_tensor = torch.tensor(handpts_real)
-        #     handpts_fake_tensor = torch.tensor(handpts_fake)
         
-        # input_dict = {'label': label_tensor.float(), 'image': image_tensor,
-        #               'path': original_label_path, 'next_label': next_label,
-        #               'next_image': next_image, 'hand_real': handpts_real_tensor, 'hand_fake': handpts_fake_tensor }
         
         input_dict = {'label': label_tensor.float(), 'image': image_tensor, 
-                'path': original_label_path, 'next_label': next_label, 'next_image': next_image }
+                'path': original_label_path, 'next_label': next_label, 'next_image': next_image ,
+                'max_bbox': self.max_bbox, 'hand_bbox' : hand_bbox, 'next_hand_bbox': hand_bbox_next}
         
         return input_dict
 

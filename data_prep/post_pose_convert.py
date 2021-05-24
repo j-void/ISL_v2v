@@ -7,8 +7,8 @@ import cv2
 import time
 import sys
 
-sys.path.append("/Users/janmesh007/Documents/IIITB/ISL_v2v/")
-print(sys.path)
+#sys.path.append("/Users/janmesh007/Documents/IIITB/ISL_v2v/")
+#print(sys.path)
 import util.hand_utils as hand_utils
 
 initTime = time.time()

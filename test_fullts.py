@@ -38,28 +38,33 @@ for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break
 
+    hand_bbox = [0, 0, 0, 0]
+    prev_hand_bbox = [0, 0, 0, 0]
+    bbox_size = data["max_bbox"]
+
+    if opt.netG == "local":
+      lbx, lby, lbw, rbx, rby, rbw = data['hand_bbox']
+      lsx = (lbx+lbx+lbw)/2 - bbox_size/2
+      lsx = 0 if lsx < 0 else lsx
+      lsy = (lby+lby+lbw)/2 - bbox_size/2
+      lsy = 0 if lsy < 0 else lsy
+      rsx = (rbx+rbx+rbw)/2 - bbox_size/2
+      rsx = 0 if rsx < 0 else rsx
+      rsy = (rby+rby+rbw)/2 - bbox_size/2
+      rsy = 0 if rsy < 0 else rsy
+      hand_bbox = [lsx, lsy, rsx, rsy]
+
     if unset: #no previous results, condition on zero image
       previous_cond = torch.zeros(data['label'].size())
-      unset = False
+      prev_hand_bbox = hand_bbox
+      unset = False    
 
-    lbx = lby = lbw = rbx = rby = rbw = 0
-
-    if opt.shand_gen:
-      #targets = torch.cat((data['image'], data['next_image']), dim=3)
-      real_img = util.tensor2im(data['image'][0])
-      real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
-      #cv2.imwrite("tmp.png", real_img)
-      scale_n, translate_n = hand_utils.resize_scale(real_img)
-      real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
-      lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
-      lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
-      rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
   
     #generated = model.inference(data['label'], previous_cond, data['face_coords'])
-    generated = model.inference(data['label'], previous_cond, [lbx, lby, lbw], [rbx, rby, rbw])
+    generated = model.inference(data['label'], previous_cond, hand_bbox, prev_hand_bbox, bbox_size)
 
     previous_cond = generated.data
-
+    prev_hand_bbox = hand_bbox
     visuals = OrderedDict([('synthesized_image', util.tensor2im(generated.data[0]))])
     img_path = data['path']
     print('process image... %s' % img_path)

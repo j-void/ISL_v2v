@@ -6,7 +6,11 @@ from renderpose import *
 import cv2
 import time
 import pickle
+import sys
 
+sys.path.append(os.path.join(os.path.normpath(os.getcwd() + os.sep + os.pardir), 'util'))
+print(sys.path)
+import util.hand_utils as hand_utils
 initTime = time.time()
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -26,6 +30,8 @@ cap1 = cv2.VideoCapture(args.vid)
 fps1 = cap1.get(cv2.CAP_PROP_FPS)
 frame_count1 = cap1.get(cv2.CAP_PROP_FRAME_COUNT)
 cap1.release()
+
+bbox_list = []
 
 posepts_list = []
 facepts_list = []
@@ -134,6 +140,20 @@ for f in range(len(imgs)):
     
     enb = False
     
+    lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(_frame, fix_coords=True)
+    lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+    rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+    if check_detected(r_handpts) ==  False:
+        rbw = 0
+    if check_detected(l_handpts) == False:
+        lbw = 0
+    bbox_sizes.append(lbw)
+    bbox_sizes.append(rbw)
+    
+    bbox_list.append([lbx, lby, lbw, rbx, rby, rbw])
+
+    posepts_arr = posepts_arr + get_keypoint_array_pose(posepts)
+    
     if args.save_dir:
         _fn = "frame_"+'{:0>12}'.format(f)+".png"
         _filepath_label = os.path.join(savedir, "test_label")
@@ -141,6 +161,11 @@ for f in range(len(imgs)):
         _filepath_img = os.path.join(savedir, "test_img")
         filename_img = os.path.join(_filepath_img, _fn)
         print("Processing frame: ", f)
+        keypoints_dict = {'max_bbox' : max(bbox_sizes), 'bbox_list':bbox_list}
+        outfile = open(os.path.join(savedir, "bbox_out.pkl"), 'wb')
+        import pickle
+        pickle.dump(keypoints_dict, outfile)
+        outfile.close()
         cv2.imwrite(filename_label, output_frame)
         cv2.imwrite(filename_img, _frame)
     if args.display:

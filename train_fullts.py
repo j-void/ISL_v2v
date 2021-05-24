@@ -1,5 +1,6 @@
 ### Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
 ### Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
+from re import L
 import time
 from collections import OrderedDict
 
@@ -72,34 +73,37 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
         if no_nexts:
             cond_zeros = torch.zeros(data['label'].size()).float()
-            targets = torch.cat((data['image'], data['next_image']), dim=3)
-            real_img = util.tensor2im(targets[0])
-            height, width, channels = real_img.shape
-            real_img = cv2.cvtColor(real_img[:,:int(width/2),:], cv2.COLOR_RGB2BGR)
-            hsk_frame = np.zeros(real_img.shape, dtype=np.uint8)
-            hsk_frame.fill(255)
             
-            if opt.netG == "global":
-                scale_n, translate_n = hand_utils.resize_scale(real_img, myshape=(256, 512, 3))
-                real_img = hand_utils.fix_image(scale_n, translate_n, real_img, myshape=(256, 512, 3))
-                lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True, sz=64)
-                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
-                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts, sz=2)                
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts, sz=2)
-
-            else:
-                scale_n, translate_n = hand_utils.resize_scale(real_img)
-                real_img = hand_utils.fix_image(scale_n, translate_n, real_img)
-                lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
-                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
-                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, lfpts)
-                hand_utils.display_single_hand_skleton(hsk_frame, rfpts)
+            hand_bbox = [0, 0, 0, 0]
+            next_hand_bbox = [0, 0, 0, 0]
+            bbox_size = data["max_bbox"]
             
-
+            if opt.netG == "local":
+                lbx, lby, lbw, rbx, rby, rbw = data['hand_bbox']
+                lsx = (lbx+lbx+lbw)/2 - bbox_size/2
+                lsx = 0 if lsx < 0 else lsx
+                lsy = (lby+lby+lbw)/2 - bbox_size/2
+                lsy = 0 if lsy < 0 else lsy
+                rsx = (rbx+rbx+rbw)/2 - bbox_size/2
+                rsx = 0 if rsx < 0 else rsx
+                rsy = (rby+rby+rbw)/2 - bbox_size/2
+                rsy = 0 if rsy < 0 else rsy
+                hand_bbox = [lsx, lsy, rsx, rsy]
+                
+                lbx, lby, lbw, rbx, rby, rbw = data['next_hand_bbox']
+                lsx = (lbx+lbx+lbw)/2 - bbox_size/2
+                lsx = 0 if lsx < 0 else lsx
+                lsy = (lby+lby+lbw)/2 - bbox_size/2
+                lsy = 0 if lsy < 0 else lsy
+                rsx = (rbx+rbx+rbw)/2 - bbox_size/2
+                rsx = 0 if rsx < 0 else rsx
+                rsy = (rby+rby+rbw)/2 - bbox_size/2
+                rsy = 0 if rsy < 0 else rsy
+                next_hand_bbox = [lsx, lsy, rsx, rsy]
+                
+            
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), hsk_frame, real_img, [lbx, lby, lbw], [rbx, rby, rbw], infer=True)
+                    Variable(data['next_image']), Variable(cond_zeros), hand_bbox, next_hand_bbox, bbox_size, infer=True)
 
 
             # sum per device losses
