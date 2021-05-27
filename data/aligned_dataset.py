@@ -26,10 +26,10 @@ class AlignedDataset(BaseDataset):
             self.dir_image = os.path.join(opt.dataroot, opt.phase + '_img')  
             self.image_paths = sorted(make_dataset(self.dir_image))
         
-        bbox_file = joblib.load(os.path.join(opt.dataroot, 'bbox_out.pkl'))
+        # bbox_file = joblib.load(os.path.join(opt.dataroot, 'bbox_out.pkl'))
         
-        self.bbox_list = bbox_file["bbox_list"]
-        self.max_bbox = bbox_file["max_bbox"]
+        # self.bbox_list = bbox_file["bbox_list"]
+        # self.max_bbox = bbox_file["max_bbox"]
         self.dataset_size = len(self.label_paths) 
       
     def __getitem__(self, index):        
@@ -51,7 +51,7 @@ class AlignedDataset(BaseDataset):
             transform_image = get_transform(self.opt, params)     
             image_tensor = transform_image(image).float()
 
-        hand_bbox = self.bbox_list[index]
+        #hand_bbox = self.bbox_list[index]
 
         is_next = index < len(self) - 1
         if self.opt.gestures:
@@ -67,7 +67,7 @@ class AlignedDataset(BaseDataset):
             transform_label = get_transform(self.opt, params, method=Image.NEAREST, normalize=False)
             next_label = transform_label(label).float()
             
-            hand_bbox_next = self.bbox_list[index+1]
+            #hand_bbox_next = self.bbox_list[index+1]
             
             if self.opt.isTrain or self.opt.shand_gen:
                 image_path = self.image_paths[index+1]   
@@ -88,9 +88,12 @@ class AlignedDataset(BaseDataset):
         """ If using for hand keypoints """
         
         
+        # input_dict = {'label': label_tensor.float(), 'image': image_tensor, 
+        #         'path': original_label_path, 'next_label': next_label, 'next_image': next_image ,
+        #         'max_bbox': self.max_bbox, 'hand_bbox' : hand_bbox, 'next_hand_bbox': hand_bbox_next}
+        
         input_dict = {'label': label_tensor.float(), 'image': image_tensor, 
-                'path': original_label_path, 'next_label': next_label, 'next_image': next_image ,
-                'max_bbox': self.max_bbox, 'hand_bbox' : hand_bbox, 'next_hand_bbox': hand_bbox_next}
+                'path': original_label_path, 'next_label': next_label, 'next_image': next_image }
         
         return input_dict
 

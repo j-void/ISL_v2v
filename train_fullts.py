@@ -76,10 +76,17 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             
             hand_bbox = [0, 0, 0, 0]
             next_hand_bbox = [0, 0, 0, 0]
-            bbox_size = data["max_bbox"]
             
-            if opt.netG == "local":
-                lbx, lby, lbw, rbx, rby, rbw = data['hand_bbox']
+            
+            if opt.shand_gen:
+                real_img = util.tensor2im(data['image'].data[0])
+                height, width, channels = real_img.shape
+                lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+                
+                #lbx, lby, lbw, rbx, rby, rbw = data['hand_bbox']
+                
                 lsx = (lbx+lbx+lbw)//2 - bbox_size//2
                 lsx = 0 if lsx < 0 else lsx
                 lsy = (lby+lby+lbw)//2 - bbox_size//2
@@ -90,7 +97,12 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsy = 0 if rsy < 0 else rsy
                 hand_bbox = [lsx, lsy, rsx, rsy]
                 
-                lbx, lby, lbw, rbx, rby, rbw = data['next_hand_bbox']
+                
+                next_img = util.tensor2im(data['next_image'].data[0])
+                lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(next_img, fix_coords=True)
+                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+                #lbx, lby, lbw, rbx, rby, rbw = data['next_hand_bbox']
                 lsx = (lbx+lbx+lbw)//2 - bbox_size//2
                 lsx = 0 if lsx < 0 else lsx
                 lsy = (lby+lby+lbw)//2 - bbox_size//2
