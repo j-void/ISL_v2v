@@ -43,16 +43,10 @@ class Pix2PixHDModel(BaseModel):
             self.netD = networks.define_D(netD_input_nc, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
                                           opt.num_D, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids)
             
-        if self.isTrain and self.opt.hand_discrim:
-            use_sigmoid = opt.no_lsgan
-            # self.netDhand = networks.define_D(6, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
-            #                               1, False, gpu_ids=self.gpu_ids, netD='hand')
-            self.netDhand = networks.define_D(6, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
-                                          opt.num_D, False, gpu_ids=self.gpu_ids)
 
         if self.isTrain and opt.shand_dis:
-            self.netDshand = networks.define_D(opt.output_nc*2, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
-                                          1, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids, netD='hand')
+            self.netDshand = networks.define_D(opt.output_nc*4, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
+                                          opt.num_D, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids)
         
         if  self.opt.shand_gen:
             if opt.shandGtype == 'unet':
@@ -76,8 +70,6 @@ class Pix2PixHDModel(BaseModel):
             self.load_network(self.netG, 'G', opt.which_epoch, pretrained_path)            
             if self.isTrain:
                 self.load_network(self.netD, 'D', opt.which_epoch, pretrained_path)
-                if opt.hand_discrim:
-                    self.load_network(self.netDhand, 'Dhand', opt.which_epoch, pretrained_path)
                 if opt.shand_dis:
                     self.load_network(self.shandGen, 'Dshand', opt.which_epoch, pretrained_path)
             if opt.shand_gen:
@@ -130,16 +122,12 @@ class Pix2PixHDModel(BaseModel):
             if opt.niter_fix_main > 0:
                 print('------------- Only training hand discriminator network  ------------')
                 params = []
-                if opt.hand_discrim:
-                    params = params + list(self.netDhand.parameters()) 
                 if opt.shand_dis:
                     params = params + list(self.netDshand.parameters())              
             else:
                 params = list(self.netD.parameters())  
                 if opt.shand_dis:
                     params = params + list(self.netDshand.parameters())
-                if opt.hand_discrim:
-                    params = params + list(self.netDhand.parameters()) 
 
             self.optimizer_D = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))
 
@@ -278,8 +266,8 @@ class Pix2PixHDModel(BaseModel):
                 hand_size_right_1 = (_hand_label_right_1.shape[2], _hand_label_right_1.shape[3])
                 hand_label_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = _hand_label_right_1
 
-        I_hand_left_1 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
-        I_hand_right_1 = torch.zeros(input_label.shape[0], input_label.shape[1], 128, 128).cuda()
+        I_hand_left_1 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
+        I_hand_right_1 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
         if self.opt.shand_gen:
             initial_I_1 = self.netG.forward(input_concat)
             _hand_left_0 = torch.zeros(I_0.shape[0], I_0.shape[1], bbox_size, bbox_size).cuda()
@@ -332,19 +320,19 @@ class Pix2PixHDModel(BaseModel):
                 real_hand_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = next_image[:, :, next_hand_bbox[3]:next_hand_bbox[3]+bbox_size, next_hand_bbox[2]:next_hand_bbox[2]+bbox_size]
                 
             
-            pred_fake_pool_left = self.discriminate_4(hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1, use_pool=True)
+            pred_fake_pool_left = self.discriminate_4_hand(hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1, use_pool=True)
             loss_D_fake_hand_left = self.criterionGAN(pred_fake_pool_left, False)
             
-            pred_real_left = self.discriminate_4(hand_label_left_0, hand_label_left_1, real_hand_left_0, real_hand_left_1)
+            pred_real_left = self.discriminate_4_hand(hand_label_left_0, hand_label_left_1, real_hand_left_0, real_hand_left_1)
             loss_D_real_hand_left = self.criterionGAN(pred_real_left, True)
             
             pred_fake_left = self.netD.forward(torch.cat((hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1), dim=1))
             loss_G_GAN_hand_left = self.criterionGAN(pred_fake_left, True)
             
-            pred_fake_pool_right = self.discriminate_4(hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1, use_pool=True)
+            pred_fake_pool_right = self.discriminate_4_hand(hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1, use_pool=True)
             loss_D_fake_hand_right = self.criterionGAN(pred_fake_pool_right, False)
             
-            pred_real_right = self.discriminate_4(hand_label_right_0, hand_label_right_1, real_hand_right_0, real_hand_right_1)
+            pred_real_right = self.discriminate_4_hand(hand_label_right_0, hand_label_right_1, real_hand_right_0, real_hand_right_1)
             loss_D_real_hand_right = self.criterionGAN(pred_real_right, True)
             
             pred_fake_right = self.netD.forward(torch.cat((hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1), dim=1))
@@ -454,8 +442,6 @@ class Pix2PixHDModel(BaseModel):
     def save(self, which_epoch):
         self.save_network(self.netG, 'G', which_epoch, self.gpu_ids)
         self.save_network(self.netD, 'D', which_epoch, self.gpu_ids)
-        if self.opt.hand_discrim:
-            self.save_network(self.netDhand, 'Dhand', which_epoch, self.gpu_ids)
         if self.opt.shand_dis:
             self.save_network(self.netDshand, 'Dshand', which_epoch, self.gpu_ids)
         if self.opt.shand_gen:

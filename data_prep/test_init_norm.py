@@ -8,7 +8,7 @@ import time
 import pickle
 import sys
 
-sys.path.append(os.path.join(os.path.normpath(os.getcwd() + os.sep + os.pardir), 'util'))
+sys.path.append(os.getcwd())
 print(sys.path)
 import util.hand_utils as hand_utils
 initTime = time.time()
@@ -57,6 +57,9 @@ keypoints.sort()
 
 train_pose_path = os.path.join(args.train_dir, "avg_pose.txt")
 avg_train_pose = np.loadtxt(train_pose_path)
+
+import joblib
+max_bbox_size = joblib.load(os.path.join(args.train_dir, "bbox_out.pkl"))["max_bbox"]
 
 print(f"Initialize -> Total frames: {len(imgs)}")
 
@@ -161,7 +164,7 @@ for f in range(len(imgs)):
         _filepath_img = os.path.join(savedir, "test_img")
         filename_img = os.path.join(_filepath_img, _fn)
         print("Processing frame: ", f)
-        keypoints_dict = {'max_bbox' : max(bbox_sizes), 'bbox_list':bbox_list}
+        keypoints_dict = {'max_bbox' : max_bbox_size, 'bbox_list':bbox_list}
         outfile = open(os.path.join(savedir, "bbox_out.pkl"), 'wb')
         import pickle
         pickle.dump(keypoints_dict, outfile)
