@@ -25,23 +25,6 @@ class AlignedDataset(BaseDataset):
         if opt.isTrain or self.opt.shand_gen:
             self.dir_image = os.path.join(opt.dataroot, opt.phase + '_img')  
             self.image_paths = sorted(make_dataset(self.dir_image))
-
-        ### load face bounding box coordinates size 128x128
-        # if opt.face_discrim or opt.face_generator:
-        #     self.dir_facetext = os.path.join(opt.dataroot, opt.phase + '_facetexts128')
-        #     print('----------- loading face bounding boxes from %s ----------' % self.dir_facetext)
-        #     self.facetext_paths = sorted(make_dataset(self.dir_facetext))
-
-        ### load hand keypoints
-        # if opt.train_hand:
-        #     _train_keypoint_path = os.path.join(opt.train_keypoints_dir, "*.json")
-        #     self.train_keypoints = glob.glob(_train_keypoint_path)
-        #     self.train_keypoints.sort()
-        #     print("Train Keypoints Loaded")
-        #     _test_keypoint_path = os.path.join(opt.test_keypoints_dir, "*.json")
-        #     self.test_keypoints = glob.glob(_test_keypoint_path)
-        #     self.test_keypoints.sort()
-        #     print("Test Keypoints Loaded")
         
         bbox_file = joblib.load(os.path.join(opt.dataroot, 'bbox_out.pkl'))
         
