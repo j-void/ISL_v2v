@@ -220,7 +220,7 @@ class Pix2PixHDModel(BaseModel):
         cond_zeros_hand = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
         
         hand_label_left_0 = hand_label_right_0 = 0
-        print(hand_bbox, bbox_size)
+        #print(hand_bbox, bbox_size)
         if self.opt.shand_gen:
             hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
             if hand_bbox[0] != 0 and hand_bbox[1] != 0:
