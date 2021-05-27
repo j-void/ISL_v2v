@@ -88,13 +88,13 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 #lbx, lby, lbw, rbx, rby, rbw = data['hand_bbox']
                 
                 lsx = (lbx+lbx+lbw)/2 - bbox_size/2
-                lsx = 0 if lsx < 0 else lsx
+                lsx = 0 if lsx < 0 else int(lsx)
                 lsy = (lby+lby+lbw)/2 - bbox_size/2
-                lsy = 0 if lsy < 0 else lsy
+                lsy = 0 if lsy < 0 else int(lsy)
                 rsx = (rbx+rbx+rbw)/2 - bbox_size/2
-                rsx = 0 if rsx < 0 else rsx
+                rsx = 0 if rsx < 0 else int(rsx)
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
-                rsy = 0 if rsy < 0 else rsy
+                rsy = 0 if rsy < 0 else int(rsy)
                 hand_bbox = [lsx, lsy, rsx, rsy]
                 
                 
@@ -104,13 +104,13 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
                 #lbx, lby, lbw, rbx, rby, rbw = data['next_hand_bbox']
                 lsx = (lbx+lbx+lbw)/2 - bbox_size/2
-                lsx = 0 if lsx < 0 else lsx
+                lsx = 0 if lsx < 0 else int(lsx)
                 lsy = (lby+lby+lbw)/2 - bbox_size/2
-                lsy = 0 if lsy < 0 else lsy
+                lsy = 0 if lsy < 0 else int(lsy)
                 rsx = (rbx+rbx+rbw)/2 - bbox_size/2
-                rsx = 0 if rsx < 0 else rsx
+                rsx = 0 if rsx < 0 else int(rsx)
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
-                rsy = 0 if rsy < 0 else rsy
+                rsy = 0 if rsy < 0 else int(rsy)
                 next_hand_bbox = [lsx, lsy, rsx, rsy]
                 
             
