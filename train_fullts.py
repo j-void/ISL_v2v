@@ -140,11 +140,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 visualizer.plot_current_errors(errors, total_steps)
 
             ### display output images            
-            if total_steps % opt.save_latest_freq == 0:
+            if total_steps % 100 == 0: #opt.save_latest_freq == 0:
                 syn_img_hand = util.tensor2im(generated[0].data[0])
-                height_s, width_s, channels_s = syn_img_hand.shape
+                height, width, channels = syn_img_hand.shape
                 syn_img_hand = cv2.cvtColor(syn_img_hand[:,int(width/2):,:], cv2.COLOR_RGB2BGR)
-                real_hand_img = real_img.copy()
+                real_hand_img = util.tensor2im(data['image'].data[0])
                 inputs = torch.cat((data['label'], data['next_label']), dim=3)
                 input_label = util.tensor2im(inputs[0])[:,int(width/2):,:]
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)
@@ -156,19 +156,10 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                     input_label = hand_utils.fix_image(scale_n, translate_n, input_label)
                 
                 output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label])
-                if opt.hand_discrim:
-                    if opt.netG == "global":
-                        scale_n, translate_n = hand_utils.resize_scale(hsk_frame, myshape=(256, 512, 3))
-                        hsk_frame = hand_utils.fix_image(scale_n, translate_n, hsk_frame, myshape=(256, 512, 3))
-                    else:
-                        scale_n, translate_n = hand_utils.resize_scale(hsk_frame)
-                        hsk_frame = hand_utils.fix_image(scale_n, translate_n, hsk_frame)
-                    
-                    output_image = cv2.hconcat([syn_img_hand, real_hand_img, input_label, generated[5], generated[4], generated[6], hsk_frame])
                 
                 if opt.shand_gen:
-                    cv2.imwrite(os.path.join(tmp_out_path, "output_hand_left_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[7].data[0]), cv2.COLOR_RGB2BGR))
-                    cv2.imwrite(os.path.join(tmp_out_path, "output_hand_right_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[8].data[0]), cv2.COLOR_RGB2BGR))
+                    cv2.imwrite(os.path.join(tmp_out_path, "output_hand_left_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[4].data[0]), cv2.COLOR_RGB2BGR))
+                    cv2.imwrite(os.path.join(tmp_out_path, "output_hand_right_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated[5].data[0]), cv2.COLOR_RGB2BGR))
                 cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
             # if save_fake and opt.hand_discrim:
