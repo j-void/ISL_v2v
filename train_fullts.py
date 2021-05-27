@@ -80,24 +80,24 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             
             if opt.netG == "local":
                 lbx, lby, lbw, rbx, rby, rbw = data['hand_bbox']
-                lsx = (lbx+lbx+lbw)/2 - bbox_size/2
+                lsx = (lbx+lbx+lbw)//2 - bbox_size//2
                 lsx = 0 if lsx < 0 else lsx
-                lsy = (lby+lby+lbw)/2 - bbox_size/2
+                lsy = (lby+lby+lbw)//2 - bbox_size//2
                 lsy = 0 if lsy < 0 else lsy
-                rsx = (rbx+rbx+rbw)/2 - bbox_size/2
+                rsx = (rbx+rbx+rbw)//2 - bbox_size//2
                 rsx = 0 if rsx < 0 else rsx
-                rsy = (rby+rby+rbw)/2 - bbox_size/2
+                rsy = (rby+rby+rbw)//2 - bbox_size//2
                 rsy = 0 if rsy < 0 else rsy
                 hand_bbox = [lsx, lsy, rsx, rsy]
                 
                 lbx, lby, lbw, rbx, rby, rbw = data['next_hand_bbox']
-                lsx = (lbx+lbx+lbw)/2 - bbox_size/2
+                lsx = (lbx+lbx+lbw)//2 - bbox_size//2
                 lsx = 0 if lsx < 0 else lsx
-                lsy = (lby+lby+lbw)/2 - bbox_size/2
+                lsy = (lby+lby+lbw)//2 - bbox_size//2
                 lsy = 0 if lsy < 0 else lsy
-                rsx = (rbx+rbx+rbw)/2 - bbox_size/2
+                rsx = (rbx+rbx+rbw)//2 - bbox_size//2
                 rsx = 0 if rsx < 0 else rsx
-                rsy = (rby+rby+rbw)/2 - bbox_size/2
+                rsy = (rby+rby+rbw)//2 - bbox_size//2
                 rsy = 0 if rsy < 0 else rsy
                 next_hand_bbox = [lsx, lsy, rsx, rsy]
                 
