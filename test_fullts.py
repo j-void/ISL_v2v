@@ -44,6 +44,7 @@ for i, data in enumerate(dataset):
 
     if opt.shand_gen:
       real_img = util.tensor2im(data['image'].data[0])
+      real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
       lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
       lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
       rbx, rby, rbw = hand_utils.assert_bbox(rfpts)

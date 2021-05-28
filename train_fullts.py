@@ -98,7 +98,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
                 hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
-                print("hand_bbox", hand_bbox, lbx, lby, lbw, rbx, rby, rbw)
+                #print("hand_bbox", hand_bbox, lbx, lby, lbw, rbx, rby, rbw)
                 
                 # real_img = cv2.rectangle(real_img, (int(lsx), int(lsy)), (int(lsx+bbox_size), int(lsy+bbox_size)), (0, 255, 0), 1)
                 # real_img = cv2.rectangle(real_img, (int(rsx), int(rsy)), (int(rsx+bbox_size), int(rsy+bbox_size)), (0, 255, 0), 1)
@@ -121,7 +121,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
                 next_hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
-                print("next_hand_bbox", next_hand_bbox, lbx, lby, lbw, rbx, rby, rbw )
+                #print("next_hand_bbox", next_hand_bbox, lbx, lby, lbw, rbx, rby, rbw )
                 # next_img = cv2.rectangle(next_img, (int(lsx), int(lsy)), (int(lsx+bbox_size), int(lsy+bbox_size)), (0, 255, 0), 1)
                 # next_img = cv2.rectangle(next_img, (int(rsx), int(rsy)), (int(rsx+bbox_size), int(rsy+bbox_size)), (0, 255, 0), 1)
                 
