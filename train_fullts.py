@@ -84,7 +84,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
                 lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
-                
+                real_img = cv2.rectangle(real_img, (int(lbx), int(lby)), (int(lbx+lbw), int(lby+lbw)), (255, 0, 0), 1)
+                real_img = cv2.rectangle(real_img, (int(rbx), int(rby)), (int(rbx+rbw), int(rby+rbw)), (255, 0, 0), 1)
                 #lbx, lby, lbw, rbx, rby, rbw = data['hand_bbox']
                 
                 lsx = (lbx+lbx+lbw)/2 - bbox_size/2
@@ -96,13 +97,19 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
                 hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
-                print("hand_bbox", hand_bbox, lbx, lby, lbw, rbx, rby, rbw)
+                #print("hand_bbox", hand_bbox, lbx, lby, lbw, rbx, rby, rbw)
+                
+                real_img = cv2.rectangle(real_img, (int(lsx), int(lsy)), (int(lsx+bbox_size), int(lsy+bbox_size)), (0, 255, 0), 1)
+                real_img = cv2.rectangle(real_img, (int(rsx), int(rsy)), (int(rsx+bbox_size), int(rsy+bbox_size)), (0, 255, 0), 1)
                 
                 next_img = util.tensor2im(data['next_image'].data[0])
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(next_img, fix_coords=True)
                 lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
                 #lbx, lby, lbw, rbx, rby, rbw = data['next_hand_bbox']
+                next_img = cv2.rectangle(next_img, (int(lbx), int(lby)), (int(lbx+lbw), int(lby+lbw)), (255, 0, 0), 1)
+                next_img = cv2.rectangle(next_img, (int(rbx), int(rby)), (int(rbx+rbw), int(rby+rbw)), (255, 0, 0), 1)
+                
                 lsx = (lbx+lbx+lbw)/2 - bbox_size/2
                 lsx = 0 if lsx < 0 else int(lsx)
                 lsy = (lby+lby+lbw)/2 - bbox_size/2
@@ -112,7 +119,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
                 next_hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
-                print("next_hand_bbox", next_hand_bbox, lbx, lby, lbw, rbx, rby, rbw )
+                #print("next_hand_bbox", next_hand_bbox, lbx, lby, lbw, rbx, rby, rbw )
+                next_img = cv2.rectangle(next_img, (int(lsx), int(lsy)), (int(lsx+bbox_size), int(lsy+bbox_size)), (0, 255, 0), 1)
+                next_img = cv2.rectangle(next_img, (int(rsx), int(rsy)), (int(rsx+bbox_size), int(rsy+bbox_size)), (0, 255, 0), 1)
+                
+                cv2.imwrite(os.path.join("tmp", "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.hconcat([real_img, next_img]))
             
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), hand_bbox, next_hand_bbox, bbox_size, infer=True)
