@@ -96,7 +96,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
                 hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
-                
+                print("hand_bbox", hand_bbox)
                 
                 next_img = util.tensor2im(data['next_image'].data[0])
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(next_img, fix_coords=True)
@@ -112,7 +112,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
                 next_hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
-                
+                print("next_hand_bbox", next_hand_bbox)
             
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
                     Variable(data['next_image']), Variable(cond_zeros), hand_bbox, next_hand_bbox, bbox_size, infer=True)
