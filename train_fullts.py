@@ -81,6 +81,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             if opt.shand_gen:
                 real_img = util.tensor2im(data['image'].data[0])
                 height, width, channels = real_img.shape
+                real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
                 lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
@@ -103,6 +104,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 real_img = cv2.rectangle(real_img, (int(rsx), int(rsy)), (int(rsx+bbox_size), int(rsy+bbox_size)), (0, 255, 0), 1)
                 
                 next_img = util.tensor2im(data['next_image'].data[0])
+                next_img = cv2.cvtColor(next_img, cv2.COLOR_RGB2BGR)
                 lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(next_img, fix_coords=True)
                 lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
                 rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
