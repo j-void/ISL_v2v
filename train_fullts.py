@@ -74,8 +74,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         if no_nexts:
             cond_zeros = torch.zeros(data['label'].size()).float()
             
-            hand_bbox = [0, 0, 0, 0]
-            next_hand_bbox = [0, 0, 0, 0]
+            hand_bbox = [0, 0, 0, 0, 0, 0]
+            next_hand_bbox = [0, 0, 0, 0, 0, 0]
             
             
             if opt.shand_gen:
@@ -95,7 +95,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsx = 0 if rsx < 0 else int(rsx)
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
-                hand_bbox = [lsx, lsy, rsx, rsy]
+                hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
                 
                 
                 next_img = util.tensor2im(data['next_image'].data[0])
@@ -111,7 +111,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 rsx = 0 if rsx < 0 else int(rsx)
                 rsy = (rby+rby+rbw)/2 - bbox_size/2
                 rsy = 0 if rsy < 0 else int(rsy)
-                next_hand_bbox = [lsx, lsy, rsx, rsy]
+                next_hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
                 
             
             losses, generated = model(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
@@ -152,11 +152,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
                 visualizer.plot_current_errors(errors, total_steps)
 
             ### display output images            
-            if total_steps % 100 == 0: #opt.save_latest_freq == 0:
+            if total_steps % opt.save_latest_freq == 0:
                 syn_img_hand = util.tensor2im(generated[0].data[0])
                 height, width, channels = syn_img_hand.shape
                 syn_img_hand = cv2.cvtColor(syn_img_hand[:,int(width/2):,:], cv2.COLOR_RGB2BGR)
-                real_hand_img = util.tensor2im(data['image'].data[0])
+                real_hand_img = cv2.cvtColor(util.tensor2im(data['image'].data[0]), cv2.COLOR_RGB2BGR)
                 inputs = torch.cat((data['label'], data['next_label']), dim=3)
                 input_label = util.tensor2im(inputs[0])[:,int(width/2):,:]
                 input_label = cv2.cvtColor(input_label, cv2.COLOR_RGB2BGR)

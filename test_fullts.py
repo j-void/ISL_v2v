@@ -38,8 +38,8 @@ for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break
 
-    hand_bbox = [0, 0, 0, 0]
-    prev_hand_bbox = [0, 0, 0, 0]
+    hand_bbox = [0, 0, 0, 0, 0, 0]
+    prev_hand_bbox = [0, 0, 0, 0, 0, 0]
     bbox_size = data["max_bbox"]
 
     if opt.shand_gen:
@@ -56,7 +56,7 @@ for i, data in enumerate(dataset):
       rsx = 0 if rsx < 0 else rsx
       rsy = (rby+rby+rbw)/2 - bbox_size/2
       rsy = 0 if rsy < 0 else rsy
-      hand_bbox = [lsx, lsy, rsx, rsy]
+      hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
 
     if unset: #no previous results, condition on zero image
       previous_cond = torch.zeros(data['label'].size())

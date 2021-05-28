@@ -223,12 +223,12 @@ class Pix2PixHDModel(BaseModel):
         #print(hand_bbox, bbox_size)
         if self.opt.shand_gen:
             hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
-            if hand_bbox[0] != 0 and hand_bbox[1] != 0:
+            if hand_bbox[4] != 0:
                 _hand_label_left_0 = input_label[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size]
                 hand_size_left_0 = (_hand_label_left_0.shape[2], _hand_label_left_0.shape[3])
                 hand_label_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = _hand_label_left_0
             hand_label_right_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
-            if hand_bbox[2] != 0 and hand_bbox[3] != 0:
+            if hand_bbox[5] != 0:
                 _hand_label_right_0 = input_label[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
                 hand_size_right_0 = (_hand_label_right_0.shape[2], _hand_label_right_0.shape[3])
                 hand_label_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = _hand_label_right_0
@@ -240,9 +240,9 @@ class Pix2PixHDModel(BaseModel):
             I_hand_left_0 = self.shandGen.forward(torch.cat((hand_label_left_0, cond_zeros_hand), dim=1))
             I_hand_right_0 = self.shandGen.forward(torch.cat((hand_label_right_0, cond_zeros_hand), dim=1))
             I_0 = initial_I_0.clone()
-            if hand_bbox[0] != 0 and hand_bbox[1] != 0:
+            if hand_bbox[4] != 0:
                 I_0[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size] = I_hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]]
-            if hand_bbox[2] != 0 and hand_bbox[3] != 0:
+            if hand_bbox[5] != 0:
                 I_0[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size] = I_hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]]
         else:
             I_0 = self.netG.forward(input_concat)
@@ -256,12 +256,12 @@ class Pix2PixHDModel(BaseModel):
         
         if self.opt.shand_gen:
             hand_label_left_1 = torch.zeros(next_label.shape[0], next_label.shape[1], bbox_size, bbox_size).cuda()
-            if next_hand_bbox[0] != 0 and next_hand_bbox[1] != 0:
+            if next_hand_bbox[4] != 0:
                 _hand_label_left_1 = next_label[:, :, next_hand_bbox[1]:next_hand_bbox[1]+bbox_size, next_hand_bbox[0]:next_hand_bbox[0]+bbox_size]
                 hand_size_left_1 = (_hand_label_left_1.shape[2], _hand_label_left_1.shape[3])
                 hand_label_left_1[:,:,:hand_size_left_1[0],:hand_size_left_1[1]] = _hand_label_left_1
             hand_label_right_1 = torch.zeros(next_label.shape[0], next_label.shape[1], bbox_size, bbox_size).cuda()
-            if next_hand_bbox[2] != 0 and next_hand_bbox[3] != 0:        
+            if next_hand_bbox[5] != 0:        
                 _hand_label_right_1 = next_label[:, :, next_hand_bbox[3]:next_hand_bbox[3]+bbox_size, next_hand_bbox[2]:next_hand_bbox[2]+bbox_size]
                 hand_size_right_1 = (_hand_label_right_1.shape[2], _hand_label_right_1.shape[3])
                 hand_label_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = _hand_label_right_1
@@ -271,17 +271,17 @@ class Pix2PixHDModel(BaseModel):
         if self.opt.shand_gen:
             initial_I_1 = self.netG.forward(input_concat1)
             _hand_left_0 = torch.zeros(I_0.shape[0], I_0.shape[1], bbox_size, bbox_size).cuda()
-            if hand_bbox[0] != 0 and hand_bbox[1] != 0:
+            if hand_bbox[4] != 0:
                 _hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = I_0[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size]
             _hand_right_0 = torch.zeros(I_0.shape[0], I_0.shape[1], bbox_size, bbox_size).cuda()
-            if hand_bbox[2] != 0 and hand_bbox[3] != 0:    
+            if hand_bbox[5] != 0:    
                 _hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = I_0[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
             I_hand_left_1 = self.shandGen.forward(torch.cat((hand_label_left_1, _hand_left_0), dim=1))
             I_hand_right_1 = self.shandGen.forward(torch.cat((hand_label_right_1, _hand_right_0), dim=1))
             I_1 = initial_I_1.clone()
-            if next_hand_bbox[0] != 0 and next_hand_bbox[1]:
+            if next_hand_bbox[4] != 0:
                 I_1[:, :, next_hand_bbox[1]:next_hand_bbox[1]+bbox_size, next_hand_bbox[0]:next_hand_bbox[0]+bbox_size] = I_hand_left_1[:,:,:hand_size_left_1[0],:hand_size_left_1[1]]
-            if next_hand_bbox[2] != 0 and next_hand_bbox[3] != 0:
+            if next_hand_bbox[5] != 0:
                 I_1[:, :, next_hand_bbox[3]:next_hand_bbox[3]+bbox_size, next_hand_bbox[2]:next_hand_bbox[2]+bbox_size] = I_hand_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]]
         else:
             I_1 = self.netG.forward(input_concat1)
@@ -301,7 +301,7 @@ class Pix2PixHDModel(BaseModel):
             real_hand_left_0 = torch.zeros(real_image.shape[0], real_image.shape[1], bbox_size, bbox_size).cuda()
             real_hand_left_1 = torch.zeros(next_image.shape[0], next_image.shape[1], bbox_size, bbox_size).cuda()
             
-            if next_hand_bbox[0] != 0 and next_hand_bbox[1] and hand_bbox[0] != 0 and hand_bbox[1] != 0:
+            if next_hand_bbox[4] != 0 and hand_bbox[4] != 0:
                 fake_hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = I_0[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size]
                 fake_hand_left_1[:,:,:hand_size_left_1[0],:hand_size_left_1[1]] = I_1[:, :, next_hand_bbox[1]:next_hand_bbox[1]+bbox_size, next_hand_bbox[0]:next_hand_bbox[0]+bbox_size]
                 real_hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = real_image[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size]
@@ -313,7 +313,7 @@ class Pix2PixHDModel(BaseModel):
             real_hand_right_0 = torch.zeros(real_image.shape[0], I_0.shape[1], bbox_size, bbox_size).cuda()
             real_hand_right_1 = torch.zeros(next_image.shape[0], I_0.shape[1], bbox_size, bbox_size).cuda()
             
-            if next_hand_bbox[2] != 0 and next_hand_bbox[3] != 0 and hand_bbox[2] != 0 and hand_bbox[3] != 0:
+            if next_hand_bbox[5] != 0 and hand_bbox[5] != 0:
                 fake_hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = I_0[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
                 fake_hand_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = I_1[:, :, next_hand_bbox[3]:next_hand_bbox[3]+bbox_size, next_hand_bbox[2]:next_hand_bbox[2]+bbox_size]
                 real_hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = real_image[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
@@ -401,31 +401,31 @@ class Pix2PixHDModel(BaseModel):
         
         if self.opt.shand_gen:
             hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
-            if hand_bbox[0] != 0 and hand_bbox[1] != 0:
+            if hand_bbox[4] != 0:
                 _hand_label_left_0 = input_label[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size]
                 hand_size_left_0 = (_hand_label_left_0.shape[2], _hand_label_left_0.shape[3])
                 hand_label_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = _hand_label_left_0
             
             hand_label_right_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
-            if hand_bbox[2] != 0 and hand_bbox[3] != 0:
+            if hand_bbox[5] != 0:
                 _hand_label_right_0 = input_label[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
                 hand_size_right_0 = (_hand_label_right_0.shape[2], _hand_label_right_0.shape[3])
                 hand_size_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = _hand_label_right_0
                 
             _hand_left_0 = torch.zeros(initial_I_0.shape[0], initial_I_0.shape[1], bbox_size, bbox_size).cuda()
-            if prev_hand_bbox[0] != 0 and prev_hand_bbox[1] != 0:
+            if prev_hand_bbox[4] != 0:
                 _hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = initial_I_0[:, :, prev_hand_bbox[1]:prev_hand_bbox[1]+bbox_size, prev_hand_bbox[0]:prev_hand_bbox[0]+bbox_size]
             
             _hand_right_0 = torch.zeros(I_0.shape[0], I_0.shape[1], bbox_size, bbox_size).cuda()
-            if prev_hand_bbox[2] != 0 and prev_hand_bbox[3] != 0:    
+            if prev_hand_bbox[5] != 0:    
                 _hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]] = initial_I_0[:, :, prev_hand_bbox[3]:prev_hand_bbox[3]+bbox_size, prev_hand_bbox[2]:prev_hand_bbox[2]+bbox_size]
                 
             I_hand_left_0 = self.shandGen.forward(torch.cat((hand_label_left_0, _hand_left_0), dim=1))
             I_hand_right_0 = self.shandGen.forward(torch.cat((hand_label_right_0, _hand_right_0), dim=1))
             I_0 = initial_I_0.clone()
-            if hand_bbox[0] != 0 and hand_bbox[1] != 0:
+            if hand_bbox[4] != 0:
                 I_0[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size] = I_hand_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]]
-            if hand_bbox[2] != 0 and hand_bbox[3] != 0:
+            if hand_bbox[5] != 0:
                 I_0[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size] = I_hand_right_0[:,:,:hand_size_right_0[0],:hand_size_right_0[1]]
             return I_0
 
