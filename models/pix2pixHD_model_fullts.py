@@ -399,6 +399,9 @@ class Pix2PixHDModel(BaseModel):
         input_concat = torch.cat((input_label, prevouts), dim=1) 
         initial_I_0 = self.netG.forward(input_concat)
         
+        hand_size_left_0 = (bbox_size, bbox_size)
+        hand_size_right_0 = (bbox_size, bbox_size)
+        
         if self.opt.shand_gen:
             hand_label_left_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
             if hand_bbox[4] > 0:
