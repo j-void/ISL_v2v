@@ -410,7 +410,7 @@ class Pix2PixHDModel(BaseModel):
                 hand_label_left_0[:,:,:hand_size_left_0[0],:hand_size_left_0[1]] = _hand_label_left_0
             
             hand_label_right_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
-            #print(hand_bbox, bbox_size)
+            ##print(hand_bbox, bbox_size)
             if hand_bbox[5] > 0:
                 _hand_label_right_0 = input_label[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
                 hand_size_right_0 = (_hand_label_right_0.shape[2], _hand_label_right_0.shape[3])
