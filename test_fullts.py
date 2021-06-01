@@ -34,13 +34,15 @@ webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.na
 unset = True
 print('#testing images = %d' % len(data_loader))
 
+with open(os.path.join(opt.dataroot, "bbox_size.txt"), 'r') as f:
+    bbox_size = int(f.read())
+
 for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break
 
     hand_bbox = [0, 0, 0, 0, 0, 0]
     prev_hand_bbox = [0, 0, 0, 0, 0, 0]
-    bbox_size = data["max_bbox"]
 
     if opt.shand_gen:
       real_img = util.tensor2im(data['image'].data[0])
