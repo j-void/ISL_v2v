@@ -50,7 +50,7 @@ class Pix2PixHDModel(BaseModel):
         
         if  self.opt.shand_gen:
             if opt.shandGtype == 'unet':
-                self.shandGen = networks.define_G(opt.output_nc*2, opt.output_nc, 32, 'unet', 
+                self.shandGen = networks.define_G(opt.output_nc*2, opt.output_nc, 64, 'unet', 
                                           n_downsample_global=2, n_blocks_global=5, n_local_enhancers=0, 
                                           n_blocks_local=0, norm=opt.norm, gpu_ids=self.gpu_ids)
             elif opt.shandGtype == 'global':
