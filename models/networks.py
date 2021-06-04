@@ -483,6 +483,7 @@ class UnetSkipConnectionBlock(nn.Module):
         if self.outermost:
             return self.model(x)
         else:
+            print(x.shape, self.model(x).shape)
             return torch.cat([x, self.model(x)], 1)       
 
 from torchvision import models
