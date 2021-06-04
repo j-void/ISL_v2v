@@ -46,7 +46,7 @@ class Pix2PixHDModel(BaseModel):
 
         if self.isTrain and opt.shand_dis:
             self.netDshand = networks.define_D(opt.output_nc*4, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
-                                          opt.num_D, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids)
+                                          opt.num_D, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids, netD='hand')
         
         if  self.opt.shand_gen:
             if opt.shandGtype == 'unet':
