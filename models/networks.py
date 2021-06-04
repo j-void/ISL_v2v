@@ -39,7 +39,7 @@ def define_G(input_nc, output_nc, ngf, netG, n_downsample_global=3, n_blocks_glo
         netG = LocalEnhancer(input_nc, output_nc, ngf, n_downsample_global, n_blocks_global, 
                                   n_local_enhancers, n_blocks_local, norm_layer)
     elif netG == 'unet':
-        netG = UnetGenerator(input_nc, output_nc, 2, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, gpu_ids=[])
+        netG = UnetGenerator(input_nc, output_nc, 3, ngf, norm_layer=nn.BatchNorm2d, use_dropout=False, gpu_ids=[])
     else:
         raise('generator not implemented!')
     print(netG)

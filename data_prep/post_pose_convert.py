@@ -7,7 +7,7 @@ import cv2
 import time
 import sys
 
-#sys.path.append("/Users/janmesh007/Documents/IIITB/ISL_v2v/")
+sys.path.append("/Users/janmesh007/Documents/IIITB/ISL_v2v/")
 #print(sys.path)
 import util.hand_utils as hand_utils
 
@@ -69,7 +69,7 @@ for f in range(len(imgs)):
         lbw = 0
     bbox_sizes.append(lbw)
     bbox_sizes.append(rbw)
-    
+    #print(lbx, lby, lbw, rbx, rby, rbw)
     bbox_list.append([lbx, lby, lbw, rbx, rby, rbw])
 
     posepts_arr = posepts_arr + get_keypoint_array_pose(posepts)
@@ -89,6 +89,10 @@ for f in range(len(imgs)):
         cv2.imwrite(filename_label, output_frame)
         cv2.imwrite(filename_img, _frame)
     if args.display:
+        output_frame = cv2.putText(output_frame, str(int(lbw)), (int(lbx+lbw/2), int(lby+lbw/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
+        output_frame = cv2.putText(output_frame, str(int(rbw)), (int(rbx+rbw/2), int(rby+rbw/2)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA)
+        output_frame = cv2.rectangle(output_frame, (int(lbx), int(lby)), (int(lbx+lbw), int(lby+lbw)), (255, 0, 0), 1)
+        output_frame = cv2.rectangle(output_frame, (int(rbx), int(rby)), (int(rbx+rbw), int(rby+rbw)), (255, 0, 0), 1)
         cv2.imshow("Skleton Frame", output_frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -110,5 +114,6 @@ if args.save_dir:
     with open(os.path.join(savedir, "bbox_size.txt"), 'w') as f:
         f.write('%d' % max(bbox_sizes))
 time_taken = time.time() - initTime
+print(f'Max hand bbox: {max(bbox_sizes)}')
 print(f"Summary -> Total frames: {len(imgs)}, Processed frames: {len(imgs) - skip_index}, Skipped: {skip_index}, Total time taken: {time_taken}s, Rate: {(len(imgs) - skip_index)/time_taken} FPS")
      
