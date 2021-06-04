@@ -237,6 +237,7 @@ class Pix2PixHDModel(BaseModel):
         I_hand_right_0 = torch.zeros(input_label.shape[0], input_label.shape[1], bbox_size, bbox_size).cuda()
         if self.opt.shand_gen:
             initial_I_0 = self.netG.forward(input_concat)
+            print(torch.cat((hand_label_left_0, cond_zeros_hand), dim=1).shape)
             I_hand_left_0 = self.shandGen.forward(torch.cat((hand_label_left_0, cond_zeros_hand), dim=1))
             I_hand_right_0 = self.shandGen.forward(torch.cat((hand_label_right_0, cond_zeros_hand), dim=1))
             I_0 = initial_I_0.clone()
