@@ -9,6 +9,8 @@ import numpy as np
 import math
 import torch.nn.functional as F
 import copy
+from torch.nn.modules.batchnorm import BatchNorm2d
+import torchvision.transforms.functional as TF
 
 ###############################################################################
 # Functions
@@ -483,8 +485,11 @@ class UnetSkipConnectionBlock(nn.Module):
         if self.outermost:
             return self.model(x)
         else:
-            print(x.shape, self.model(x).shape)
-            return torch.cat([x, self.model(x)], 1)       
+            model_x = self.model(x)
+            #print(x.shape, model_x.shape)
+            if x.shape != model_x.shape:
+                model_x = TF.resize(model_x, size=x.shape[2:])
+            return torch.cat([x, model_x], 1)       
 
 from torchvision import models
 class Vgg19(torch.nn.Module):
@@ -538,4 +543,68 @@ class HandDiscriminator(nn.Module):
         )
 
     def forward(self, x):
-        return self.disc(x)
+        return self.disc(x) 
+    
+class DoubleConv(nn.Module):
+    def __init__(self, input_nc, output_nc):
+        super(DoubleConv, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(input_nc, output_nc, 3, 1, 1, bias=False),
+            nn.BatchNorm2d(output_nc),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(output_nc, output_nc, 3, 1, 1, bias=False),
+            nn.BatchNorm2d(output_nc),
+            nn.ReLU(inplace=True)
+        )
+    
+    def forward(self, x):
+        self.conv(x)
+    
+class UnetGeneratorNew(nn.Module):
+    def __init__(self, input_nc, output_nc, num_downs=4, ngf=64, use_dropout=False, gpu_ids=[]): #features 64, 128, 256, 512
+        super(UnetGeneratorNew, self).__init__()
+        self.gpu_ids = gpu_ids
+        self.ups = nn.ModuleList()
+        self.downs = nn.ModuleList()
+        self.pool = nn.MaxPool2d(kernel_size=3, stride=2)
+        
+        
+        #Down Part
+        in_channels = input_nc
+        for i in range(1, num_downs):
+            self.downs.append(DoubleConv(in_channels, ngf*i*2))
+            in_channels = ngf*i*2
+            
+        #Up Part
+        for i in range(num_downs, 1):
+            self.ups.append(
+                nn.ConvTranspose2d(
+                    ngf*i*2*2, ngf*i*2, kernel_size=2, stride=2
+                )
+            )
+            self.ups.add_module(DoubleConv(ngf*i*2*2, ngf*i*2))
+        
+        self.bottleneck = DoubleConv(num_downs*ngf*2, num_downs*ngf*2*2)
+        self.final_conv = nn.Conv2d(ngf, output_nc, kernel_size=1)
+    
+    def forward(self, x):
+        skip_connections = []
+        for down in self.downs:
+            x = down(x)
+            skip_connections.append(x)
+            x = self.pool(x)
+            
+        x = self.bottleneck(x)
+        skip_connections = skip_connections[::-1]
+        
+        for idx in range(0, len(self.ups), 2):
+            x = self.ups[idx](x)
+            skip_connection = skip_connections[idx//2]
+            
+            if x.shape != skip_connection.shape:
+                x = TF.resize(x, size=skip_connection.shape[2:])
+            
+            concat_skip = torch.cat((skip_connection, x), 1)
+            x = self.ups[idx+1](concat_skip)
+            
+        return self.final_conv(x)  
