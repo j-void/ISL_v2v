@@ -488,7 +488,7 @@ class UnetSkipConnectionBlock(nn.Module):
             model_x = self.model(x)
             #print(x.shape, model_x.shape)
             if x.shape != model_x.shape:
-                model_x = TF.resize(model_x, size=x.shape[2:])
+                model_x = F.interpolate(model_x, size=x.shape[2:])
             return torch.cat([x, model_x], 1)       
 
 from torchvision import models
