@@ -68,7 +68,7 @@ for i, data in enumerate(dataset):
 
   
     #generated = model.inference(data['label'], previous_cond, data['face_coords'])
-    generated = model.inference(data['label'], previous_cond, hand_bbox, prev_hand_bbox, bbox_size)
+    generated = model.inference(data['label'], previous_cond, hand_bbox, bbox_size)
 
     previous_cond = generated.data
     prev_hand_bbox = hand_bbox
