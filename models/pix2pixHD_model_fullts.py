@@ -321,19 +321,19 @@ class Pix2PixHDModel(BaseModel):
                 real_hand_right_1[:,:,:hand_size_right_1[0],:hand_size_right_1[1]] = next_image[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
                 
             
-            pred_fake_pool_left = self.discriminate_4_hand(hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1, use_pool=True)
+            pred_fake_pool_left = self.discriminate_4(hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1, use_pool=True)
             loss_D_fake_hand_left = self.criterionGAN(pred_fake_pool_left, False)
             
-            pred_real_left = self.discriminate_4_hand(hand_label_left_0, hand_label_left_1, real_hand_left_0, real_hand_left_1)
+            pred_real_left = self.discriminate_4(hand_label_left_0, hand_label_left_1, real_hand_left_0, real_hand_left_1)
             loss_D_real_hand_left = self.criterionGAN(pred_real_left, True)
             
             pred_fake_left = self.netD.forward(torch.cat((hand_label_left_0, hand_label_left_1, fake_hand_left_0, fake_hand_left_1), dim=1))
             loss_G_GAN_hand_left = self.criterionGAN(pred_fake_left, True)
             
-            pred_fake_pool_right = self.discriminate_4_hand(hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1, use_pool=True)
+            pred_fake_pool_right = self.discriminate_4(hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1, use_pool=True)
             loss_D_fake_hand_right = self.criterionGAN(pred_fake_pool_right, False)
             
-            pred_real_right = self.discriminate_4_hand(hand_label_right_0, hand_label_right_1, real_hand_right_0, real_hand_right_1)
+            pred_real_right = self.discriminate_4(hand_label_right_0, hand_label_right_1, real_hand_right_0, real_hand_right_1)
             loss_D_real_hand_right = self.criterionGAN(pred_real_right, True)
             
             pred_fake_right = self.netD.forward(torch.cat((hand_label_right_0, hand_label_right_1, fake_hand_right_0, fake_hand_right_1), dim=1))
