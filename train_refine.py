@@ -43,9 +43,10 @@ print('#training images = %d' % dataset_size)
 
 """ new residual model """
 model = create_model_fullts(opt)
-visualizer = Visualizer(opt)
-
 model_refine = create_model_refine(opt)
+
+
+visualizer = Visualizer(opt)
 
 tmp_out_path = os.path.join(opt.checkpoints_dir, opt.name, "tmp")
 
@@ -115,7 +116,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
         # update discriminator weights
         model_refine.module.optimizer_D.zero_grad()
-        loss_D.backward(retain_graph=True)
+        loss_D.backward()
         model_refine.module.optimizer_D.step()
         
         if total_steps % opt.print_freq == 0:
