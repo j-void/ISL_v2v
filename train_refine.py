@@ -97,7 +97,10 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         previous_cond = generated.data
         
         cond_zeros = torch.zeros(data['image'].size()).float()
-        losses, generated = model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
+        losses, generated_refine = model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
+        
+        output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), cv2.cvtColor(util.tensor2im(generated.data[0]), cv2.COLOR_RGB2BGR), real_img])
+        cv2.imwrite("output_image.png", output_image)
         
         losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
         loss_dict = dict(zip(model_refine.module.loss_names, losses))
@@ -128,7 +131,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         
         ### display output images            
         if total_steps % opt.save_latest_freq == 0:            
-            output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated[0].data[0]), cv2.COLOR_RGB2BGR), real_img])
+            output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), real_img])
             cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
 
