@@ -7,11 +7,7 @@ import util.util as util
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
-import util.hand_utils as hand_utils
-import cv2
 import torchvision.transforms as transforms
-from PIL import Image
-import torch.nn.functional as F
 
 class Pix2PixHDModelRefine(BaseModel):
     def name(self):
@@ -178,6 +174,14 @@ class Pix2PixHDModelRefine(BaseModel):
         I_0 = self.netG.forward(real_image)
 
         return I_0
+    
+    def get_edges(self, t):
+        edge = torch.cuda.ByteTensor(t.size()).zero_()
+        edge[:,:,:,1:] = edge[:,:,:,1:] | (t[:,:,:,1:] != t[:,:,:,:-1])
+        edge[:,:,:,:-1] = edge[:,:,:,:-1] | (t[:,:,:,1:] != t[:,:,:,:-1])
+        edge[:,:,1:,:] = edge[:,:,1:,:] | (t[:,:,1:,:] != t[:,:,:-1,:])
+        edge[:,:,:-1,:] = edge[:,:,:-1,:] | (t[:,:,1:,:] != t[:,:,:-1,:])
+        return edge.float()
     
     def save(self, which_epoch):
         self.save_network(self.netG, 'Grefine', which_epoch, self.gpu_ids)
