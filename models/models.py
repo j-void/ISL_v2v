@@ -8,7 +8,7 @@ def create_model_fullts(opt):
     model.initialize(opt)
     print("model [%s] was created" % (model.name()))
 
-    if opt.isTrain and len(opt.gpu_ids):
+    if opt.isTrain and len(opt.gpu_ids) and not opt.refine:
         model = torch.nn.DataParallel(model, device_ids=opt.gpu_ids)
 
     return model
