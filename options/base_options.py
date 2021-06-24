@@ -74,6 +74,7 @@ class BaseOptions():
         # for gestures, only do 64 frame segments
         self.parser.add_argument('--gestures', action='store_true', help='for gestures project 64 frames')
 
+        self.parser.add_argument('--refine', action='store_true', help='train refinement network')
 
         self.initialized = True
 
