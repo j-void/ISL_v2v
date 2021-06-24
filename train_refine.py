@@ -115,7 +115,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
 
         # update discriminator weights
         model_refine.module.optimizer_D.zero_grad()
-        loss_D.backward()
+        loss_D.backward(retain_graph=True)
         model_refine.module.optimizer_D.step()
         
         if total_steps % opt.print_freq == 0:
