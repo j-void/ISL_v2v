@@ -42,7 +42,7 @@ dataset_size = len(data_loader)
 print('#training images = %d' % dataset_size)
 
 """ new residual model """
-model = create_model_fullts(opt)
+#model = create_model_fullts(opt)
 model_refine = create_model_refine(opt)
 
 
@@ -93,14 +93,15 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             previous_cond = torch.zeros(data['label'].size())
             unset = False 
         
-        generated = model.inference(data['label'], previous_cond, hand_bbox, bbox_size)
-        previous_cond = generated.data
+        #generated = model.inference(data['label'], previous_cond, hand_bbox, bbox_size)
+        #previous_cond = generated.data
         
         cond_zeros = torch.zeros(data['image'].size()).float()
-        losses, generated_refine = model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
+        #losses, generated_refine = model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
+        losses, generated_refine = model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)
         
-        output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), cv2.cvtColor(util.tensor2im(generated.data[0]), cv2.COLOR_RGB2BGR), real_img])
-        cv2.imwrite("output_image.png", output_image)
+        #output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), cv2.cvtColor(util.tensor2im(generated.data[0]), cv2.COLOR_RGB2BGR), real_img])
+        #cv2.imwrite("output_image.png", output_image)
         
         losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
         loss_dict = dict(zip(model_refine.module.loss_names, losses))
@@ -131,6 +132,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         
         ### display output images            
         if total_steps % opt.save_latest_freq == 0:            
+            #output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), cv2.cvtColor(util.tensor2im(generated.data[0]), cv2.COLOR_RGB2BGR), real_img])
             output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), real_img])
             cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
             
@@ -138,7 +140,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         ### save latest model
         if total_steps % opt.save_latest_freq == 0:
             print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
-            model.module.save('latest')
+            #model.module.save('latest')
             model_refine.module.save('latest')      
             np.savetxt(iter_path, (epoch, epoch_iter), delimiter=',', fmt='%d')
        
@@ -150,8 +152,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
     ### save model for this epoch
     if epoch % opt.save_epoch_freq == 0:
         print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))        
-        model.module.save('latest')
-        model.module.save(epoch)
+        #model.module.save('latest')
+        #model.module.save(epoch)
         model_refine.module.save('latest')
         model_refine.module.save(epoch)
         np.savetxt(iter_path, (epoch+1, 0), delimiter=',', fmt='%d')
