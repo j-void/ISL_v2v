@@ -25,7 +25,7 @@ class Pix2PixHDModelRefine(BaseModel):
         self.img_idx = 0
         ##### define networks        
         # Generator network
-        netG_input_nc = opt.label_nc
+        netG_input_nc = opt.output_nc
         if not opt.no_instance:
             netG_input_nc += 1          
         self.netG = networks.define_G(netG_input_nc, opt.output_nc, opt.ngf, opt.netG, 
