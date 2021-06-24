@@ -104,7 +104,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         #cv2.imwrite("output_image.png", output_image)
         
         losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
-        loss_dict = dict(zip(model_refine.module.loss_names, losses))
+        loss_dict = dict(zip(model_refine.loss_names, losses))
         
         loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5
         loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG']
@@ -141,7 +141,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         if total_steps % opt.save_latest_freq == 0:
             print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
             #model.module.save('latest')
-            model_refine.module.save('latest')      
+            model_refine.save('latest')      
             np.savetxt(iter_path, (epoch, epoch_iter), delimiter=',', fmt='%d')
        
     # end of epoch  
