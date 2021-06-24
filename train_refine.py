@@ -72,9 +72,6 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         save_fake = total_steps % opt.display_freq == 0
         
         ############## Forward Pass ######################
-
-
-        no_nexts = data['next_label'].dim() > 1 #check if has a next label (last training pair does not have a next label)
         
         if opt.shand_gen:
             real_img = util.tensor2im(data['image'].data[0])
@@ -100,7 +97,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         previous_cond = generated.data
         
         cond_zeros = torch.zeros(data['image'].size()).float()
-        losses, generated = model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)
+        losses, generated = model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
         
         losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
         loss_dict = dict(zip(model_refine.module.loss_names, losses))
