@@ -102,7 +102,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         losses, generated = model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)
         
         losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
-        loss_dict = dict(zip(model.module.loss_names, losses))
+        loss_dict = dict(zip(model_refine.module.loss_names, losses))
         
         loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5
         loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG']
