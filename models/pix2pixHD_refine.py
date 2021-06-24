@@ -124,7 +124,7 @@ class Pix2PixHDModelRefine(BaseModel):
         #input_concat = torch.cat((input_label, zeroshere), dim=1) 
         
 
-        I_0 = self.netG.forward(image.cuda())
+        I_0 = self.netG.forward(image)
         
             
         self.img_idx = self.img_idx + 1
