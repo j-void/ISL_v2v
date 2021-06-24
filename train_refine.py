@@ -1,0 +1,165 @@
+### Copyright (C) 2017 NVIDIA Corporation. All rights reserved. 
+### Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
+from re import L
+import time
+from collections import OrderedDict
+
+from numpy.lib import utils
+from numpy.lib.ufunclike import fix
+from options.train_options import TrainOptions
+from data.data_loader import CreateDataLoader
+from models.models import create_model_fullts, create_model_refine
+import util.util as util
+from util.visualizer import Visualizer
+import os
+import numpy as np
+import torch
+from torch.autograd import Variable
+import util.hand_utils as hand_utils
+import cv2
+
+opt = TrainOptions().parse()
+iter_path = os.path.join(opt.checkpoints_dir, opt.name, 'iter.txt')
+if opt.continue_train:
+    try:
+        start_epoch, epoch_iter = np.loadtxt(iter_path , delimiter=',', dtype=int)
+    except:
+        start_epoch, epoch_iter = 1, 0
+    print('Resuming from epoch %d at iteration %d' % (start_epoch, epoch_iter))        
+else:    
+    start_epoch, epoch_iter = 1, 0
+
+if opt.debug:
+    opt.display_freq = 1
+    opt.print_freq = 1
+    opt.niter = 1
+    opt.niter_decay = 0
+    opt.max_dataset_size = 10
+
+data_loader = CreateDataLoader(opt)
+dataset = data_loader.load_data()
+dataset_size = len(data_loader)
+print('#training images = %d' % dataset_size)
+
+""" new residual model """
+model = create_model_fullts(opt)
+visualizer = Visualizer(opt)
+
+model_refine = create_model_refine(opt)
+
+tmp_out_path = os.path.join(opt.checkpoints_dir, opt.name, "tmp")
+
+unset = True
+
+with open(os.path.join(opt.dataroot, "bbox_size.txt"), 'r') as f:
+    bbox_size = int(f.read())
+
+if not os.path.exists(tmp_out_path):
+    os.makedirs(tmp_out_path)
+
+total_steps = (start_epoch-1) * dataset_size + epoch_iter    
+for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
+    epoch_start_time = time.time()
+    if epoch != start_epoch:
+        epoch_iter = epoch_iter % dataset_size
+    for i, data in enumerate(dataset, start=epoch_iter):
+        iter_start_time = time.time()
+        total_steps += opt.batchSize
+        epoch_iter += opt.batchSize
+
+        # whether to collect output images
+        save_fake = total_steps % opt.display_freq == 0
+        
+        ############## Forward Pass ######################
+
+
+        no_nexts = data['next_label'].dim() > 1 #check if has a next label (last training pair does not have a next label)
+        
+        if opt.shand_gen:
+            real_img = util.tensor2im(data['image'].data[0])
+            real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
+            lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+            lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+            rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+            lsx = (lbx+lbx+lbw)/2 - bbox_size/2
+            lsx = 0 if lsx < 0 else int(lsx)
+            lsy = (lby+lby+lbw)/2 - bbox_size/2
+            lsy = 0 if lsy < 0 else int(lsy)
+            rsx = (rbx+rbx+rbw)/2 - bbox_size/2
+            rsx = 0 if rsx < 0 else int(rsx)
+            rsy = (rby+rby+rbw)/2 - bbox_size/2
+            rsy = 0 if rsy < 0 else int(rsy)
+            hand_bbox = [lsx, lsy, rsx, rsy, lbw, rbw]
+        
+        if unset: #no previous results, condition on zero image
+            previous_cond = torch.zeros(data['label'].size())
+            unset = False 
+        
+        generated = model.inference(data['label'], previous_cond, hand_bbox, bbox_size)
+        previous_cond = generated.data
+        
+        cond_zeros = torch.zeros(data['image'].size()).float()
+        losses, generated = model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)
+        
+        losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
+        loss_dict = dict(zip(model.module.loss_names, losses))
+        
+        loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5
+        loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG']
+        
+        ############### Backward Pass ####################
+        # update generator weights
+        model_refine.module.optimizer_G.zero_grad()
+        loss_G.backward()
+        model_refine.module.optimizer_G.step()
+
+        # update discriminator weights
+        model_refine.module.optimizer_D.zero_grad()
+        loss_D.backward()
+        model_refine.module.optimizer_D.step()
+        
+        if total_steps % opt.print_freq == 0:
+            errors = {}
+            if torch.__version__[0] == '1':
+                errors = {k: v.item() if not isinstance(v, int) else v for k, v in loss_dict.items()}
+            else:
+                errors = {k: v.data[0] if not isinstance(v, int) else v for k, v in loss_dict.items()}
+            t = (time.time() - iter_start_time) / opt.batchSize
+            visualizer.print_current_errors(epoch, epoch_iter, errors, t)
+            visualizer.plot_current_errors(errors, total_steps)
+        
+        ### display output images            
+        if total_steps % opt.save_latest_freq == 0:            
+            output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated[0].data[0]), cv2.COLOR_RGB2BGR), real_img])
+            cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
+            
+
+        ### save latest model
+        if total_steps % opt.save_latest_freq == 0:
+            print('saving the latest model (epoch %d, total_steps %d)' % (epoch, total_steps))
+            model.module.save('latest')
+            model_refine.module.save('latest')      
+            np.savetxt(iter_path, (epoch, epoch_iter), delimiter=',', fmt='%d')
+       
+    # end of epoch  
+    iter_end_time = time.time()
+    print('End of epoch %d / %d \t Time Taken: %d sec' %
+          (epoch, opt.niter + opt.niter_decay, time.time() - epoch_start_time))
+
+    ### save model for this epoch
+    if epoch % opt.save_epoch_freq == 0:
+        print('saving the model at the end of epoch %d, iters %d' % (epoch, total_steps))        
+        model.module.save('latest')
+        model.module.save(epoch)
+        model_refine.module.save('latest')
+        model_refine.module.save(epoch)
+        np.savetxt(iter_path, (epoch+1, 0), delimiter=',', fmt='%d')
+
+    ### instead of only training the local enhancer, train the entire network after certain iterations
+    if (opt.niter_fix_global != 0) and (epoch == opt.niter_fix_global):
+        print('------------- finetuning Local + Global generators jointly -------------')
+        model_refine.module.update_fixed_params()
+
+    ### linearly decay learning rate after certain iterations
+    if epoch > opt.niter:
+        model_refine.module.update_learning_rate()

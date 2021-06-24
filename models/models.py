@@ -8,6 +8,17 @@ def create_model_fullts(opt):
     model.initialize(opt)
     print("model [%s] was created" % (model.name()))
 
+    if opt.isTrain and len(opt.gpu_ids) and not opt.refine:
+        model = torch.nn.DataParallel(model, device_ids=opt.gpu_ids)
+
+    return model
+
+def create_model_refine(opt):
+    from .pix2pixHD_refine import Pix2PixHDModelRefine
+    model = Pix2PixHDModelRefine()    
+    model.initialize(opt)
+    print("model [%s] was created" % (model.name()))
+
     if opt.isTrain and len(opt.gpu_ids):
         model = torch.nn.DataParallel(model, device_ids=opt.gpu_ids)
 
