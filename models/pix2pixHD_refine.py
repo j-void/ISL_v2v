@@ -123,7 +123,9 @@ class Pix2PixHDModelRefine(BaseModel):
             
         self.img_idx = self.img_idx + 1
         
-        loss_D_fake = loss_D_real = loss_G_GAN = 0
+        loss_D_fake = 0
+        loss_D_real = 0
+        loss_G_GAN = 0
         
         # Fake Detection and Loss
         # pred_fake_pool = self.discriminate(I_0, use_pool=True)
