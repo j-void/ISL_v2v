@@ -127,7 +127,7 @@ class GANLoss(nn.Module):
 class GANLossRefine(nn.Module):
     def __init__(self, use_lsgan=True, target_real_label=1.0, target_fake_label=0.0,
                  tensor=torch.FloatTensor):
-        super(GANLoss, self).__init__()
+        super(GANLossRefine, self).__init__()
         self.real_label = target_real_label
         self.fake_label = target_fake_label
         self.real_label_var = None
