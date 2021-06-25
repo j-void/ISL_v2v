@@ -141,8 +141,8 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_G_GAN_Feat = 0
         if not self.opt.no_ganFeat_loss:
             feat_weights = 4.0 / (self.opt.n_layers_D + 1)
-            D_weights = 1.0 / self.opt.num_D
-            for i in range(self.opt.num_D):
+            D_weights = 1.0 / 1
+            for i in range(1):
                 for j in range(len(pred_fake[i])-1):
                     loss_G_GAN_Feat += D_weights * feat_weights * \
                         self.criterionFeat(pred_fake[i][j], pred_real[i][j].detach()) * self.opt.lambda_feat
