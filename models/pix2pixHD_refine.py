@@ -104,7 +104,7 @@ class Pix2PixHDModelRefine(BaseModel):
     def discriminate(self, input, use_pool=False):
         #input_concat = torch.cat((input, output.detach()), dim=1)
         if use_pool:            
-            fake_query = self.fake_pool.query(input)
+            fake_query = self.fake_pool.query(input.detach())
             return self.netDrefine.forward(fake_query)
         else:
             return self.netDrefine.forward(input)

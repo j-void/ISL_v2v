@@ -148,15 +148,11 @@ class GANLossRefine(nn.Module):
                 self.real_label_var = Variable(real_tensor, requires_grad=True)
             target_tensor = self.real_label_var
         else:
-            print("l2")
             create_label = ((self.fake_label_var is None) or
                             (self.fake_label_var.numel() != input.numel()))
             if create_label:
-                print("l3")
                 fake_tensor = self.Tensor(input.size()).fill_(self.fake_label)
-                print("l4")
                 self.fake_label_var = Variable(fake_tensor, requires_grad=True)
-                print("l5")
             target_tensor = self.fake_label_var
         return target_tensor
 
@@ -169,7 +165,6 @@ class GANLossRefine(nn.Module):
                 loss += self.loss(pred, target_tensor)
             return loss
         else:
-            print("l1")
             target_tensor = self.get_target_tensor(input[-1], target_is_real)
             return self.loss(input[-1], target_tensor)
 
