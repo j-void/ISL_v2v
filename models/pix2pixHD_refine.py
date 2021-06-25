@@ -59,7 +59,6 @@ class Pix2PixHDModelRefine(BaseModel):
 
             # define loss functions
             self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
-            self.criterionHandGAN = torch.nn.BCELoss()
             self.criterionFeat = torch.nn.L1Loss()
             if not opt.no_vgg_loss:             
                 self.criterionVGG = networks.VGGLoss(self.gpu_ids)
@@ -82,7 +81,6 @@ class Pix2PixHDModelRefine(BaseModel):
                         params += [{'params':[value],'lr':0.0}]                            
             else:
                 params = list(self.netG.parameters())
-
 
             self.optimizer_G = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))                            
 
@@ -126,7 +124,7 @@ class Pix2PixHDModelRefine(BaseModel):
         self.img_idx = self.img_idx + 1
         
         # Fake Detection and Loss
-        pred_fake_pool = self.discriminate(I_0, use_pool=True)
+        pred_fake_pool = self.discriminate(I_0, use_pool=False)
         loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
         # Real Detection and Loss        

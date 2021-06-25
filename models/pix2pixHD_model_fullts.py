@@ -71,7 +71,7 @@ class Pix2PixHDModel(BaseModel):
             if self.isTrain:
                 self.load_network(self.netD, 'D', opt.which_epoch, pretrained_path)
                 if opt.shand_dis:
-                    self.load_network(self.shandGen, 'Dshand', opt.which_epoch, pretrained_path)
+                    self.load_network(self.netDshand, 'Dshand', opt.which_epoch, pretrained_path)
             if opt.shand_gen:
                 self.load_network(self.shandGen, 'Gshand', opt.which_epoch, pretrained_path)
 
