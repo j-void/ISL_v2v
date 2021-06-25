@@ -107,7 +107,7 @@ class Pix2PixHDModelRefine(BaseModel):
             fake_query = self.fake_pool.query(input.detach())
             return self.netDrefine.forward(fake_query)
         else:
-            return self.netDrefine.forward(input)
+            return self.netDrefine.forward(input.detach())
     
     def forward(self, image, zeroshere, infer=False):
         # Encode Inputs
