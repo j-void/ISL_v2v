@@ -24,9 +24,9 @@ class Pix2PixHDModelRefine(BaseModel):
         netG_input_nc = opt.output_nc
         if not opt.no_instance:
             netG_input_nc += 1          
-        self.netG = networks.define_G(netG_input_nc, opt.output_nc, opt.ngf, 'global', 
-                                      opt.n_downsample_global, opt.n_blocks_global, opt.n_local_enhancers, 
-                                      opt.n_blocks_local, opt.norm, gpu_ids=self.gpu_ids)        
+        self.netG = networks.define_G(netG_input_nc, opt.output_nc, 64, 'global', 
+                                      n_downsample_global=3, n_blocks_global=5, n_local_enhancers=0, 
+                                      n_blocks_local=0, norm=opt.norm, gpu_ids=self.gpu_ids)        
 
         # Discriminator network
         if self.isTrain:
