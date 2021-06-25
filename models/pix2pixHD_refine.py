@@ -141,13 +141,13 @@ class Pix2PixHDModelRefine(BaseModel):
         
         # GAN feature matching loss
         loss_G_GAN_Feat = 0
-        if not self.opt.no_ganFeat_loss:
-            feat_weights = 4.0 / (self.opt.n_layers_D + 1)
-            D_weights = 1.0 / self.opt.num_D
-            for i in range(self.opt.num_D):
-                for j in range(len(pred_fake[i])-1):
-                    loss_G_GAN_Feat += D_weights * feat_weights * \
-                        self.criterionFeat(pred_fake[i][j], pred_real[i][j].detach()) * self.opt.lambda_feat
+        # if not self.opt.no_ganFeat_loss:
+        #     feat_weights = 4.0 / (self.opt.n_layers_D + 1)
+        #     D_weights = 1.0 / self.opt.num_D
+        #     for i in range(self.opt.num_D):
+        #         for j in range(len(pred_fake[i])-1):
+        #             loss_G_GAN_Feat += D_weights * feat_weights * \
+        #                 self.criterionFeat(pred_fake[i][j], pred_real[i][j].detach()) * self.opt.lambda_feat
                    
         # VGG feature matching loss
         loss_G_VGG = 0
