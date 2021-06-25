@@ -151,7 +151,7 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_G_VGG = 0
         if not self.opt.no_vgg_loss:
             loss_G_VGG = self.criterionVGG(I_0, real_image) * self.opt.lambda_feat
-            if self.opt.netGrefine == 'global': #need 2x VGG for artifacts when training local
+            if self.opt.netG == 'global': #need 2x VGG for artifacts when training local
                 loss_G_VGG *= 0.5
 
         if self.opt.use_l1:
