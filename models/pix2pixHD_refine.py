@@ -24,7 +24,7 @@ class Pix2PixHDModelRefine(BaseModel):
         netG_input_nc = opt.output_nc
         if not opt.no_instance:
             netG_input_nc += 1          
-        self.netG = networks.define_G(netG_input_nc, opt.output_nc, 64, 'global', 
+        self.netGrefine = networks.define_G(netG_input_nc, opt.output_nc, 64, 'global', 
                                       n_downsample_global=3, n_blocks_global=5, n_local_enhancers=0, 
                                       n_blocks_local=0, norm=opt.norm, gpu_ids=self.gpu_ids)        
 
@@ -34,7 +34,7 @@ class Pix2PixHDModelRefine(BaseModel):
             netD_input_nc = opt.output_nc
             if not opt.no_instance:
                 netD_input_nc += 1
-            self.netD = networks.define_D(netD_input_nc, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
+            self.netDrefine = networks.define_D(netD_input_nc, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
                                           opt.num_D, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids)
             
         
@@ -46,9 +46,9 @@ class Pix2PixHDModelRefine(BaseModel):
         # load networks
         if (not self.isTrain or opt.continue_train or opt.load_pretrain):
             pretrained_path = '' if not self.isTrain else opt.load_pretrain
-            self.load_network(self.netG, 'Grefine', opt.which_epoch, pretrained_path)            
+            self.load_network(self.netGrefine, 'Grefine', opt.which_epoch, pretrained_path)            
             if self.isTrain:
-                self.load_network(self.netD, 'Drefine', opt.which_epoch, pretrained_path)
+                self.load_network(self.netDrefine, 'Drefine', opt.which_epoch, pretrained_path)
 
         # set loss functions and optimizers
         if self.isTrain:
@@ -72,7 +72,7 @@ class Pix2PixHDModelRefine(BaseModel):
             # optimizer G
             if opt.niter_fix_global > 0:
                 print('------------- Only training the local enhancer network (for %d epochs) ------------' % opt.niter_fix_global)
-                params_dict = dict(self.netG.named_parameters())
+                params_dict = dict(self.netGrefine.named_parameters())
                 params = []
                 for key, value in params_dict.items():       
                     if key.startswith('model' + str(opt.n_local_enhancers)):
@@ -80,12 +80,12 @@ class Pix2PixHDModelRefine(BaseModel):
                     else:
                         params += [{'params':[value],'lr':0.0}]                            
             else:
-                params = list(self.netG.parameters())
+                params = list(self.netGrefine.parameters())
 
             self.optimizer_G = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))                            
 
             # optimizer D
-            params = list(self.netD.parameters())  
+            params = list(self.netDrefine.parameters())  
             self.optimizer_D = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))
     
     def encode_input(self, real_image=None, zeroshere=None, infer=False):
@@ -104,9 +104,9 @@ class Pix2PixHDModelRefine(BaseModel):
         #input_concat = torch.cat((input, output.detach()), dim=1)
         if use_pool:            
             fake_query = self.fake_pool.query(input)
-            return self.netD.forward(fake_query)
+            return self.netDrefine.forward(fake_query)
         else:
-            return self.netD.forward(input)
+            return self.netDrefine.forward(input)
     
     def forward(self, image, zeroshere, infer=False):
         # Encode Inputs
@@ -118,13 +118,13 @@ class Pix2PixHDModelRefine(BaseModel):
         #input_concat = torch.cat((input_label, zeroshere), dim=1) 
         
 
-        I_0 = self.netG.forward(image)
+        I_0 = self.netGrefine.forward(image)
         
             
         self.img_idx = self.img_idx + 1
         
         # Fake Detection and Loss
-        pred_fake_pool = self.discriminate(I_0, use_pool=False)
+        pred_fake_pool = self.discriminate(I_0, use_pool=True)
         loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
         # Real Detection and Loss        
@@ -132,7 +132,7 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_D_real = self.criterionGAN(pred_real, True)
 
         # GAN loss (Fake Passability Loss)        
-        pred_fake = self.netD.forward(I_0)        
+        pred_fake = self.netDrefine.forward(I_0)        
         loss_G_GAN = self.criterionGAN(pred_fake, True)
         
         
@@ -151,7 +151,7 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_G_VGG = 0
         if not self.opt.no_vgg_loss:
             loss_G_VGG = self.criterionVGG(I_0, real_image) * self.opt.lambda_feat
-            if self.opt.netG == 'global': #need 2x VGG for artifacts when training local
+            if self.opt.netGrefine == 'global': #need 2x VGG for artifacts when training local
                 loss_G_VGG *= 0.5
 
         if self.opt.use_l1:
@@ -169,7 +169,7 @@ class Pix2PixHDModelRefine(BaseModel):
         I_0 = 0
         # Fake Generation
 
-        I_0 = self.netG.forward(real_image)
+        I_0 = self.netGrefine.forward(real_image)
 
         return I_0
     
@@ -182,12 +182,12 @@ class Pix2PixHDModelRefine(BaseModel):
         return edge.float()
     
     def save(self, which_epoch):
-        self.save_network(self.netG, 'Grefine', which_epoch, self.gpu_ids)
-        self.save_network(self.netD, 'Drefine', which_epoch, self.gpu_ids)
+        self.save_network(self.netGrefine, 'Grefine', which_epoch, self.gpu_ids)
+        self.save_network(self.netDrefine, 'Drefine', which_epoch, self.gpu_ids)
 
     def update_fixed_params(self):
         # after fixing the global generator for a number of iterations, also start finetuning it
-        params = list(self.netG.parameters())     
+        params = list(self.netGrefine.parameters())     
         self.optimizer_G = torch.optim.Adam(params, lr=self.opt.lr, betas=(self.opt.beta1, 0.999)) 
         print('------------ Now also finetuning global generator -----------')
 
