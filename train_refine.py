@@ -43,7 +43,7 @@ print('#training images = %d' % dataset_size)
 
 """ new residual model """
 #model = create_model_fullts(opt)
-model_refine = create_model_fullts(opt)#create_model_refine(opt)
+model_refine = create_model_refine(opt)
 visualizer = Visualizer(opt)
 
 tmp_out_path = os.path.join(opt.checkpoints_dir, opt.name, "tmp")
@@ -95,9 +95,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         #previous_cond = generated.data
         
         cond_zeros = torch.zeros(data['image'].size()).float()
-        #losses, generated_refine = model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
-        losses, generated_refine = model_refine(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
-                    Variable(data['next_image']), Variable(cond_zeros), hand_bbox, bbox_size, infer=True)
+        losses, generated_refine = model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)#model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
+        # losses, generated_refine = model_refine(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
+        #             Variable(data['next_image']), Variable(cond_zeros), hand_bbox, bbox_size, infer=True)
         #model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)
         
         #output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), cv2.cvtColor(util.tensor2im(generated.data[0]), cv2.COLOR_RGB2BGR), real_img])
