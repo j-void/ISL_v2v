@@ -88,17 +88,20 @@ class Pix2PixHDModelRefine(BaseModel):
             params = list(self.netDrefine.parameters())  
             self.optimizer_D = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))
     
-    def encode_input(self, real_image=None, zeroshere=None, infer=False):
+    def encode_input(self, real_image=None, input_image=None,zeroshere=None, infer=False):
     
         if real_image is not None:
             real_image = Variable(real_image.data.float().cuda())
+            
+        if input_image is not None:
+            input_image = Variable(input_image.data.float().cuda())
 
         if zeroshere is not None:
             zeroshere = zeroshere.data.float().cuda()
             zeroshere = Variable(zeroshere, volatile=infer)
 
 
-        return real_image, zeroshere
+        return real_image, input_image, zeroshere
     
     def discriminate(self, input, use_pool=False):
         #input_concat = torch.cat((input, output.detach()), dim=1)
@@ -108,9 +111,9 @@ class Pix2PixHDModelRefine(BaseModel):
         else:
             return self.netDrefine.forward(input.detach())
     
-    def forward(self, image, zeroshere, infer=False):
+    def forward(self, image, input_image, zeroshere, infer=False):
         # Encode Inputs
-        real_image, zeroshere = self.encode_input(image, zeroshere=zeroshere)
+        real_image, input_image, zeroshere = self.encode_input(real_image=image, input_image=input_image, zeroshere=zeroshere)
                     
         
         initial_I_0 = 0
@@ -118,7 +121,7 @@ class Pix2PixHDModelRefine(BaseModel):
         #input_concat = torch.cat((input_label, zeroshere), dim=1) 
         
 
-        I_0 = self.netGrefine.forward(image)
+        I_0 = self.netGrefine.forward(input_image)
         
             
         self.img_idx = self.img_idx + 1

@@ -95,7 +95,7 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         previous_cond = generated.data
         
         cond_zeros = torch.zeros(data['image'].size()).float()
-        losses, generated_refine = model_refine(Variable(generated.data), Variable(cond_zeros), infer=True)
+        losses, generated_refine = model_refine(Variable(data['image']), Variable(generated.data), Variable(cond_zeros), infer=True)
         # losses, generated_refine = model_refine(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
         #             Variable(data['next_image']), Variable(cond_zeros), hand_bbox, bbox_size, infer=True)
         #model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)
