@@ -131,9 +131,9 @@ class Pix2PixHDModelRefine(BaseModel):
         # pred_fake_pool = self.discriminate(I_0, use_pool=True)
         # loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
-        # # Real Detection and Loss        
-        # pred_real = self.discriminate(real_image)
-        # loss_D_real = self.criterionGAN(pred_real, True)
+        # Real Detection and Loss        
+        pred_real = self.discriminate(real_image)
+        loss_D_real = self.criterionGAN(pred_real, True)
 
         # GAN loss (Fake Passability Loss)        
         pred_fake = self.netDrefine.forward(I_0)        
@@ -143,13 +143,13 @@ class Pix2PixHDModelRefine(BaseModel):
         
         # GAN feature matching loss
         loss_G_GAN_Feat = 0
-        # if not self.opt.no_ganFeat_loss:
-        #     feat_weights = 4.0 / (self.opt.n_layers_D + 1)
-        #     D_weights = 1.0 / self.opt.num_D
-        #     for i in range(self.opt.num_D):
-        #         for j in range(len(pred_fake[i])-1):
-        #             loss_G_GAN_Feat += D_weights * feat_weights * \
-        #                 self.criterionFeat(pred_fake[i][j], pred_real[i][j].detach()) * self.opt.lambda_feat
+        if not self.opt.no_ganFeat_loss:
+            feat_weights = 4.0 / (self.opt.n_layers_D + 1)
+            D_weights = 1.0 / self.opt.num_D
+            for i in range(self.opt.num_D):
+                for j in range(len(pred_fake[i])-1):
+                    loss_G_GAN_Feat += D_weights * feat_weights * \
+                        self.criterionFeat(pred_fake[i][j], pred_real[i][j].detach()) * self.opt.lambda_feat
                    
         # VGG feature matching loss
         loss_G_VGG = 0
