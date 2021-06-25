@@ -123,17 +123,19 @@ class Pix2PixHDModelRefine(BaseModel):
             
         self.img_idx = self.img_idx + 1
         
+        loss_D_fake = loss_D_real = loss_G_GAN = 0
+        
         # Fake Detection and Loss
-        pred_fake_pool = self.discriminate(I_0, use_pool=True)
-        loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
+        # pred_fake_pool = self.discriminate(I_0, use_pool=True)
+        # loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
-        # Real Detection and Loss        
-        pred_real = self.discriminate(real_image)
-        loss_D_real = self.criterionGAN(pred_real, True)
+        # # Real Detection and Loss        
+        # pred_real = self.discriminate(real_image)
+        # loss_D_real = self.criterionGAN(pred_real, True)
 
-        # GAN loss (Fake Passability Loss)        
-        pred_fake = self.netDrefine.forward(I_0)        
-        loss_G_GAN = self.criterionGAN(pred_fake, True)
+        # # GAN loss (Fake Passability Loss)        
+        # pred_fake = self.netDrefine.forward(I_0)        
+        # loss_G_GAN = self.criterionGAN(pred_fake, True)
         
         
         
