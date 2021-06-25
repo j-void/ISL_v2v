@@ -61,7 +61,6 @@ class Pix2PixHDModel(BaseModel):
                 raise('face generator not implemented!')
         
         
-        
         self.data_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])    
         
         print('---------- Networks initialized -------------')
