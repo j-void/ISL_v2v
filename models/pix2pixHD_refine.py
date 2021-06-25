@@ -35,7 +35,7 @@ class Pix2PixHDModelRefine(BaseModel):
             if not opt.no_instance:
                 netD_input_nc += 1
             self.netDrefine = networks.define_D(netD_input_nc, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
-                                                1, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids)
+                                                opt.num_D, not opt.no_ganFeat_loss, gpu_ids=self.gpu_ids)
             
         
         
