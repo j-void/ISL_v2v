@@ -24,9 +24,9 @@ class Pix2PixHDModelRefine(BaseModel):
         netG_input_nc = opt.output_nc
         if not opt.no_instance:
             netG_input_nc += 1          
-        self.netGrefine = networks.define_G(netG_input_nc, opt.output_nc, 64, 'global', 
-                                      n_downsample_global=3, n_blocks_global=5, n_local_enhancers=0, 
-                                      n_blocks_local=0, norm=opt.norm, gpu_ids=self.gpu_ids)        
+        self.netGrefine = networks.define_G(netG_input_nc, opt.output_nc, opt.ngf, opt.netG, 
+                                      opt.n_downsample_global, opt.n_blocks_global, opt.n_local_enhancers, 
+                                      opt.n_blocks_local, opt.norm, gpu_ids=self.gpu_ids)        
 
         # Discriminator network
         if self.isTrain:
@@ -141,8 +141,8 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_G_GAN_Feat = 0
         if not self.opt.no_ganFeat_loss:
             feat_weights = 4.0 / (self.opt.n_layers_D + 1)
-            D_weights = 1.0 / 1
-            for i in range(1):
+            D_weights = 1.0 / self.opt.num_D
+            for i in range(self.opt.num_D):
                 for j in range(len(pred_fake[i])-1):
                     loss_G_GAN_Feat += D_weights * feat_weights * \
                         self.criterionFeat(pred_fake[i][j], pred_real[i][j].detach()) * self.opt.lambda_feat
