@@ -103,17 +103,17 @@ class Pix2PixHDModelRefine(BaseModel):
 
         return real_image, input_image, zeroshere
     
-    def discriminate(self, input, use_pool=False):
-        #input_concat = torch.cat((input, output.detach()), dim=1)
+    def discriminate(self, input_label, test_image, use_pool=False):
+        input_concat = torch.cat((input_label, test_image.detach()), dim=1)
         if use_pool:            
-            fake_query = self.fake_pool.query(input.detach())
+            fake_query = self.fake_pool.query(input_concat)
             return self.netDrefine.forward(fake_query)
         else:
-            return self.netDrefine.forward(input.detach())
+            return self.netDrefine.forward(input_concat)
     
-    def forward(self, image, input_image, zeroshere, infer=False):
+    def forward(self, image, input_image, zeroshere=None, infer=False):
         # Encode Inputs
-        real_image, input_image, zeroshere = self.encode_input(real_image=image, input_image=input_image, zeroshere=zeroshere)
+        real_image, input_image, _ = self.encode_input(real_image=image, input_image=input_image, zeroshere=zeroshere)
                     
         
         initial_I_0 = 0
@@ -131,15 +131,15 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_G_GAN = 0
         
         # Fake Detection and Loss
-        pred_fake_pool = self.discriminate(I_0, use_pool=True)
+        pred_fake_pool = self.discriminate(input_image, I_0, use_pool=True)
         loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
         # Real Detection and Loss        
-        pred_real = self.discriminate(real_image)
+        pred_real = self.discriminate(input_image, real_image)
         loss_D_real = self.criterionGAN(pred_real, True)
 
         # GAN loss (Fake Passability Loss)        
-        pred_fake = self.netDrefine.forward(I_0)        
+        pred_fake = self.netDrefine.forward(torch.cat((input_image, I_0), dim=1))        
         loss_G_GAN = self.criterionGAN(pred_fake, True)
         
         
@@ -168,15 +168,15 @@ class Pix2PixHDModelRefine(BaseModel):
         return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake] , None if not infer else [I_0] ]     
     
     
-    def inference(self, image):
+    def inference(self, input_image):
     
         # Encode Inputs        
-        real_image, zeroshere = self.encode_input(Variable(image), zeroshere=None, infer=True)
+        _, input_image , _ = self.encode_input(real_image=None, input_image=input_image, zeroshere=None, infer=True)
         
         I_0 = 0
         # Fake Generation
 
-        I_0 = self.netGrefine.forward(real_image)
+        I_0 = self.netGrefine.forward(input_image)
 
         return I_0
     
