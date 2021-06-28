@@ -103,8 +103,11 @@ class Pix2PixHDModelRefine(BaseModel):
 
         return real_image, input_image, zeroshere
     
-    def discriminate(self, input_label, test_image, use_pool=False):
-        input_concat = torch.cat((input_label, test_image.detach()), dim=1)
+    def discriminate(self, input_label, test_image=None, use_pool=False):
+        if test_image != None:
+            input_concat = torch.cat((input_label, test_image.detach()), dim=1)
+        else:
+            input_concat = input_label.detach();
         if use_pool:            
             fake_query = self.fake_pool.query(input_concat)
             return self.netDrefine.forward(fake_query)
@@ -131,15 +134,15 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_G_GAN = 0
         
         # Fake Detection and Loss
-        pred_fake_pool = self.discriminate(input_image, I_0, use_pool=True)
+        pred_fake_pool = self.discriminate(input_label=I_0, test_image=None, use_pool=True)
         loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
         # Real Detection and Loss        
-        pred_real = self.discriminate(input_image, real_image)
+        pred_real = self.discriminate(input_label=real_image, test_image=None)
         loss_D_real = self.criterionGAN(pred_real, True)
 
         # GAN loss (Fake Passability Loss)        
-        pred_fake = self.netDrefine.forward(torch.cat((input_image, I_0), dim=1))        
+        pred_fake = self.netDrefine.forward(I_0)        
         loss_G_GAN = self.criterionGAN(pred_fake, True)
         
         
