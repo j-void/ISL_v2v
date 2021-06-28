@@ -31,7 +31,7 @@ class Pix2PixHDModelRefine(BaseModel):
         # Discriminator network
         if self.isTrain:
             use_sigmoid = opt.no_lsgan
-            netD_input_nc = opt.output_nc*2
+            netD_input_nc = opt.output_nc
             if not opt.no_instance:
                 netD_input_nc += 1
             self.netDrefine = networks.define_D(netD_input_nc, opt.ndf, opt.n_layers_D, opt.norm, use_sigmoid, 
