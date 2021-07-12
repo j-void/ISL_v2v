@@ -75,6 +75,7 @@ class BaseOptions():
         self.parser.add_argument('--gestures', action='store_true', help='for gestures project 64 frames')
 
         self.parser.add_argument('--refine', action='store_true', help='train refinement network')
+        self.parser.add_argument('--refine_hand', action='store_true', help='hand refinement discriminator only')
 
         self.initialized = True
 

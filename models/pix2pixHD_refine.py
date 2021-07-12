@@ -66,7 +66,8 @@ class Pix2PixHDModelRefine(BaseModel):
                 self.criterionL1 = torch.nn.L1Loss()
         
             # Loss names
-            self.loss_names = ['G_GAN', 'G_GAN_Feat', 'G_VGG', 'D_real', 'D_fake']
+            self.loss_names = ['G_GAN', 'G_GAN_Feat', 'G_VGG', 'D_real', 'D_fake',\
+                'G_GAN_hand_left', 'D_hand_left_real', 'D_hand_left_fake', 'G_GAN_hand_right', 'D_hand_right_real', 'D_hand_right_fake']
 
             # initialize optimizers
             # optimizer G
@@ -114,9 +115,9 @@ class Pix2PixHDModelRefine(BaseModel):
         else:
             return self.netDrefine.forward(input_concat)
     
-    def forward(self, image, input_image, zeroshere=None, infer=False):
+    def forward(self, image, input_image, zeroshere, hand_bbox, bbox_size, infer=False):
         # Encode Inputs
-        real_image, input_image, _ = self.encode_input(real_image=image, input_image=input_image, zeroshere=zeroshere)
+        real_image, input_image, _ = self.encode_input(real_image=image, input_image=input_image, zeroshere=None)
                     
         
         initial_I_0 = 0
@@ -133,17 +134,58 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_D_real = 0
         loss_G_GAN = 0
         
-        # Fake Detection and Loss
-        pred_fake_pool = self.discriminate(input_label=I_0, test_image=None, use_pool=True)
-        loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
+        hand_left_out = hand_right_out = 0
+        
+        loss_D_fake_hand_right = loss_D_fake_hand_left = loss_D_real_hand_right = loss_D_real_hand_left = loss_G_GAN_hand_left = loss_G_GAN_hand_right = 0
+        
+        if self.opt.refine_hand:
+            hand_left_real = torch.zeros(input_image.shape[0], input_image.shape[1], bbox_size, bbox_size).cuda()
+            hand_left_fake = torch.zeros(input_image.shape[0], input_image.shape[1], bbox_size, bbox_size).cuda()
+            hand_right_real = torch.zeros(input_image.shape[0], input_image.shape[1], bbox_size, bbox_size).cuda()
+            hand_right_fake = torch.zeros(input_image.shape[0], input_image.shape[1], bbox_size, bbox_size).cuda()
+            if hand_bbox[4] > 0:
+                _hand_left_real = input_image[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size]
+                hand_left_real[:,:,:_hand_left_real.shape[2],:_hand_left_real.shape[3]] = _hand_left_real
+                _hand_left_fake = I_0[:, :, hand_bbox[1]:hand_bbox[1]+bbox_size, hand_bbox[0]:hand_bbox[0]+bbox_size]
+                hand_left_fake[:,:,:_hand_left_fake.shape[2],:_hand_left_fake.shape[3]] = _hand_left_fake
+            if hand_bbox[5] > 0:
+                _hand_right_real = input_image[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
+                hand_right_real[:,:,:_hand_left_real.shape[2],:_hand_left_real.shape[3]] = _hand_right_real
+                _hand_right_fake = I_0[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
+                hand_right_fake[:,:,:_hand_left_fake.shape[2],:_hand_left_fake.shape[3]] = _hand_right_fake
+                
+            pred_fake_pool_left = self.discriminate(input_label=hand_left_fake, test_image=None, use_pool=True)
+            loss_D_fake_hand_left = self.criterionGAN(pred_fake_pool_left, False)        
+            
+            pred_real_left = self.discriminate(input_label=hand_left_real, test_image=None)
+            loss_D_real_hand_left = self.criterionGAN(pred_real_left, True)
+            
+            pred_fake_left = self.netDrefine.forward(hand_left_fake)        
+            loss_G_GAN_hand_left = self.criterionGAN(pred_fake_left, True)
+            
+            pred_fake_pool_right = self.discriminate(input_label=hand_right_fake, test_image=None, use_pool=True)
+            loss_D_fake_hand_right = self.criterionGAN(pred_fake_pool_right, False)        
+            
+            pred_real_right = self.discriminate(input_label=hand_right_real, test_image=None)
+            loss_D_real_hand_right = self.criterionGAN(pred_real_right, True)
+            
+            pred_fake_right = self.netDrefine.forward(hand_right_fake)
+            loss_G_GAN_hand_right = self.criterionGAN(pred_fake_right, True)
+            
+            hand_left_out = torch.cat((hand_left_fake, hand_left_real), dim=3)
+            hand_right_out = torch.cat((hand_right_fake, hand_right_real), dim=3)
+        else:
+            # Fake Detection and Loss
+            pred_fake_pool = self.discriminate(input_label=I_0, test_image=None, use_pool=True)
+            loss_D_fake = self.criterionGAN(pred_fake_pool, False)        
 
-        # Real Detection and Loss        
-        pred_real = self.discriminate(input_label=real_image, test_image=None)
-        loss_D_real = self.criterionGAN(pred_real, True)
+            # Real Detection and Loss        
+            pred_real = self.discriminate(input_label=real_image, test_image=None)
+            loss_D_real = self.criterionGAN(pred_real, True)
 
-        # GAN loss (Fake Passability Loss)        
-        pred_fake = self.netDrefine.forward(I_0)        
-        loss_G_GAN = self.criterionGAN(pred_fake, True)
+            # GAN loss (Fake Passability Loss)        
+            pred_fake = self.netDrefine.forward(I_0)        
+            loss_G_GAN = self.criterionGAN(pred_fake, True)
         
         
         
@@ -161,14 +203,22 @@ class Pix2PixHDModelRefine(BaseModel):
         loss_G_VGG = 0
         if not self.opt.no_vgg_loss:
             loss_G_VGG = self.criterionVGG(I_0, real_image) * self.opt.lambda_feat
+            if self.opt.refine_hand:
+                loss_G_VGG += self.criterionVGG(hand_left_fake, hand_left_real) * self.opt.lambda_feat
+                loss_G_VGG += self.criterionVGG(hand_right_fake, hand_right_real) * self.opt.lambda_feat
             if self.opt.netG == 'global': #need 2x VGG for artifacts when training local
                 loss_G_VGG *= 0.5
 
         if self.opt.use_l1:
             loss_G_VGG += (self.criterionL1(I_0, real_image)) * self.opt.lambda_A
+            if self.opt.refine_hand:
+                loss_G_VGG += (self.criterionL1(hand_left_fake, hand_left_real)) * self.opt.lambda_A
+                loss_G_VGG += (self.criterionL1(hand_right_fake, hand_right_real)) * self.opt.lambda_A
                 
         # Only return the fake_B image if necessary to save BW
-        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake] , None if not infer else [I_0] ]     
+        return [ [ loss_G_GAN, loss_G_GAN_Feat, loss_G_VGG, loss_D_real, loss_D_fake,\
+            loss_G_GAN_hand_left, loss_D_real_hand_left, loss_D_fake_hand_left, loss_G_GAN_hand_right, loss_D_real_hand_right, \
+                loss_D_fake_hand_right] , None if not infer else [I_0, hand_left_out, hand_right_out] ]     
     
     
     def inference(self, input_image):

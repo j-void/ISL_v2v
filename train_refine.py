@@ -95,7 +95,18 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         previous_cond = generated.data
         
         cond_zeros = torch.zeros(data['image'].size()).float()
-        losses, generated_refine = model_refine(Variable(data['image']), Variable(generated.data), Variable(cond_zeros), infer=True)
+        bbox_size_ = bbox_size + 20
+        lsx = (lbx+lbx+lbw)/2 - bbox_size_/2
+        lsx = 0 if lsx < 0 else int(lsx)
+        lsy = (lby+lby+lbw)/2 - bbox_size_/2
+        lsy = 0 if lsy < 0 else int(lsy)
+        rsx = (rbx+rbx+rbw)/2 - bbox_size_/2
+        rsx = 0 if rsx < 0 else int(rsx)
+        rsy = (rby+rby+rbw)/2 - bbox_size_/2
+        rsy = 0 if rsy < 0 else int(rsy)
+        hand_bbox_ = [lsx, lsy, rsx, rsy, lbw, rbw]
+        
+        losses, generated_refine = model_refine(Variable(data['image']), Variable(generated.data), Variable(cond_zeros), hand_bbox_, bbox_size_, infer=True)
         # losses, generated_refine = model_refine(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \
         #             Variable(data['next_image']), Variable(cond_zeros), hand_bbox, bbox_size, infer=True)
         #model_refine(Variable(data['image']), Variable(cond_zeros), infer=True)
@@ -106,8 +117,8 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
         loss_dict = dict(zip(model_refine.module.loss_names, losses))
         
-        loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5
-        loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG']
+        loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5 + (loss_dict['D_hand_left_real'] + loss_dict['D_hand_left_fake']) * 0.5 + (loss_dict['D_hand_right_real'] + loss_dict['D_hand_right_fake']) * 0.5 
+        loss_G = loss_dict['G_GAN'] + loss_dict['G_GAN_Feat'] + loss_dict['G_VGG'] + loss_dict['G_GAN_hand_left'] + loss_dict['G_GAN_hand_right']
         
         ############### Backward Pass ####################
         # update generator weights
@@ -135,6 +146,9 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
             output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), cv2.cvtColor(util.tensor2im(generated.data[0]), cv2.COLOR_RGB2BGR), real_img])
             #output_image = cv2.hconcat([cv2.cvtColor(util.tensor2im(generated_refine[0].data[0]), cv2.COLOR_RGB2BGR), real_img])
             cv2.imwrite(os.path.join(tmp_out_path, "output_image_"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), output_image)
+            if opt.refine_hand:
+                cv2.imwrite(os.path.join(tmp_out_path, "hand_left"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated_refine[1].data[0]), cv2.COLOR_RGB2BGR))
+                cv2.imwrite(os.path.join(tmp_out_path, "hand_right"+str(epoch)+"_"+'{:0>12}'.format(i)+".png"), cv2.cvtColor(util.tensor2im(generated_refine[2].data[0]), cv2.COLOR_RGB2BGR))
             
 
         ### save latest model
