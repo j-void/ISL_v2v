@@ -150,9 +150,9 @@ class Pix2PixHDModelRefine(BaseModel):
                 hand_left_fake[:,:,:_hand_left_fake.shape[2],:_hand_left_fake.shape[3]] = _hand_left_fake
             if hand_bbox[5] > 0:
                 _hand_right_real = input_image[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
-                hand_right_real[:,:,:_hand_left_real.shape[2],:_hand_left_real.shape[3]] = _hand_right_real
+                hand_right_real[:,:,:_hand_right_real.shape[2],:_hand_right_real.shape[3]] = _hand_right_real
                 _hand_right_fake = I_0[:, :, hand_bbox[3]:hand_bbox[3]+bbox_size, hand_bbox[2]:hand_bbox[2]+bbox_size]
-                hand_right_fake[:,:,:_hand_left_fake.shape[2],:_hand_left_fake.shape[3]] = _hand_right_fake
+                hand_right_fake[:,:,:_hand_right_fake.shape[2],:_hand_right_fake.shape[3]] = _hand_right_fake
                 
             pred_fake_pool_left = self.discriminate(input_label=hand_left_fake, test_image=None, use_pool=True)
             loss_D_fake_hand_left = self.criterionGAN(pred_fake_pool_left, False)        
