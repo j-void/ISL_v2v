@@ -17,6 +17,7 @@ parser.add_argument("--k1_pkl", type=str, help="word1 directory")
 parser.add_argument("--k2_pkl", type=str, help='word2 directory')
 parser.add_argument("--save_dir", type=str, help='save directory')
 parser.add_argument("--train_dir", type=str, help='train directory')
+parser.add_argument("--out_pkl", type=str, help='train directory')
 parser.add_argument("--display", help='display the output', action="store_true")
 
 args = parser.parse_args()
@@ -39,6 +40,11 @@ posepts_list = keypoints1["posepts"] + keypoints2["posepts"]
 facepts_list = keypoints1["facepts"] + keypoints2["facepts"]
 r_handpts_list = keypoints1["r_handpts"] + keypoints2["r_handpts"]
 l_handpts_list = keypoints1["l_handpts"] + keypoints2["l_handpts"]
+
+posepts_list_new = []
+facepts_list_new = []
+r_handpts_list_new = []
+l_handpts_list_new = []
 
 
 frame_count1 = len(keypoints1["posepts"])
@@ -81,13 +87,13 @@ for val in k1_ypts[::-1]:
         startpt = pt
         plt.plot(pt, k1_ypts[pt],'r*')
         break
-    
+   
 endpt = 0 
 for val in k2_ypts:
-    if val < 0:
+    if val < 100:
         continue
     if (val - 416) < 0:
-        pt = k2_ypts.index(val)
+        pt = k2_ypts.index(val)-1
         endpt = pt
         plt.plot(pt+len(k1_ypts), k2_ypts[pt],'r*')
         break
@@ -215,7 +221,7 @@ idx_k2d = np.where(theta_k2d>min_angle)[0]+1
 
 
 #RDP end
-
+_yymax = 480
 #startpt = np.where(k1_xpts==sx_k1[idx_k1x[-2]])[0][0]
 timspace = np.arange(startpt, endpt+frame_count1)
 print(startpt, endpt+frame_count1)
@@ -234,6 +240,10 @@ for j in range(25):
         trev_list.append(i)
         xrev_list.append(posepts_list[i][j*3])
         yrev_list.append(posepts_list[i][j*3 + 1])
+        # if posepts_list[i][j*3 + 1] >= _yymax:
+        #     yrev_list.append(_yymax)
+        # else:
+        #     yrev_list.append(posepts_list[i][j*3 + 1])
         
     for i in range(endpt+int(frame_count1), endpt+int(frame_count1)+10):
         if posepts_list[i][j*3] <= 0 or posepts_list[i][j*3 + 1] <= 0:
@@ -242,6 +252,10 @@ for j in range(25):
         trev_list.append(i)
         xrev_list.append(posepts_list[i][j*3])
         yrev_list.append(posepts_list[i][j*3 + 1])
+        # if posepts_list[i][j*3 + 1] >= _yymax:
+        #     yrev_list.append(_yymax)
+        # else:
+        #     yrev_list.append(posepts_list[i][j*3 + 1])
     
     if skp_this == True:
         skp_this = False
@@ -276,6 +290,10 @@ for j in range(21):
         trev_list.append(i)
         xrev_list.append(r_handpts_list[i][j*3])
         yrev_list.append(r_handpts_list[i][j*3 + 1])
+        # if posepts_list[i][j*3 + 1] >= _yymax:
+        #     yrev_list.append(_yymax)
+        # else:
+        #     yrev_list.append(r_handpts_list[i][j*3 + 1])
         
         
     for i in range(endpt+int(frame_count1), endpt+int(frame_count1)+10):
@@ -285,6 +303,10 @@ for j in range(21):
         trev_list.append(i)
         xrev_list.append(r_handpts_list[i][j*3])
         yrev_list.append(r_handpts_list[i][j*3 + 1])
+        # if posepts_list[i][j*3 + 1] >= _yymax:
+        #     yrev_list.append(_yymax)
+        # else:
+        #     yrev_list.append(r_handpts_list[i][j*3 + 1])
         
     if skp_this == True:
         skp_this = False
@@ -318,7 +340,11 @@ for j in range(21):
             continue
         trev_list.append(i)
         xrev_list.append(l_handpts_list[i][j*3])
-        yrev_list.append(l_handpts_list[i][j*3+1])
+        yrev_list.append(l_handpts_list[i][j*3 + 1])
+        # if posepts_list[i][j*3 + 1] >= _yymax:
+        #     yrev_list.append(_yymax)
+        # else:
+        #     yrev_list.append(l_handpts_list[i][j*3 + 1])
         
     for i in range(endpt+int(frame_count1), endpt+int(frame_count1)+10):
         if l_handpts_list[i][j*3] <= 0 or l_handpts_list[i][j*3 + 1] <= 0:
@@ -326,7 +352,11 @@ for j in range(21):
             continue
         trev_list.append(i)
         xrev_list.append(l_handpts_list[i][j*3])
-        yrev_list.append(l_handpts_list[i][j*3+1])
+        yrev_list.append(l_handpts_list[i][j*3 + 1])
+        # if posepts_list[i][j*3 + 1] >= _yymax:
+        #     yrev_list.append(_yymax)
+        # else:
+        #     yrev_list.append(l_handpts_list[i][j*3 + 1])
         
     if skp_this == True:
         skp_this = False
@@ -395,7 +425,11 @@ for i in range(len(posepts_list)):
     output_frame.fill(255)
     hand_frame = output_frame.copy()
 
-    display_skleton(output_frame, posepts_list[i], facepts_list[i], r_handpts_list[i], l_handpts_list[i])
+    posepts_list_new.append(posepts_list[i])
+    facepts_list_new.append(facepts_list[i])
+    r_handpts_list_new.append(r_handpts_list[i])
+    l_handpts_list_new.append(l_handpts_list[i])
+    display_skleton(output_frame, posepts_list[i], facepts_list[i], r_handpts_list[i], l_handpts_list[i], zeropts=[0,0])
     
     plt.plot(i, posepts_list[i][7*3], 'g*')
     
@@ -414,4 +448,9 @@ for i in range(len(posepts_list)):
             break
     
 #plt.show()
-    
+keypoints_prev = {'posepts' : posepts_list_new, 'facepts':facepts_list_new, 'r_handpts':r_handpts_list_new, 'l_handpts':l_handpts_list_new, 'fps': avg_fps}
+if args.out_pkl:
+    import pickle
+    outfile = open(args.out_pkl, 'wb')
+    pickle.dump(keypoints_prev, outfile)
+    outfile.close()

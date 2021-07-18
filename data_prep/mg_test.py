@@ -123,12 +123,13 @@ for val in k1_ypts[::-1]:
         plt.plot(pt, k1_ypts[pt],'k*')
         break
     
+print("startpt init", startpt)
 endpt = 0 
 for val in k2_ypts:
-    if val < 0:
+    if val < 100:
         continue
     if (val - 416) < 0:
-        pt = k2_ypts.index(val)
+        pt = k2_ypts.index(val)+5
         endpt = pt
         plt.figure(1)
         plt.plot(pt+len(k1_ypts), k2_ypts[pt],'k*')
@@ -171,7 +172,7 @@ idx_k1y = np.where(theta_k1y>min_angle)[0]+1
 if startpt == 0:
     startpt = np.where(k1_ypts==sy_k1[idx_k1y[-1]])[0][0]
     print(startpt)
-
+print("startpt 2", startpt)
 plt.figure(1)
 plt.plot(st_k1y, sy_k1, 'r-')
 plt.plot(st_k1y[idx_k1y], sy_k1[idx_k1y], 'g*')
@@ -288,7 +289,7 @@ for i in range(len(idx_k1d), 0, -1):
                 plt.plot(st_k1d[i-1], sd_k1[i-1], 'ko')
                 startpt = int(st_k1d[i-1])
         break
-
+print("startpt 3", startpt)
 plt.figure(3)
 plt.plot(st_k1d, sd_k1, 'r-')
 plt.plot(st_k1d[idx_k1d], sd_k1[idx_k1d], 'g*')
@@ -319,6 +320,10 @@ for i in range(startpt-10, startpt):
     #plt.plot(i, posepts_arr[j, 1], 'b*')
     xrev_list.append(posepts_arr[j, 0])
     yrev_list.append(posepts_arr[j, 1])
+    # if posepts_arr[j, 1] >= 512:
+    #     yrev_list.append(512)
+    # else:
+    #     yrev_list.append(posepts_arr[j, 1])
     
 for i in range(endpt+len(k1_ypts), endpt+len(k1_ypts)+10):
     trev_list.append(i)
@@ -326,13 +331,19 @@ for i in range(endpt+len(k1_ypts), endpt+len(k1_ypts)+10):
     #plt.plot(i, posepts_arr[j, 1], 'b*')
     xrev_list.append(posepts_arr[j, 0])
     yrev_list.append(posepts_arr[j, 1])
+    # if posepts_arr[j, 1] >= 512:
+    #     yrev_list.append(512)
+    # else:
+    #     yrev_list.append(posepts_arr[j, 1])
     
-zx_rev = np.polyfit(np.array(trev_list), np.array(xrev_list), 1)
+zx_rev = np.polyfit(np.array(trev_list), np.array(xrev_list), 2)
 px_rev = np.poly1d(zx_rev)
-zy_rev = np.polyfit(np.array(trev_list), np.array(yrev_list), 1)
+zy_rev = np.polyfit(np.array(trev_list), np.array(yrev_list), 2)
 py_rev = np.poly1d(zy_rev)
 xnew_rev = px_rev(timspace)
 ynew_rev = py_rev(timspace)  
+
+ynew_rev = ynew_rev * (550 /  (max(max(ynew_rev), 550)))
 
 plt.figure(1)
 plt.plot(timspace, ynew_rev, 'b-')

@@ -52,8 +52,8 @@ def readkeypointsfile_json(myfile):
     r_handpts = []
     l_handpts = []
     for p in people:
-        if p['pose_keypoints_2d'][0] < 512:
-            continue
+        # if p['pose_keypoints_2d'][0] < 512:
+        #     continue
         posepts += p['pose_keypoints_2d']
         facepts += p['face_keypoints_2d']
         r_handpts += p['hand_right_keypoints_2d']
