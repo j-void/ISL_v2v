@@ -22,7 +22,7 @@ class AlignedDataset(BaseDataset):
         
 
         ### real images
-        if opt.isTrain or self.opt.shand_gen:
+        if (opt.isTrain or self.opt.shand_gen) and not self.opt.bbox_pkl:
             self.dir_image = os.path.join(opt.dataroot, opt.phase + '_img')  
             self.image_paths = sorted(make_dataset(self.dir_image))
         
