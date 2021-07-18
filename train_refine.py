@@ -56,9 +56,6 @@ with open(os.path.join(opt.dataroot, "bbox_size.txt"), 'r') as f:
 if not os.path.exists(tmp_out_path):
     os.makedirs(tmp_out_path)
 
-if opt.bbox_pkl:
-    import joblib
-    bbox_list = joblib.load(os.path.join(opt.dataroot, "bbox_out.pkl"))["bbox_list"]
 
 total_steps = (start_epoch-1) * dataset_size + epoch_iter    
 for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
@@ -76,14 +73,11 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         ############## Forward Pass ######################
         
         if opt.shand_gen:
-            if opt.bbox_pkl:
-                lbx, lby, lbw, rbx, rby, rbw = bbox_list[i]
-            else:
-                real_img = util.tensor2im(data['image'].data[0])
-                real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
-                lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
-                lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
-                rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
+            real_img = util.tensor2im(data['image'].data[0])
+            real_img = cv2.cvtColor(real_img, cv2.COLOR_RGB2BGR)
+            lfpts_rz, rfpts_rz, lfpts, rfpts = hand_utils.get_keypoints_holistic(real_img, fix_coords=True)
+            lbx, lby, lbw = hand_utils.assert_bbox(lfpts)
+            rbx, rby, rbw = hand_utils.assert_bbox(rfpts)
             lsx = (lbx+lbx+lbw)/2 - bbox_size/2
             lsx = 0 if lsx < 0 else int(lsx)
             lsy = (lby+lby+lbw)/2 - bbox_size/2
