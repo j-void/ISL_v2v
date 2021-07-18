@@ -45,7 +45,7 @@ class AlignedDataset(BaseDataset):
         image_tensor = next_label = next_image = face_tensor = handpts_real_tensor = handpts_fake_tensor = 0
         hand_bbox = hand_bbox_next = 0
         ### real images 
-        if self.opt.isTrain or self.opt.shand_gen:
+        if (self.opt.isTrain or self.opt.shand_gen) and not self.opt.bbox_pkl:
             image_path = self.image_paths[index]   
             image = Image.open(image_path).convert('RGB')    
             transform_image = get_transform(self.opt, params)     
@@ -69,7 +69,7 @@ class AlignedDataset(BaseDataset):
             
             #hand_bbox_next = self.bbox_list[index+1]
             
-            if self.opt.isTrain or self.opt.shand_gen:
+            if (self.opt.isTrain or self.opt.shand_gen) and not self.opt.bbox_pkl:
                 image_path = self.image_paths[index+1]   
                 image = Image.open(image_path).convert('RGB')
                 transform_image = get_transform(self.opt, params)      
