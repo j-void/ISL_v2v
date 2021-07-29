@@ -6,3 +6,5 @@ python train_refine.py --name slv07_rz_hand_refine --dataroot ../edn_data/slv07_
 
 python test_refine.py --name slv07_rz_hand_refine_nc --dataroot ../edn_data/surveyvids/sentences_1/09/ --checkpoints_dir checkpoints/ --results_dir ../edn_data/surveyvids/sentences_1/09/ --shand_gen --shandGtype global --netG local --ngf 32 --no_instance --resize_or_crop none --how_many 10000 --label_nc 6
 
+
+
