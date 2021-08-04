@@ -9,13 +9,14 @@ parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFo
 parser.add_argument('--frame_dict', type=str, help='frame directory')
 parser.add_argument('--output', type=str, help='output video')
 parser.add_argument('--fps_vid', type=str, help='Video to take FPS from')
+parser.add_argument('--fps', type=int, help='FPS')
 parser.add_argument('--h', type=int, help='output video height')
 parser.add_argument('--w', type=int, help='output video width')
 parser.add_argument('--use_vdims', help='use video dimensions', action="store_true")
 
 args = parser.parse_args()
 
-path = glob.glob(args.frame_dict+"*.png")
+path = glob.glob(args.frame_dict+"*.jpg")
 
 path.sort()
 
@@ -25,15 +26,22 @@ fheight, fwidth, channels = frame0.shape
 width = fwidth
 height = fheight
 
-cam = cv2.VideoCapture(args.fps_vid)
-fps = cam.get(cv2.CAP_PROP_FPS)
+fps = 30
+
+if args.fps_vid:
+	cam = cv2.VideoCapture(args.fps_vid)
+	fps = cam.get(cv2.CAP_PROP_FPS)
+
+if args.fps:
+    fps = args.fps
 
 if args.use_vdims:
 	height = cam.get(cv2.CAP_PROP_FRAME_HEIGHT)
 	width  = cam.get(cv2.CAP_PROP_FRAME_WIDTH)
 	print("height: ", height, "| width:", width)
 
-cam.release()
+if args.fps_vid:
+	cam.release()
 
 if args.w is not None and args.h is None:
 	width = args.w
