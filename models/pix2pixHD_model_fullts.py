@@ -133,7 +133,7 @@ class Pix2PixHDModel(BaseModel):
                     params = params + list(self.netDshand.parameters())
             
             #Train both hand+body from start
-            params = list(self.netD.parameters()) #+ list(self.netDshand.parameters()) 
+            params = list(self.netD.parameters()) + list(self.netDshand.parameters()) 
             
             self.optimizer_D = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))
 
@@ -465,7 +465,7 @@ class Pix2PixHDModel(BaseModel):
         print('------------ Now also finetuning global generator -----------')
 
     def update_fixed_params_netD(self):
-        params = list(self.netD.parameters()) #+ list(self.netDshand.parameters())         
+        params = list(self.netD.parameters()) + list(self.netDshand.parameters())         
         self.optimizer_D = torch.optim.Adam(params, lr=self.opt.lr, betas=(self.opt.beta1, 0.999)) 
         print('------------ Now also finetuning multiscale discriminator -----------')
 
