@@ -69,7 +69,8 @@ class AlignedDataset(BaseDataset):
             
             #hand_bbox_next = self.bbox_list[index+1]
             
-            if (self.opt.isTrain or self.opt.shand_gen) and not self.opt.bbox_pkl:
+            #if (self.opt.isTrain or self.opt.shand_gen) and not self.opt.bbox_pkl:
+            if self.opt.isTrain or self.opt.shand_gen:
                 image_path = self.image_paths[index+1]   
                 image = Image.open(image_path).convert('RGB')
                 transform_image = get_transform(self.opt, params)      
