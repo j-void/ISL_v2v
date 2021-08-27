@@ -96,16 +96,19 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
         previous_cond = generated.data
         
         cond_zeros = torch.zeros(data['image'].size()).float()
-        bbox_size_ = bbox_size + 20
-        lsx = (lbx+lbx+lbw)/2 - bbox_size_/2
-        lsx = 0 if lsx < 0 else int(lsx)
-        lsy = (lby+lby+lbw)/2 - bbox_size_/2
-        lsy = 0 if lsy < 0 else int(lsy)
-        rsx = (rbx+rbx+rbw)/2 - bbox_size_/2
-        rsx = 0 if rsx < 0 else int(rsx)
-        rsy = (rby+rby+rbw)/2 - bbox_size_/2
-        rsy = 0 if rsy < 0 else int(rsy)
-        hand_bbox_ = [lsx, lsy, rsx, rsy, lbw, rbw]
+        bbox_size_ = 0
+        hand_bbox_ = [0, 0, 0, 0, 0, 0]
+        if opt.refine_hand:
+            bbox_size_ = bbox_size + 20
+            lsx = (lbx+lbx+lbw)/2 - bbox_size_/2
+            lsx = 0 if lsx < 0 else int(lsx)
+            lsy = (lby+lby+lbw)/2 - bbox_size_/2
+            lsy = 0 if lsy < 0 else int(lsy)
+            rsx = (rbx+rbx+rbw)/2 - bbox_size_/2
+            rsx = 0 if rsx < 0 else int(rsx)
+            rsy = (rby+rby+rbw)/2 - bbox_size_/2
+            rsy = 0 if rsy < 0 else int(rsy)
+            hand_bbox_ = [lsx, lsy, rsx, rsy, lbw, rbw]
         
         losses, generated_refine = model_refine(Variable(data['image']), Variable(generated.data), Variable(cond_zeros), hand_bbox_, bbox_size_, infer=True)
         # losses, generated_refine = model_refine(Variable(data['label']), Variable(data['next_label']), Variable(data['image']), \

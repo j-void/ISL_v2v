@@ -116,7 +116,9 @@ class Pix2PixHDModel(BaseModel):
             else:
                 if opt.niter_fix_main == 0:
                     params += list(self.netG.parameters())
-
+            
+            params = list(self.netG.parameters()) + list(self.shandGen.parameters())  
+            
             self.optimizer_G = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))                            
 
             # optimizer D
@@ -129,7 +131,10 @@ class Pix2PixHDModel(BaseModel):
                 params = list(self.netD.parameters())  
                 if opt.shand_dis:
                     params = params + list(self.netDshand.parameters())
-
+            
+            #Train both hand+body from start
+            params = list(self.netD.parameters()) + list(self.netDshand.parameters()) 
+            
             self.optimizer_D = torch.optim.Adam(params, lr=opt.lr, betas=(opt.beta1, 0.999))
 
     def encode_input(self, label_map, real_image=None, next_label=None, next_image=None, zeroshere=None, infer=False):
@@ -455,7 +460,7 @@ class Pix2PixHDModel(BaseModel):
 
     def update_fixed_params(self):
         # after fixing the global generator for a number of iterations, also start finetuning it
-        params = list(self.netG.parameters())     
+        params = list(self.netG.parameters()) + list(self.shandGen.parameters())  
         self.optimizer_G = torch.optim.Adam(params, lr=self.opt.lr, betas=(self.opt.beta1, 0.999)) 
         print('------------ Now also finetuning global generator -----------')
 
